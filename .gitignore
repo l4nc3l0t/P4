@@ -1,0 +1,5 @@
+.vscode
+*.csv
+Figures/
+Tableaux/
+*.synctex.gz
