@@ -70,4 +70,80 @@ else:
 BEB2015.sort_values('OSEBuildingID', inplace=True)
 BEB2015.reset_index(inplace=True, drop=True)
 
+# %% [markdown]
+# Liste des colonnes présentes uniquement dans les données de 2015
+
+# %%
+# colonnes uniquement dans les données de 2015
+BEB2015.columns.difference(BEB2016.columns)
+
+# %% [markdown]
+# Liste des colonnes présentes uniquement dans les données de 2016
+
+# %%
+# colonnes uniquement dans les données de 2016
+BEB2016.columns.difference(BEB2015.columns)
+
+# %% [markdown]
+# Les données de location en 2015 sont dans une seule colonne
+# on va faire en sorte d'uniformiser avec les colonnes présentes en 2016
+
+# %%
+BEB2015['Latitude'] = BEB2015.Location.str.split(
+    '(', expand=True)[1].str.split(',', expand=True)[0].astype('float64')
+BEB2015['Longitude'] = BEB2015.Location.str.split(
+    '(',
+    expand=True)[1].str.split(',',
+                              expand=True)[1].str.strip(')').astype('float64')
+BEB2015['Address'] = BEB2015.Location.str.split('\n', n=1, expand=True)[0]
+BEB2015['City'] = BEB2015.Location.str.split(
+    '\n', n=1, expand=True)[1].str.split(',', n=1, expand=True)[0]
+BEB2015['State'] = BEB2015.Location.str.split(
+    '\n', n=1, expand=True)[1].str.split(
+        ',', n=1, expand=True)[1].str.lstrip(' ').str.split(' ',
+                                                            n=1,
+                                                            expand=True)[0]
+BEB2015['ZipCode'] = BEB2015.Location.str.split(
+    '\n', n=1, expand=True)[1].str.split(
+        ',', n=1, expand=True)[1].str.lstrip(' ').str.split(
+            ' ', n=1,
+            expand=True)[1].str.split('\n', expand=True)[0].astype('float64')
+
+# %%
+BEB2015.drop(columns='Location', inplace=True)
+
+# %%
+BEB2015.columns.difference(BEB2016.columns)
+# %%
+BEB2016.columns.difference(BEB2015.columns)
+# %% [markdown]
+# GHGEMissions (MetricTonsCO2e) et TotalGHGEmissions renseignent les mêmes informations
+# ainsi que GHGEmissionsIntesity (kgCO2e/ft2) et GHGEmissionsIntensity
+# %%
+BEB2015.rename(columns={
+    'GHGEmissions(MetricTonsCO2e)': 'TotalGHGEmissions',
+    'GHGEmissionsIntensity(kgCO2e/ft2)': 'GHGEmissionsIntensity'
+},
+               inplace=True)
+
+# %%
+BEB2015.columns.difference(BEB2016.columns)
+# %%
+BEB2016.columns.difference(BEB2015.columns)
+# %%
+BEB2016.Comments.unique()
+
+# %% [markdown]
+# Pas de commentaire dans les données de 2016
+# %%
+BEB2016.drop(columns='Comments', inplace=True)
+# %%
+BEB2015.Comment.unique()
+# %% [markdown]
+# présence de commentaires dans les données de 2015
+# %% [markdown]
+# Nous allons joindre nos données pour n'avoir qu'un seul fichier
+# sur lequel travailler lors des test de modèles
+# %%
+BEBFull = BEB2015.merge(BEB2016, how='outer')
 # %%
