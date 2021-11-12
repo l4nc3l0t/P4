@@ -8,6 +8,7 @@ import os
 import wget
 import pandas as pd
 from ast import literal_eval
+import plotly.express as px
 
 # %%
 write_data = True
@@ -136,4 +137,52 @@ BEB2015[['Latitude', 'Longitude',
 # sur lequel travailler lors des test de modèles
 # %%
 BEBFull = BEB2015.merge(BEB2016, how="outer")
+# %%
+StatsCat = BEBFull.describe(exclude='number')
+StatsCat
+
+# %%
+StatsNum = BEBFull.describe()
+StatsNum
+
+# %% [markdown]
+# Nous avons des valeurs de surface de batiment et de parking négatives
+# nous allons supprimer ces batiments
+# %%
+BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
+                                    | (BEBFull.PropertyGFAParking < 0)].index)
+
+# %% [markdown]
+# Nous allons supprimer les colonnes comportant moins de 50% de données
+# et celles qui ne nous intéressent pas
+# (1 seule valeurs dans les colonnes state/city par exemple)
+# %%
+BEBFullClean.dropna(
+    axis='columns',
+    thresh=(BEBFullClean.shape[0] * .5),
+    # nombre de valeurs = shape * .1
+    # soit 90% de NaN et 10% de valeurs
+    inplace=True)
+
+# %%
+BEBFullClean.City.unique()
+# %%
+BEBFullClean.drop(columns=['State','City'], inplace=True)
+# %%
+# graphique du nombre de données par indicateurs après filtre NaN
+px.bar(x=BEBFullClean.shape[0] -
+       BEBFullClean.isna().sum().sort_values(ascending=False).values,
+       y=BEBFullClean.isna().sum().sort_values(ascending=False).index,
+       labels=dict(x='Nombre de données', y='Indicateurs'),
+       height=1000,
+       width=1000)
+# %%
+BEBFullClean.Neighborhood.unique()
+# %%
+BEBFullClean.Neighborhood.replace('DELRIDGE NEIGHBORHOODS',
+                                  'DELRIDGE',
+                                  inplace=True)
+BEBFullClean.Neighborhood = BEBFullClean.Neighborhood.map(lambda x: x.upper())
+# %%
+BEBFullClean.Neighborhood.unique()
 # %%
