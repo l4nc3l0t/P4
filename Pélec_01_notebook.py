@@ -166,6 +166,18 @@ StatsNum
 # sup. val < 0 dans les valeurs de surface
 BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
                                     | (BEBFull.PropertyGFAParking < 0)].index)
+# %%
+# graphique du nombre de données
+fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
+             y=BEBFullClean.shape[0] -
+             BEBFullClean.isna().sum().sort_values().values,
+             labels=dict(x='Indicateurs', y='Nombre de données'),
+             title='Nombre de données par colonnes',
+             height=550,
+             width=900)
+fig.show('notebook')
+if write_data is True:
+    fig.write_image('./Figures/DataNbFull.pdf')
 
 # %% [markdown]
 # Nous allons supprimer les colonnes comportant moins de 50% de données
@@ -184,14 +196,7 @@ BEBFullClean.dropna(
 BEBFullClean.City.unique()
 # %%
 BEBFullClean.drop(columns=['State', 'City'], inplace=True)
-# %%
-# graphique du nombre de données par indicateurs après filtre NaN
-px.bar(x=BEBFullClean.shape[0] -
-       BEBFullClean.isna().sum().sort_values(ascending=False).values,
-       y=BEBFullClean.isna().sum().sort_values(ascending=False).index,
-       labels=dict(x='Nombre de données', y='Indicateurs'),
-       height=1000,
-       width=1000)
+
 # %%
 BEBFullClean.Neighborhood.unique()
 # %%
@@ -201,4 +206,40 @@ BEBFullClean.Neighborhood.replace('DELRIDGE NEIGHBORHOODS',
 BEBFullClean.Neighborhood = BEBFullClean.Neighborhood.map(lambda x: x.upper())
 # %%
 BEBFullClean.Neighborhood.unique()
+# %%
+# selection des colonnes de type numérique
+columns_num = BEBFullClean.select_dtypes('number')
+corr = columns_num.corr()
+# heatmap à partir ce cette matrice
+fig = px.imshow(corr, height=700, width=700)
+fig.show('notebook')
+if write_data is True:
+    fig.write_image('./Figures/HeatmapNum.pdf')
+
+# %% [markdown]
+# Les colonnes NaturalGas(kBtu)/NaturalGas(therms) et Electricity(kBtu)/Electricity(kWh)
+# sont des doublon l'une de l'autre nous n'allons garder que les données en kBtu
+# car c'est l'unitée utilisée pour les autres indicateurs
+#
+# Les colonnes SiteEUIWN(kBtu/sf) et SourceEUIWN(kBtu/sf) sont les données normalisée
+# en fonction des conditions climatiques moyennes sur 30 ans. Elles sont très corrélées
+# au données non normalisées (>.99) nous allons donc les supprimer
+# %%
+BEBFullClean.drop(columns=[
+    'NaturalGas(therms)', 'Electricity(kWh)', 'SiteEUIWN(kBtu/sf)',
+    'SourceEUIWN(kBtu/sf)'
+],
+                  inplace=True)
+# %%
+# graphique du nombre de données par indicateurs après filtre NaN
+fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
+             y=BEBFullClean.shape[0] -
+             BEBFullClean.isna().sum().sort_values().values,
+             labels=dict(x='Indicateurs', y='Nombre de données'),
+             title='Nombre de données par colonnes',
+             height=400,
+             width=700)
+fig.show('notebook')
+if write_data is True:
+    fig.write_image('./Figures/DataNbDrop.pdf')
 # %%
