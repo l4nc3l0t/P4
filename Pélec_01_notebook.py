@@ -9,6 +9,7 @@ import wget
 import pandas as pd
 from ast import literal_eval
 import plotly.express as px
+import folium
 
 # %%
 write_data = True
@@ -94,9 +95,9 @@ BEB2015.columns.difference(BEB2016.columns)
 # %%
 BEB2016.columns.difference(BEB2015.columns)
 # %% [markdown]
-# GHGEMissions (MetricTonsCO2e) et TotalGHGEmissions renseignent les mêmes informations
-# ainsi que GHGEmissionsIntesity (kgCO2e/ft2) et GHGEmissionsIntensity nous allons les
-# renommer de la même manière (2016)
+# GHGEMissions (MetricTonsCO2e) et TotalGHGEmissions renseignent les mêmes
+# informations ainsi que GHGEmissionsIntesity (kgCO2e/ft2) et
+# GHGEmissionsIntensity nous allons les renommer de la même manière (2016)
 # %%
 # renomages des colonnes pour correspondre aux données de 2016
 BEB2015.rename(
@@ -217,19 +218,27 @@ if write_data is True:
     fig.write_image('./Figures/HeatmapNum.pdf')
 
 # %% [markdown]
-# Les colonnes NaturalGas(kBtu)/NaturalGas(therms) et Electricity(kBtu)/Electricity(kWh)
-# sont des doublon l'une de l'autre nous n'allons garder que les données en kBtu
-# car c'est l'unitée utilisée pour les autres indicateurs
+# Les colonnes NaturalGas(kBtu)/NaturalGas(therms) et
+# Electricity(kBtu)/Electricity(kWh) sont des doublon l'une de l'autre nous
+# n'allons garder que les données en kBtu car c'est l'unité utilisée pour les
+# autres indicateurs
 #
-# Les colonnes SiteEUIWN(kBtu/sf) et SourceEUIWN(kBtu/sf) sont les données normalisée
-# en fonction des conditions climatiques moyennes sur 30 ans. Elles sont très corrélées
-# au données non normalisées (>.99) nous allons donc les supprimer
+# Les colonnes SiteEUIWN(kBtu/sf) et SourceEUIWN(kBtu/sf) sont les données
+# normalisée en fonction des conditions climatiques moyennes sur 30 ans.
+# Elles sont très corrélées au données non normalisées (>.99) nous allons
+#  donc les supprimer
 # %%
 BEBFullClean.drop(columns=[
     'NaturalGas(therms)', 'Electricity(kWh)', 'SiteEUIWN(kBtu/sf)',
     'SourceEUIWN(kBtu/sf)'
 ],
                   inplace=True)
+
+# %%
+print(BEBFullClean.shape)
+BEBFullClean.dropna()
+BEBFullClean.shape
+
 # %%
 # graphique du nombre de données par indicateurs après filtre NaN
 fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
@@ -242,4 +251,17 @@ fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
 fig.show('notebook')
 if write_data is True:
     fig.write_image('./Figures/DataNbDrop.pdf')
+# %%
+map = folium.Map(
+    location=[BEBFullClean.Latitude.mean(),
+              BEBFullClean.Longitude.mean()])
+for i in range(0, len(BEBFullClean)):
+    folium.Circle(location=[
+        BEBFullClean.iloc[i].Latitude, BEBFullClean.iloc[i].Longitude
+    ],
+                  radius=10,
+                  popup=BEBFullClean.iloc[i].PropertyName,
+                  fill=True).add_to(map)
+map
+
 # %%
