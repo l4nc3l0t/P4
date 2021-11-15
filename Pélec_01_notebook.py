@@ -226,19 +226,18 @@ if write_data is True:
 # Les colonnes SiteEUIWN(kBtu/sf) et SourceEUIWN(kBtu/sf) sont les données
 # normalisée en fonction des conditions climatiques moyennes sur 30 ans.
 # Elles sont très corrélées au données non normalisées (>.99) nous allons
-#  donc les supprimer
+# donc les supprimer. Les données SiteEnergyUseWN(kBtu) sont moins
+# corrélée à SiteEnergyUse(kBtu) (.8) mais nous allons les supprimer
+# aussi pour n'avoir que les données brutes
 # %%
 BEBFullClean.drop(columns=[
     'NaturalGas(therms)', 'Electricity(kWh)', 'SiteEUIWN(kBtu/sf)',
-    'SourceEUIWN(kBtu/sf)'
+    'SourceEUIWN(kBtu/sf)', 'SiteEnergyUseWN(kBtu)'
 ],
                   inplace=True)
 
-# %%
-print(BEBFullClean.shape)
-BEBFullClean.dropna()
-BEBFullClean.shape
-
+# %% [markdown]
+# Nous devons prédire
 # %%
 # graphique du nombre de données par indicateurs après filtre NaN
 fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
@@ -263,5 +262,34 @@ for i in range(0, len(BEBFullClean)):
                   popup=BEBFullClean.iloc[i].PropertyName,
                   fill=True).add_to(map)
 map
+
+# %% [markdown]
+# Les catégories qui vont nous intéresser pour l'entrainement des modèles
+# sont les catégories permettant de classifier les batiments à savoir
+# BuildingType, PrimaryPropertyType, Neighborhood et LargestPropertyUseType.
+# Nous retirons les autres catégories de la matrices que nous utiliserons
+# pour l'entrainement des modèles
+# %%
+useful_cat = [
+    'BuildingType', 'PrimaryPropertyType', 'Neighborhood',
+    'LargestPropertyUseType'
+]
+# %%
+# création dataframe pour étudier les émissions de CO2 et la consommation
+# totale d’énergie
+BEBClean = BEBFullClean.drop(columns='ENERGYSTARScore')
+BEBClean.dropna(inplace=True)
+BEBClean = BEBClean.select_dtypes('number').drop(
+    columns=['CouncilDistrictCode', 'ZipCode']).join(BEBClean[useful_cat])
+if write_data is True:
+    BEBClean.to_csv('BEB.csv')
+
+# %%
+# création dataframe pour étudier EnergyStarScore
+BEBESSClean = BEBFullClean.dropna()
+BEBESSClean = BEBESSClean.select_dtypes('number').drop(
+    columns=['CouncilDistrictCode', 'ZipCode']).join(BEBESSClean[useful_cat])
+if write_data is True:
+    BEBESSClean.to_csv('BEBESS.csv')
 
 # %%
