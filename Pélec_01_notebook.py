@@ -176,7 +176,7 @@ fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
              title='Nombre de données par colonnes',
              height=550,
              width=900)
-fig.show('notebook')
+fig.show(renderer='notebook')
 if write_data is True:
     fig.write_image('./Figures/DataNbFull.pdf')
 
@@ -213,7 +213,7 @@ columns_num = BEBFullClean.select_dtypes('number')
 corr = columns_num.corr()
 # heatmap à partir ce cette matrice
 fig = px.imshow(corr, height=700, width=700)
-fig.show('notebook')
+fig.show(renderer='notebook')
 if write_data is True:
     fig.write_image('./Figures/HeatmapNum.pdf')
 
@@ -247,7 +247,7 @@ fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
              title='Nombre de données par colonnes',
              height=400,
              width=700)
-fig.show('notebook')
+fig.show(renderer='notebook')
 if write_data is True:
     fig.write_image('./Figures/DataNbDrop.pdf')
 # %%
@@ -282,7 +282,7 @@ BEBClean.dropna(inplace=True)
 BEBClean = BEBClean.select_dtypes('number').drop(
     columns=['CouncilDistrictCode', 'ZipCode']).join(BEBClean[useful_cat])
 if write_data is True:
-    BEBClean.to_csv('BEB.csv')
+    BEBClean.to_csv('BEB.csv', index=False)
 
 # %%
 # création dataframe pour étudier EnergyStarScore
@@ -290,6 +290,6 @@ BEBESSClean = BEBFullClean.dropna()
 BEBESSClean = BEBESSClean.select_dtypes('number').drop(
     columns=['CouncilDistrictCode', 'ZipCode']).join(BEBESSClean[useful_cat])
 if write_data is True:
-    BEBESSClean.to_csv('BEBESS.csv')
+    BEBESSClean.to_csv('BEBESS.csv', index=False)
 
 # %%
