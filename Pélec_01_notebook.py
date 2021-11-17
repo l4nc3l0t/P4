@@ -270,17 +270,15 @@ map
 # Nous retirons les autres catégories de la matrices que nous utiliserons
 # pour l'entrainement des modèles
 # %%
-useful_cat = [
-    'BuildingType', 'PrimaryPropertyType', 'Neighborhood',
-    'LargestPropertyUseType'
-]
+useful_cat = ['BuildingType', 'PrimaryPropertyType', 'LargestPropertyUseType']
 # %%
 # création dataframe pour étudier les émissions de CO2 et la consommation
 # totale d’énergie
 BEBClean = BEBFullClean.drop(columns='ENERGYSTARScore')
 BEBClean.dropna(inplace=True)
 BEBClean = BEBClean.select_dtypes('number').drop(
-    columns=['CouncilDistrictCode', 'ZipCode']).join(BEBClean[useful_cat])
+    columns=['CouncilDistrictCode', 'ZipCode', 'Latitude', 'Longitude']).join(
+        BEBClean[useful_cat])
 if write_data is True:
     BEBClean.to_csv('BEB.csv', index=False)
 
@@ -288,7 +286,7 @@ if write_data is True:
 # création dataframe pour étudier EnergyStarScore
 BEBESSClean = BEBFullClean.dropna()
 BEBESSClean = BEBESSClean.select_dtypes('number').drop(
-    columns=['CouncilDistrictCode', 'ZipCode']).join(BEBESSClean[useful_cat])
+    columns=['CouncilDistrictCode', 'ZipCode', 'Latitude', 'Longitude']).join(BEBESSClean[useful_cat])
 if write_data is True:
     BEBESSClean.to_csv('BEBESS.csv', index=False)
 
