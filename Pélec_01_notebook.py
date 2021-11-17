@@ -7,9 +7,12 @@
 import os
 import wget
 import pandas as pd
+import numpy as np
 from ast import literal_eval
 import plotly.express as px
+import plotly.graph_objects as go
 import folium
+from sklearn.linear_model import LinearRegression
 
 # %%
 write_data = True
@@ -211,9 +214,9 @@ BEBFullClean.Neighborhood.unique()
 # selection des colonnes de type numérique
 columns_num = BEBFullClean.select_dtypes('number')
 corr = columns_num.corr()
-# heatmap à partir ce cette matrice
+# heatmap à partir de cette matrice
 fig = px.imshow(corr, height=700, width=700)
-fig.show(renderer='notebook')
+fig.show()
 if write_data is True:
     fig.write_image('./Figures/HeatmapNum.pdf')
 
@@ -236,8 +239,36 @@ BEBFullClean.drop(columns=[
 ],
                   inplace=True)
 
-# %% [markdown]
-# Nous devons prédire
+# %%
+for i in BEBFullClean.loc[:,
+                          BEBFullClean.columns.str.
+                          contains('kbtu', case=False)].drop(
+                              columns='SiteEnergyUse(kBtu)').columns.to_list():
+    LR = BEBFullClean.loc[:, (i, 'SiteEnergyUse(kBtu)')].dropna()
+    lr = LinearRegression()
+    X = np.array(LR.iloc[:, 0]).reshape(-1, 1)
+    y = LR['SiteEnergyUse(kBtu)']
+
+    LinReg = lr.fit(X, y)
+    x_range = np.linspace(X.min(), X.max(), 100)
+    y_range = LinReg.predict(x_range.reshape(-1, 1))
+
+    rsqrt = LinReg.score(X, y)
+    print(rsqrt)
+
+    fig = px.scatter(LR, x=i, y='SiteEnergyUse(kBtu)', opacity=.1)
+    fig.add_traces(
+        go.Scatter(x=x_range,
+                   y=y_range,
+                   name=(str(LinReg.coef_[0].round(2)) + 'x' + '<br>R² = ' +
+                         str(rsqrt.round(3)))))
+    fig.update_layout(legend=dict(yanchor="top",
+                                  y=0.99,
+                                  xanchor="left",
+                                  x=0.01),
+                      title='Régression')
+    fig.show()
+
 # %%
 # graphique du nombre de données par indicateurs après filtre NaN
 fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
@@ -270,23 +301,39 @@ map
 # Nous retirons les autres catégories de la matrices que nous utiliserons
 # pour l'entrainement des modèles
 # %%
-useful_cat = ['BuildingType', 'PrimaryPropertyType', 'LargestPropertyUseType']
+useful_cat = [
+    'BuildingType', 'PrimaryPropertyType', 'LargestPropertyUseType',
+    'Neighborhood'
+]
+#%%
+# selection des données numériques n'étant pas des relevés de consommation
+useful_num = BEBFullClean.select_dtypes('number').drop(columns=[
+    'CouncilDistrictCode', 'YearBuilt', 'GHGEmissionsIntensity', 'Latitude',
+    'Longitude', 'ZipCode'
+])
+useful_num = useful_num.loc[:, ~useful_num.columns.str.
+                            contains('kbtu', case=False)].join(
+                                BEBFull['SiteEnergyUse(kBtu)'])
+
+# %%
+# heatmap à partir des colonnes numériques utiles
+usednum_corr = useful_num.corr()
+fig = px.imshow(usednum_corr, height=500, width=500)
+fig.show()
+if write_data is True:
+    fig.write_image('./Figures/HeatmapUsedNum.pdf')
+
 # %%
 # création dataframe pour étudier les émissions de CO2 et la consommation
 # totale d’énergie
-BEBClean = BEBFullClean.drop(columns='ENERGYSTARScore')
+BEBClean = useful_num.drop(columns='ENERGYSTARScore')
 BEBClean.dropna(inplace=True)
-BEBClean = BEBClean.select_dtypes('number').drop(
-    columns=['CouncilDistrictCode', 'ZipCode', 'Latitude', 'Longitude']).join(
-        BEBClean[useful_cat])
 if write_data is True:
     BEBClean.to_csv('BEB.csv', index=False)
 
 # %%
 # création dataframe pour étudier EnergyStarScore
-BEBESSClean = BEBFullClean.dropna()
-BEBESSClean = BEBESSClean.select_dtypes('number').drop(
-    columns=['CouncilDistrictCode', 'ZipCode', 'Latitude', 'Longitude']).join(BEBESSClean[useful_cat])
+BEBESSClean = useful_num.dropna()
 if write_data is True:
     BEBESSClean.to_csv('BEBESS.csv', index=False)
 
