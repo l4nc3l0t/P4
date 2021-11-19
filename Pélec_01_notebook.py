@@ -249,8 +249,10 @@ BEBFullClean.Neighborhood.unique()
 # selection des colonnes de type numérique
 columns_num = BEBFullClean.select_dtypes('number')
 corr = columns_num.corr()
+corr = corr.where(np.tril(np.ones(corr.shape)).astype('bool'))
 # heatmap à partir de cette matrice
-fig = px.imshow(corr, height=700, width=700)
+fig = px.imshow(corr, height=700, width=700, color_continuous_scale='balance')
+fig.update_layout(plot_bgcolor='white')
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/HeatmapNum.pdf')
@@ -353,7 +355,13 @@ useful_num = useful_num.loc[:, ~useful_num.columns.str.
 # %%
 # heatmap à partir des colonnes numériques utiles
 usednum_corr = useful_num.corr()
-fig = px.imshow(usednum_corr, height=500, width=500)
+usednum_corr = usednum_corr.where(
+    np.tril(np.ones(usednum_corr.shape)).astype('bool'))
+fig = px.imshow(usednum_corr,
+                height=500,
+                width=500,
+                color_continuous_scale='balance')
+fig.update_layout(plot_bgcolor='white')
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/HeatmapUsedNum.pdf')
