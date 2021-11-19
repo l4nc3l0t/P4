@@ -1,74 +1,51 @@
 import pandas as pd
 import numpy as np
-import plotly.express as px
-from sklearn import preprocessing, metrics
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.preprocessing import StandardScaler
 from sklearn import linear_model
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, KFold
+from sklearn.pipeline import make_pipeline
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.svm import LinearSVC
 
 BEB = pd.read_csv('BEB.csv')
 
-# remplacement des valeurs de catégories par des entiers
-enc = preprocessing.OrdinalEncoder()
-BEBCat = BEB.select_dtypes('object').values
-BEBCat_enc = enc.fit_transform(BEBCat)
+BEBM = BEB.drop(columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
+SiteEnergyUse = np.array(BEB['SiteEnergyUse(kBtu)']).reshape(-1, 1)
+TotalGHGEmissions = np.array(BEB.TotalGHGEmissions).reshape(-1, 1)
 
-# rempalcements des valeurs des colonnes catégorielles
-BEBEnc = pd.concat([
-    BEB.drop(columns=BEB.select_dtypes('object').columns),
-    pd.DataFrame(BEBCat_enc,
-                 columns=BEB.select_dtypes('object').columns.to_list())
-],
-                   axis=1)
-
-# sélection de la matrice de données et vecteur cible
-BEBM = BEBEnc.drop(columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
-SiteEnergyUse = BEBEnc['SiteEnergyUse(kBtu)']
-TotalGHGEmissions = BEBEnc.TotalGHGEmissions
-# création de jeux de test et d'entrainement
 BEBM_train, BEBM_test, SiteEnergyUse_train, SiteEnergyUse_test = train_test_split(
-    BEBM,
-    SiteEnergyUse,
-    test_size=0.25  # 25% des données dans le jeu de test
-)
+    BEBM, SiteEnergyUse, test_size=.2)
 
-std_scale = preprocessing.StandardScaler().fit(BEBM_train)
-BEBM_train_std = std_scale.transform(BEBM_train)
-BEBM_test_std = std_scale.transform(BEBM_test)
-""" ridge = linear_model.Ridge()
-ridge_coefs = []
-ridge_errors = []
-for a in np.logspace(0, 10, 500):
-    ridge.set_params(alpha=a)
-    ridge.fit(BEBM_train_std, SiteEnergyUse_train)
-    ridge_coefs.append(ridge.coef_)
-    ridge_errors.append(
-        np.mean((ridge.predict(BEBM_test_std) - SiteEnergyUse_test)**2))
+pipeLR = make_pipeline(StandardScaler(), linear_model.LinearRegression())
 
-lasso = linear_model.Lasso(fit_intercept=False)
-lasso_coefs = []
-lasso_errors = []
-for a in np.logspace(-1, 10, 100):
-    lasso.set_params(alpha=a)
-    lasso.fit(BEBM_train_std, SiteEnergyUse_train)
-    lasso_coefs.append(ridge.coef_)
-    lasso_errors.append(
-        np.mean((ridge.predict(BEBM_test_std) - SiteEnergyUse_test)**2)) """
+pipeLR.fit(BEBM_train, SiteEnergyUse_train)
 
-parameters = {
-    'n_estimators': [10, 50, 100, 300, 500],
-    'min_samples_leaf': [1, 3, 5, 10],
-    'max_features': ['auto', 'sqrt']
-}
-rfr_search = GridSearchCV(RandomForestRegressor(),
-                          param_grid=parameters,
-                          verbose=2,
-                          cv=5,
-                          n_jobs=-1)
+SiteEnergyUse_pred = pipeLR.predict(BEBM_test)
 
-rfr_search.fit(BEBM_train_std, SiteEnergyUse_train)
+r2 = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_pred)
+print("r2 :", r2)
+rmse = metrics.mean_squared_error(SiteEnergyUse_test, SiteEnergyUse_pred)
+print("rmse :", rmse)
 
-rfr_search.best_params_
 
-np.sqrt(metrics.mean_squared_error(rfr_search.predict(BEBM_test_std), SiteEnergyUse_test))
+"""
+piperige = make_pipeline(StandardScaler(), linear_model.Ridge())
+
+alphas = np.linspace(10, 20, 50)
+param_grid = {'ridge__alpha': alphas}
+
+gridsearch = GridSearchCV(piperige, param_grid, n_jobs=-1)
+
+gridsearch.fit(BEBM, SiteEnergyUse)
+
+print("Best score: %0.3f" % gridsearch.best_score_)
+
+print("Best parameters set:")
+best_parameters = gridsearch.best_estimator_.get_params()
+for param_name in sorted(param_grid.keys()):
+    print("\t%s: %r" % (param_name, best_parameters[param_name]))
+
+#ax.plot(alphas, gridsearch.)"""
