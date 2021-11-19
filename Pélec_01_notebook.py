@@ -170,6 +170,41 @@ StatsNum
 # sup. val < 0 dans les valeurs de surface
 BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
                                     | (BEBFull.PropertyGFAParking < 0)].index)
+
+# %% [markdown]
+# Le batiment le plus haut de Seattle fait 76 étages d'après
+# [Wikipédia](https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Seattle)
+# Nous allons vérifier que nous n'avons pas de batiments plus grand
+# %%
+# Affiche les batiments de plus de 76 étages
+BEBFullClean[BEBFullClean.NumberofFloors > 76][[
+    'OSEBuildingID', 'NumberofFloors', 'PropertyName', 'PrimaryPropertyType'
+]]
+
+# %% [markdown]
+# Nous avons bien un batiment de 76 étages mais nous avons aussi une église.
+# Cette église ne fait pas 99 étages :
+# <https://en.wikipedia.org/wiki/Chinese_Baptist_Church#/media/File:Seattle_-_Chinese_Southern_Baptist_01.jpg>
+#
+# Nous allons remplacer cette valeur par 1
+
+# %%
+# remplace la valeur 99 par 1 dans la colonne NumberofFloors
+BEBFullClean.NumberofFloors.replace(99, 1, inplace=True)
+
+# %%
+# Affiche les batiments ayant 0 batiments
+BEBFullClean[BEBFullClean.NumberofBuildings == 0][[
+    'OSEBuildingID', 'NumberofBuildings', 'PropertyName', 'PrimaryPropertyType'
+]]
+
+# %% [markdown]
+# 92 entrée comporte un nombre de batiments nul cela est aberrant.
+# Nous allons remplacer ces valeures nulles par 1
+
+# %%
+BEBFullClean.NumberofBuildings.replace(0, 1, inplace=True)
+
 # %%
 # graphique du nombre de données
 fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
@@ -308,8 +343,8 @@ useful_cat = [
 #%%
 # selection des données numériques n'étant pas des relevés de consommation
 useful_num = BEBFullClean.select_dtypes('number').drop(columns=[
-    'CouncilDistrictCode', 'YearBuilt', 'GHGEmissionsIntensity', 'Latitude',
-    'Longitude', 'ZipCode'
+    'OSEBuildingID', 'CouncilDistrictCode', 'YearBuilt',
+    'GHGEmissionsIntensity', 'Latitude', 'Longitude', 'ZipCode'
 ])
 useful_num = useful_num.loc[:, ~useful_num.columns.str.
                             contains('kbtu', case=False)].join(
