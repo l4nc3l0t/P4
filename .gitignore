@@ -4,3 +4,4 @@
 Figures/
 Tableaux/
 *.synctex.gz
+__pycache__/
