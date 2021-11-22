@@ -344,17 +344,17 @@ useful_cat = [
 ]
 #%%
 # selection des données numériques n'étant pas des relevés de consommation
-useful_num = BEBFullClean.select_dtypes('number').drop(columns=[
+usefull_num = BEBFullClean.select_dtypes('number').drop(columns=[
     'OSEBuildingID', 'CouncilDistrictCode', 'YearBuilt',
     'GHGEmissionsIntensity', 'Latitude', 'Longitude', 'ZipCode'
 ])
-useful_num = useful_num.loc[:, ~useful_num.columns.str.
+usefull_num = usefull_num.loc[:, ~usefull_num.columns.str.
                             contains('kbtu', case=False)].join(
                                 BEBFull['SiteEnergyUse(kBtu)'])
 
 # %%
 # heatmap à partir des colonnes numériques utiles
-usednum_corr = useful_num.corr()
+usednum_corr = usefull_num.corr()
 usednum_corr = usednum_corr.where(
     np.tril(np.ones(usednum_corr.shape)).astype('bool'))
 fig = px.imshow(usednum_corr,
@@ -369,14 +369,14 @@ if write_data is True:
 # %%
 # création dataframe pour étudier les émissions de CO2 et la consommation
 # totale d’énergie
-BEBClean = useful_num.drop(columns='ENERGYSTARScore')
+BEBClean = usefull_num.drop(columns='ENERGYSTARScore')
 BEBClean.dropna(inplace=True)
 if write_data is True:
     BEBClean.to_csv('BEB.csv', index=False)
 
 # %%
 # création dataframe pour étudier EnergyStarScore
-BEBESSClean = useful_num.dropna()
+BEBESSClean = usefull_num.dropna()
 if write_data is True:
     BEBESSClean.to_csv('BEBESS.csv', index=False)
 
