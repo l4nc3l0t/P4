@@ -150,17 +150,35 @@ BEB2015[['Latitude', 'Longitude',
 # %%
 # jonction des deux jeux de données
 BEBFull = BEB2015.merge(BEB2016, how="outer")
+
+# %%
+# conservation d'une seule valeur par batiments
+unique2015 = BEBFull[~BEBFull.where(
+    BEBFull.DataYear == 2015)['OSEBuildingID'].isin(
+        BEBFull.where(BEBFull.DataYear == 2016)['OSEBuildingID'])]
+
+unique2016 = BEBFull[~BEBFull.where(
+    BEBFull.DataYear == 2016)['OSEBuildingID'].isin(
+        BEBFull.where(BEBFull.DataYear == 2015)['OSEBuildingID'])]
+
+commun = BEBFull.where(
+        BEBFull.DataYear == 2016)[
+    BEBFull.where(
+        BEBFull.DataYear == 2016)['OSEBuildingID'].isin(BEBFull.where(
+            BEBFull.DataYear == 2015)['OSEBuildingID'])].dropna(how='all')
+
+BEBFullUnique = unique2015.merge(unique2016, how='outer').merge(commun, how='outer')
 # %% [markdown]
 # Nous allons voir quelques statistiques sur chacunes de nos colonnes
 
 # %%
 # stats sur données catégorielles
-StatsCat = BEBFull.describe(exclude='number')
+StatsCat = BEBFullUnique.describe(exclude='number')
 StatsCat
 
 # %%
 # stats sur données numériques
-StatsNum = BEBFull.describe()
+StatsNum = BEBFullUnique.describe()
 StatsNum
 
 # %% [markdown]
@@ -168,8 +186,8 @@ StatsNum
 # nous allons supprimer ces batiments
 # %%
 # sup. val < 0 dans les valeurs de surface
-BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
-                                    | (BEBFull.PropertyGFAParking < 0)].index)
+BEBFullClean = BEBFullUnique.drop(BEBFullUnique[(BEBFullUnique['PropertyGFABuilding(s)'] < 0)
+                                    | (BEBFullUnique.PropertyGFAParking < 0)].index)
 
 # %% [markdown]
 # Le batiment le plus haut de Seattle fait 76 étages d'après
@@ -349,8 +367,8 @@ usefull_num = BEBFullClean.select_dtypes('number').drop(columns=[
     'GHGEmissionsIntensity', 'Latitude', 'Longitude', 'ZipCode'
 ])
 usefull_num = usefull_num.loc[:, ~usefull_num.columns.str.
-                            contains('kbtu', case=False)].join(
-                                BEBFull['SiteEnergyUse(kBtu)'])
+                              contains('kbtu', case=False)].join(
+                                  BEBFull['SiteEnergyUse(kBtu)'])
 
 # %%
 # heatmap à partir des colonnes numériques utiles
