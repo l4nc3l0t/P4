@@ -151,34 +151,17 @@ BEB2015[['Latitude', 'Longitude',
 # jonction des deux jeux de données
 BEBFull = BEB2015.merge(BEB2016, how="outer")
 
-# %%
-# conservation d'une seule valeur par batiments
-unique2015 = BEBFull[~BEBFull.where(
-    BEBFull.DataYear == 2015)['OSEBuildingID'].isin(
-        BEBFull.where(BEBFull.DataYear == 2016)['OSEBuildingID'])]
-
-unique2016 = BEBFull[~BEBFull.where(
-    BEBFull.DataYear == 2016)['OSEBuildingID'].isin(
-        BEBFull.where(BEBFull.DataYear == 2015)['OSEBuildingID'])]
-
-commun = BEBFull.where(BEBFull.DataYear == 2016)[BEBFull.where(
-    BEBFull.DataYear == 2016)['OSEBuildingID'].isin(
-        BEBFull.where(BEBFull.DataYear == 2015)['OSEBuildingID'])].dropna(
-            how='all')
-
-BEBFullUnique = unique2015.merge(unique2016, how='outer').merge(commun,
-                                                                how='outer')
 # %% [markdown]
 # Nous allons voir quelques statistiques sur chacunes de nos colonnes
 
 # %%
 # stats sur données catégorielles
-StatsCat = BEBFullUnique.describe(exclude='number')
+StatsCat = BEBFull.describe(exclude='number')
 StatsCat
 
 # %%
 # stats sur données numériques
-StatsNum = BEBFullUnique.describe()
+StatsNum = BEBFull.describe()
 StatsNum
 
 # %% [markdown]
@@ -186,12 +169,8 @@ StatsNum
 # nous allons supprimer ces batiments
 # %%
 # sup. val < 0 dans les valeurs de surface et de consommation et d'emmission
-BEBFullClean = BEBFullUnique.drop(
-    BEBFullUnique[(BEBFullUnique['PropertyGFABuilding(s)'] < 0)
-                  | (BEBFullUnique.PropertyGFAParking < 0)
-                  | (BEBFullUnique['Electricity(kBtu)'] < 0)
-                  | (BEBFullUnique.TotalGHGEmissions < 0)
-                  | (BEBFullUnique.GHGEmissionsIntensity < 0)].index)
+BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
+                                    | (BEBFull.PropertyGFAParking < 0)].index)
 
 # %% [markdown]
 # Le batiment le plus haut de Seattle fait 76 étages d'après
