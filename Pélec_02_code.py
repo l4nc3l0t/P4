@@ -28,7 +28,7 @@ BEBM_train, BEBM_test, SiteEnergyUse_train, SiteEnergyUse_test = train_test_spli
 
 # %%
 # Scaler moins sensible aux outlier d'après la doc
-scaler = RobustScaler()
+scaler = RobustScaler(quantile_range=(10, 90))
 
 # %%
 # ACP sur toutes les colonnes
@@ -78,8 +78,8 @@ SiteEnergyUse_pred = pipeLR.predict(BEBM_test)
 LRr2 = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_pred)
 print("r2 :", LRr2)
 LRrmse = metrics.mean_squared_error(SiteEnergyUse_test,
-                                     SiteEnergyUse_pred,
-                                     squared=False)
+                                    SiteEnergyUse_pred,
+                                    squared=False)
 print("rmse :", LRrmse)
 
 # %%
@@ -96,8 +96,8 @@ for n in n_neighbors:
     pipekNN.fit(BEBM_train, SiteEnergyUse_train)
     errors.append(
         metrics.mean_squared_error(SiteEnergyUse_test,
-                                       pipekNN.predict(BEBM_test),
-                                       squared=False))
+                                   pipekNN.predict(BEBM_test),
+                                   squared=False))
 
 # graph rmse
 ax = plt.gca()
@@ -145,30 +145,11 @@ print(rmsekNN)
 #modèle Rige
 piperige = make_pipeline(scaler, linear_model.Ridge())
 
-alphas = np.logspace(3, 7, 1000)
-param_grid = {'ridge__alpha': alphas}
-
-# %%
-errors = []
-for a in alphas:
-    piperige.set_params(ridge__alpha=a)
-    piperige.fit(BEBM_train, SiteEnergyUse_train)
-    errors.append(
-        metrics.mean_squared_error(SiteEnergyUse_test,
-                                   piperige.predict(BEBM_test),
-                                   squared=False))
-
-# graph rmse
-ax = plt.gca()
-ax.plot(alphas, errors)
-ax.set_xscale('log')
-plt.xlabel('alpha')
-plt.ylabel('RMSE')
-plt.axis('tight')
-plt.show()
+alphas = np.logspace(-3, 5, 1000)
 
 # %%
 # Validation croisée
+param_grid = {'ridge__alpha': alphas}
 gridpiperige = GridSearchCV(piperige,
                             param_grid,
                             cv=5,
@@ -191,16 +172,47 @@ SiteEnergyUse_predrige = gridpiperige.predict(BEBM_test)
 r2rige = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predrige)
 print(r2rige)
 rmserige = metrics.mean_squared_error(SiteEnergyUse_test,
-                                     SiteEnergyUse_predrige,
-                                     squared=False)
+                                      SiteEnergyUse_predrige,
+                                      squared=False)
 print(rmserige)
+
+# %%
+# graph R² en fonction de alpha
+scoresR2_mean = gridpiperige.cv_results_[('mean_test_r2')]
+scoresR2_sd = gridpiperige.cv_results_[('std_test_r2')]
+
+fig = px.line(x=alphas,
+              y=scoresR2_mean,
+              log_x=True,
+              labels={
+                  'x': 'alpha',
+                  'y': 'R²'
+              },
+              title='R² en fonction de alpha')  #, error_y=scoresR2_sd)
+fig.show()
+
+# %%
+# graph RMSE en fonction de alpha
+scoresRMSE_mean = gridpiperige.cv_results_[(
+    'mean_test_neg_mean_squared_error')]
+scoresRMSE_sd = gridpiperige.cv_results_[('std_test_neg_mean_squared_error')]
+
+fig = px.line(x=alphas,
+              y=-scoresRMSE_mean,
+              log_x=True,
+              labels={
+                  'x': 'alpha',
+                  'y': 'RMSE'
+              },
+              title='RMSE en fonction de alpha')  #, error_y=scoresRMSE_mean)
+fig.show()
 
 # %%
 # modèle elastic net
 pipeEN = make_pipeline(scaler, linear_model.ElasticNet())
 
-alphas = np.logspace(-3, 3, 1000)
-param_grid = {'elasticnet__alpha': alphas}
+alphas = np.logspace(-5, 1, 1000)
+l1ratio = np.linspace(0, 1, 5)
 
 # %%
 errors = []
@@ -223,6 +235,7 @@ plt.show()
 
 # %%
 # Validation croisée
+param_grid = {'elasticnet__alpha': alphas, 'elasticnet__l1_ratio': l1ratio}
 gridpipeEN = GridSearchCV(pipeEN,
                           param_grid,
                           cv=5,
@@ -245,8 +258,7 @@ SiteEnergyUse_predEN = gridpipeEN.predict(BEBM_test)
 r2EN = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predEN)
 print(r2EN)
 rmseEN = metrics.mean_squared_error(SiteEnergyUse_test,
-                                     SiteEnergyUse_predEN,
-                                     squared=False)
+                                    SiteEnergyUse_predEN,
+                                    squared=False)
 print(rmseEN)
 
-# %%
