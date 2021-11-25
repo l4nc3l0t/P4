@@ -8,12 +8,12 @@ from sklearn.preprocessing import RobustScaler, StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 from sklearn.pipeline import make_pipeline
-from sklearn import linear_model
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import LinearSVC
 
-from Pélec_04_fonctions import visuPCA
+from Pélec_04_fonctions import *
 
 write_data = True
 # %%
@@ -28,7 +28,7 @@ BEBM_train, BEBM_test, SiteEnergyUse_train, SiteEnergyUse_test = train_test_spli
 
 # %%
 # Scaler moins sensible aux outlier d'après la doc
-scaler = RobustScaler(quantile_range=(10, 90))
+scaler = StandardScaler()  #RobustScaler(quantile_range=(10, 90))
 
 # %%
 # ACP sur toutes les colonnes
@@ -51,8 +51,7 @@ fig.update_layout(title='Scree plot')
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/ScreePlot.pdf', height=300)
-
-# %%
+"""# %%
 # création des graphiques
 for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
     fig = visuPCA(
@@ -66,10 +65,10 @@ for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
         fig.write_image('./Figures/PCAF{}F{}.pdf'.format(a1 + 1, a2 + 1),
                         width=1100,
                         height=1100)
-
+"""
 # %%
 # modèle régression linéaire
-pipeLR = make_pipeline(scaler, linear_model.LinearRegression())
+pipeLR = make_pipeline(scaler, LinearRegression())
 
 pipeLR.fit(BEBM_train, SiteEnergyUse_train)
 
@@ -82,6 +81,74 @@ LRrmse = metrics.mean_squared_error(SiteEnergyUse_test,
                                     squared=False)
 print("rmse :", LRrmse)
 
+#%%
+alphasridge = np.logspace(2, 5, 100)
+param_gridRidge = {'ridge__alpha': alphasridge}
+
+score = 'neg_mean_squared_error'
+
+GridParamsRidge, \
+grid_scoresRidge, \
+grid_scores_meanRidge, \
+grid_scores_sdRidge, \
+BestParametresRidge, \
+ScoresRidge = reg_modelGrid(model=Ridge(),
+                            scaler=RobustScaler(quantile_range=(10, 90)),
+                            X_train=BEBM_train,
+                            X_test=BEBM_test,
+                            y_train=SiteEnergyUse_train,
+                            y_test=SiteEnergyUse_test,
+                            score=score,
+                            param_grid=param_gridRidge)
+
+ScoresRidge
+
+#%%
+alphaslasso = np.linspace(0.1, 1, 5)
+param_gridLasso = {'lasso__alpha': alphaslasso}
+
+score = 'neg_mean_squared_error'
+
+GridParamsLasso, \
+grid_scoresLasso, \
+grid_scores_meanLasso, \
+grid_scores_sdLasso, \
+BestParametresLasso, \
+ScoresLasso = reg_modelGrid(model=Lasso(),
+                            scaler=RobustScaler(quantile_range=(10, 90)),
+                            X_train=BEBM_train,
+                            X_test=BEBM_test,
+                            y_train=SiteEnergyUse_train,
+                            y_test=SiteEnergyUse_test,
+                            score=score,
+                            param_grid=param_gridLasso)
+
+ScoresLasso
+
+# %%
+alphasEN = np.logspace(3, 7, 100)
+l1ratioEN = np.linspace(0, 1, 6)
+param_gridEN = {
+    'elasticnet__alpha': alphasEN,
+    'elasticnet__l1_ratio': l1ratioEN
+}
+
+GridParamsEN, \
+grid_scoresEN, \
+grid_scores_meanEN, \
+grid_scores_sdEN, \
+BestParametresEN, \
+ScoresEN = reg_modelGrid(model=ElasticNet(),
+                         scaler=RobustScaler(quantile_range=(10, 90)),
+                         X_train=BEBM_train,
+                         X_test=BEBM_test,
+                         y_train=SiteEnergyUse_train,
+                         y_test=SiteEnergyUse_test,
+                         score=score,
+                         param_grid=param_gridEN)
+
+ScoresEN
+
 # %%
 # modèle kNN
 pipekNN = make_pipeline(scaler, KNeighborsRegressor(n_jobs=-1))
@@ -90,27 +157,9 @@ pipekNN = make_pipeline(scaler, KNeighborsRegressor(n_jobs=-1))
 n_neighbors = np.linspace(10, 100, dtype=int)
 
 # %%
-errors = []
-for n in n_neighbors:
-    pipekNN.set_params(kneighborsregressor__n_neighbors=n)
-    pipekNN.fit(BEBM_train, SiteEnergyUse_train)
-    errors.append(
-        metrics.mean_squared_error(SiteEnergyUse_test,
-                                   pipekNN.predict(BEBM_test),
-                                   squared=False))
-
-# graph rmse
-ax = plt.gca()
-ax.plot(n_neighbors, errors)
-plt.xlabel('alpha')
-plt.ylabel('RMSE')
-plt.axis('tight')
-plt.show()
-
-# %%
 param_grid = {'kneighborsregressor__n_neighbors': n_neighbors}
 # optimisation score
-score = ['r2', 'neg_mean_squared_error']
+score = ['r2', 'neg_mean_squared_error', 'neg_mean_squared_log_error']
 
 # Classifieur kNN avec recherche d'hyperparamètre par validation croisée
 gridpipekNN = GridSearchCV(
@@ -118,11 +167,45 @@ gridpipekNN = GridSearchCV(
     param_grid,  # hyperparamètres à tester
     cv=5,  # nombre de folds de validation croisée
     scoring=score,  # score à optimiser
-    refit='neg_mean_squared_error',
+    refit='neg_mean_squared_log_error',
     n_jobs=-1)
 
 # Optimisation du classifieur sur le jeu d'entraînement
 gridpipekNN.fit(BEBM_train, SiteEnergyUse_train)
+
+# %%
+# graph R² en fonction de alpha
+scoresR2_mean = gridpipekNN.cv_results_[('mean_test_r2')]
+scoresR2_sd = gridpipekNN.cv_results_[('std_test_r2')]
+
+fig = px.line(
+    x=n_neighbors,
+    y=scoresR2_mean,
+    error_y=scoresR2_sd,
+    labels={
+        'x': 'n neighbors',
+        'y': 'R²'
+    },
+    title='R² en fonction du nombre de voisins')  #, error_y=scoresR2_sd)
+fig.show()
+
+# %%
+# graph RMSE en fonction de alpha
+scoresMSLE_mean = gridpipekNN.cv_results_[(
+    'mean_test_neg_mean_squared_log_error')]
+scoresMSLE_sd = gridpipekNN.cv_results_[(
+    'std_test_neg_mean_squared_log_error')]
+
+fig = px.line(x=n_neighbors,
+              y=-scoresMSLE_mean,
+              error_y=scoresMSLE_sd,
+              labels={
+                  'x': 'n neighbors',
+                  'y': 'RMSLE'
+              },
+              title='RMSLE en fonction du nombre de voisins'
+              )  #, error_y=scoresRMSE_mean)
+fig.show()
 
 # %%
 # Afficher l'hyperparamètre optimal
@@ -136,6 +219,10 @@ for param_name in sorted(param_grid.keys()):
 SiteEnergyUse_predkNN = gridpipekNN.predict(BEBM_test)
 r2kNN = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predkNN)
 print(r2kNN)
+rmslekNN = metrics.mean_squared_log_error(SiteEnergyUse_test,
+                                          SiteEnergyUse_predkNN,
+                                          squared=False)
+print(rmslekNN)
 rmsekNN = metrics.mean_squared_error(SiteEnergyUse_test,
                                      SiteEnergyUse_predkNN,
                                      squared=False)
@@ -143,9 +230,9 @@ print(rmsekNN)
 
 # %%
 #modèle Rige
-piperige = make_pipeline(scaler, linear_model.Ridge())
+piperige = make_pipeline(scaler, Ridge())
 
-alphas = np.logspace(-3, 5, 1000)
+alphas = np.logspace(2, 5, 1000)
 
 # %%
 # Validation croisée
@@ -154,7 +241,7 @@ gridpiperige = GridSearchCV(piperige,
                             param_grid,
                             cv=5,
                             scoring=score,
-                            refit='neg_mean_squared_error',
+                            refit='neg_mean_squared_log_error',
                             n_jobs=-1)
 
 gridpiperige.fit(BEBM_train, SiteEnergyUse_train)
@@ -171,6 +258,10 @@ for param_name in sorted(param_grid.keys()):
 SiteEnergyUse_predrige = gridpiperige.predict(BEBM_test)
 r2rige = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predrige)
 print(r2rige)
+rmslerige = metrics.mean_squared_log_error(SiteEnergyUse_test,
+                                           SiteEnergyUse_predrige,
+                                           squared=False)
+print(rmslerige)
 rmserige = metrics.mean_squared_error(SiteEnergyUse_test,
                                       SiteEnergyUse_predrige,
                                       squared=False)
@@ -193,45 +284,42 @@ fig.show()
 
 # %%
 # graph RMSE en fonction de alpha
-scoresRMSE_mean = gridpiperige.cv_results_[(
-    'mean_test_neg_mean_squared_error')]
-scoresRMSE_sd = gridpiperige.cv_results_[('std_test_neg_mean_squared_error')]
+scores1MSLE_mean = gridpiperige.cv_results_[(
+    'split0_test_neg_mean_squared_log_error')]
+scores2MSLE_mean = gridpiperige.cv_results_[(
+    'split1_test_neg_mean_squared_log_error')]
+scores3MSLE_mean = gridpiperige.cv_results_[(
+    'split2_test_neg_mean_squared_log_error')]
+scores4MSLE_mean = gridpiperige.cv_results_[(
+    'split3_test_neg_mean_squared_log_error')]
+scores5MSLE_mean = gridpiperige.cv_results_[(
+    'split4_test_neg_mean_squared_log_error')]
+scoresMSLE_mean = gridpiperige.cv_results_[(
+    'mean_test_neg_mean_squared_log_error')]
+scoresMSLE_sd = gridpiperige.cv_results_[(
+    'std_test_neg_mean_squared_log_error')]
 
 fig = px.line(x=alphas,
-              y=-scoresRMSE_mean,
+              y=-scoresMSLE_mean,
               log_x=True,
               labels={
                   'x': 'alpha',
-                  'y': 'RMSE'
+                  'y': 'RMSLE'
               },
-              title='RMSE en fonction de alpha')  #, error_y=scoresRMSE_mean)
+              title='RMSLE en fonction de alpha')  #, error_y=scoresRMSE_mean)
+fig.add_scatter(x=alphas, y=-scores1MSLE_mean, mode='lines')
+fig.add_scatter(x=alphas, y=-scores2MSLE_mean, mode='lines')
+fig.add_scatter(x=alphas, y=-scores3MSLE_mean, mode='lines')
+fig.add_scatter(x=alphas, y=-scores4MSLE_mean, mode='lines')
+fig.add_scatter(x=alphas, y=-scores5MSLE_mean, mode='lines')
 fig.show()
 
 # %%
 # modèle elastic net
-pipeEN = make_pipeline(scaler, linear_model.ElasticNet())
+pipeEN = make_pipeline(scaler, ElasticNet())
 
-alphas = np.logspace(-5, 1, 1000)
+alphas = np.logspace(-5, 1, 100)
 l1ratio = np.linspace(0, 1, 5)
-
-# %%
-errors = []
-for a in alphas:
-    pipeEN.set_params(elasticnet__alpha=a)
-    pipeEN.fit(BEBM_train, SiteEnergyUse_train)
-    errors.append(
-        metrics.mean_squared_error(SiteEnergyUse_test,
-                                   pipeEN.predict(BEBM_test),
-                                   squared=False))
-
-# graph rmse
-ax = plt.gca()
-ax.plot(alphas, errors)
-ax.set_xscale('log')
-plt.xlabel('alpha')
-plt.ylabel('RMSE')
-plt.axis('tight')
-plt.show()
 
 # %%
 # Validation croisée
@@ -240,7 +328,7 @@ gridpipeEN = GridSearchCV(pipeEN,
                           param_grid,
                           cv=5,
                           scoring=score,
-                          refit='neg_mean_squared_error',
+                          refit='neg_mean_squared_log_error',
                           n_jobs=-1)
 
 gridpipeEN.fit(BEBM_train, SiteEnergyUse_train)
@@ -257,8 +345,13 @@ for param_name in sorted(param_grid.keys()):
 SiteEnergyUse_predEN = gridpipeEN.predict(BEBM_test)
 r2EN = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predEN)
 print(r2EN)
+rmsleEN = metrics.mean_squared_log_error(SiteEnergyUse_test,
+                                         SiteEnergyUse_predEN,
+                                         squared=False)
+print(rmsleEN)
 rmseEN = metrics.mean_squared_error(SiteEnergyUse_test,
                                     SiteEnergyUse_predEN,
                                     squared=False)
 print(rmseEN)
 
+# %%

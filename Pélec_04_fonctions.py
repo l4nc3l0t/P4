@@ -1,6 +1,7 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import plotly.express as px
+
 
 # graphique visualisation vecteurs et données
 def visuPCA(df, pca, components, loadings, axis, color=None):
@@ -8,11 +9,8 @@ def visuPCA(df, pca, components, loadings, axis, color=None):
         if color is None:
             fig = px.scatter(components, x=f1, y=f2)
         else:
-            fig = px.scatter(components,
-                             x=f1,
-                             y=f2,
-                             color=color)#,
-                             #labels={'color': 'Score<br>Nutriscore'})
+            fig = px.scatter(components, x=f1, y=f2, color=color)  #,
+            #labels={'color': 'Score<br>Nutriscore'})
     for i, feature in enumerate(df.columns):
         fig.add_shape(type='line',
                       x0=0,
@@ -35,3 +33,57 @@ def visuPCA(df, pca, components, loadings, axis, color=None):
         yaxis_title='F{} '.format(f2 + 1) + '(' + str(
             (pca.explained_variance_ratio_[f2] * 100).round(2)) + '%' + ')')
     return (fig)
+
+
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn import metrics
+
+
+# gridsearch pour modèles regression, retourne dataframe avec R², RMSE, RMSLE
+def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, param_grid,
+                  score):
+
+    pipemod = make_pipeline(scaler, model)
+    gridpipemod = GridSearchCV(
+        pipemod,
+        param_grid=param_grid,  # hyperparamètres à tester
+        cv=5,  # nombre de folds de validation croisée
+        scoring=score,  # score à optimiser
+        n_jobs=-1)
+    gridpipemod.fit(X_train, y_train)
+    y_pred = gridpipemod.predict(X_test)
+
+    # score gridsearch
+    grid_params = gridpipemod.cv_results_[('params')]
+    GridParams = pd.DataFrame(grid_params)
+    grid_scores = {}
+    for i in range(0, 5):
+        grid_scores['split {}'.format(i)] = gridpipemod.cv_results_[(
+            'split{}_test_score'.format(i))]
+    grid_scores_mean = gridpipemod.cv_results_[('mean_test_score')]
+    grid_scores_sd = gridpipemod.cv_results_[('std_test_score')]
+
+    # meilleurs paramètres
+    best_parameters = gridpipemod.best_estimator_.get_params()
+    BestParam = {}
+    for param_name in param_grid.keys():
+        BestParam[param_name] = best_parameters[param_name]
+    BestParametres = pd.DataFrame.from_dict(
+        BestParam, orient='index',
+        columns=[str(model)
+                 ]).reset_index().rename(columns={'index': 'paramètre'})
+
+    # score modèle
+    scoreR2 = metrics.r2_score(y_test, y_pred)
+    scoreRMSE = metrics.mean_squared_error(y_test, y_pred, squared=False)
+    #scoreRMSLE = metrics.mean_squared_log_error(y_test, y_pred, squared=False)
+    #    return (pd.DataFrame({model: [scoreR2, scoreRMSLE, scoreRMSE]},
+    #                         index=['R²', 'RMSLE', 'RMSE']))
+
+    # dataframe erreur
+    ScoreModele = pd.DataFrame({model: [scoreR2, scoreRMSE]},
+                               index=['R²', 'RMSE'])
+
+    return (GridParams, grid_scores, grid_scores_mean, grid_scores_sd, BestParametres,
+            ScoreModele)
