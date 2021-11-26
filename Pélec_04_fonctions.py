@@ -59,11 +59,15 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, param_grid,
     GridParams = pd.DataFrame(grid_params)
     grid_scores = {}
     for i in range(0, 5):
-        grid_scores['split {}'.format(i)] = gridpipemod.cv_results_[(
+        grid_scores['ScoresSplit{}'.format(i)] = -gridpipemod.cv_results_[(
             'split{}_test_score'.format(i))]
     grid_scores_mean = gridpipemod.cv_results_[('mean_test_score')]
     grid_scores_sd = gridpipemod.cv_results_[('std_test_score')]
-
+    GridScores = pd.DataFrame(grid_scores).join(
+        pd.Series(-grid_scores_mean, name='ScoresMean')).join(
+            pd.Series(grid_scores_sd, name='ScoresSD'))
+    GridModele = GridParams.join(GridScores)
+    
     # meilleurs paramètres
     best_parameters = gridpipemod.best_estimator_.get_params()
     BestParam = {}
@@ -85,5 +89,4 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, param_grid,
     ScoreModele = pd.DataFrame({model: [scoreR2, scoreRMSE]},
                                index=['R²', 'RMSE'])
 
-    return (GridParams, grid_scores, grid_scores_mean, grid_scores_sd, BestParametres,
-            ScoreModele)
+    return (GridModele, BestParametres, ScoreModele)

@@ -1,8 +1,12 @@
 # %%
+import os
 import pandas as pd
+
+pd.options.plotting.backend = 'plotly'
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
 from sklearn import metrics
 from sklearn.preprocessing import RobustScaler, StandardScaler
 from sklearn.decomposition import PCA
@@ -15,7 +19,22 @@ from sklearn.svm import LinearSVC
 
 from Pélec_04_fonctions import *
 
+# %%
 write_data = True
+
+if write_data is True:
+    try:
+        os.mkdir("./Figures/")
+    except OSError as error:
+        print(error)
+    try:
+        os.mkdir("./Tableaux/")
+    except OSError as error:
+        print(error)
+else:
+    print("""Visualisation uniquement dans le notebook
+    pas de création de figures ni de tableaux""")
+
 # %%
 BEB = pd.read_csv('BEB.csv')
 
@@ -26,9 +45,11 @@ TotalGHGEmissions = np.array(BEB.TotalGHGEmissions).reshape(-1, 1)
 BEBM_train, BEBM_test, SiteEnergyUse_train, SiteEnergyUse_test = train_test_split(
     BEBM, SiteEnergyUse, test_size=.2)
 
+score = 'neg_root_mean_squared_error'
+
 # %%
 # Scaler moins sensible aux outlier d'après la doc
-scaler = StandardScaler()  #RobustScaler(quantile_range=(10, 90))
+scaler = RobustScaler(quantile_range=(10, 90))
 
 # %%
 # ACP sur toutes les colonnes
@@ -51,7 +72,7 @@ fig.update_layout(title='Scree plot')
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/ScreePlot.pdf', height=300)
-"""# %%
+# %%
 # création des graphiques
 for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
     fig = visuPCA(
@@ -65,7 +86,7 @@ for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
         fig.write_image('./Figures/PCAF{}F{}.pdf'.format(a1 + 1, a2 + 1),
                         width=1100,
                         height=1100)
-"""
+
 # %%
 # modèle régression linéaire
 pipeLR = make_pipeline(scaler, LinearRegression())
@@ -82,18 +103,13 @@ LRrmse = metrics.mean_squared_error(SiteEnergyUse_test,
 print("rmse :", LRrmse)
 
 #%%
-alphasridge = np.logspace(2, 5, 100)
+alphasridge = np.logspace(-3, 5, 1000)
 param_gridRidge = {'ridge__alpha': alphasridge}
 
-score = 'neg_mean_squared_error'
-
-GridParamsRidge, \
-grid_scoresRidge, \
-grid_scores_meanRidge, \
-grid_scores_sdRidge, \
+GridRidge, \
 BestParametresRidge, \
 ScoresRidge = reg_modelGrid(model=Ridge(),
-                            scaler=RobustScaler(quantile_range=(10, 90)),
+                            scaler=scaler,
                             X_train=BEBM_train,
                             X_test=BEBM_test,
                             y_train=SiteEnergyUse_train,
@@ -101,18 +117,56 @@ ScoresRidge = reg_modelGrid(model=Ridge(),
                             score=score,
                             param_grid=param_gridRidge)
 
+print(BestParametresRidge)
 ScoresRidge
 
-#%%
+# %%
+# graph visualisation RMSE Ridge pour tout les paramètres de GridSearchCV
+fig1 = go.Figure([
+    go.Scatter(name='RMSE moyenne',
+               x=alphasridge,
+               y=GridRidge.ScoresMean,
+               mode='lines',
+               marker=dict(color='red', size=2),
+               showlegend=True),
+    go.Scatter(name='SDup RMSE',
+               x=alphasridge,
+               y=GridRidge.ScoresMean + GridRidge.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               showlegend=False),
+    go.Scatter(name='SDdown RMSE',
+               x=alphasridge,
+               y=GridRidge.ScoresMean - GridRidge.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               fillcolor='rgba(68, 68, 68, .3)',
+               fill='tonexty',
+               showlegend=False)
+])
+
+fig2 = px.line(GridRidge,
+               x=alphasridge,
+               y=[
+                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                   'ScoresSplit3', 'ScoresSplit4'
+               ])
+
+fig3 = go.Figure(data=fig1.data + fig2.data)
+fig3.update_xaxes(type='log', title='alpha')
+fig3.update_yaxes(title='RMSE')
+fig3.update_layout(
+    title="RMSE du modèle Ridge en fonction de l'hyperparamètre alpha")
+fig3.show()
+if write_data is True:
+    fig3.write_image('./Figures/graphRMSERidge.pdf')
+# %%
 alphaslasso = np.linspace(0.1, 1, 5)
 param_gridLasso = {'lasso__alpha': alphaslasso}
 
-score = 'neg_mean_squared_error'
-
-GridParamsLasso, \
-grid_scoresLasso, \
-grid_scores_meanLasso, \
-grid_scores_sdLasso, \
+GridLasso, \
 BestParametresLasso, \
 ScoresLasso = reg_modelGrid(model=Lasso(),
                             scaler=RobustScaler(quantile_range=(10, 90)),
@@ -123,23 +177,64 @@ ScoresLasso = reg_modelGrid(model=Lasso(),
                             score=score,
                             param_grid=param_gridLasso)
 
+print(BestParametresLasso)
 ScoresLasso
 
 # %%
-alphasEN = np.logspace(3, 7, 100)
+# graph visualisation RMSE Lasso pour tout les paramètres de GridSearchCV
+fig1 = go.Figure([
+    go.Scatter(name='RMSE moyenne',
+               x=alphaslasso,
+               y=GridLasso.ScoresMean,
+               mode='lines',
+               marker=dict(color='red', size=2),
+               showlegend=True),
+    go.Scatter(name='SDup RMSE',
+               x=alphaslasso,
+               y=GridLasso.ScoresMean + GridLasso.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               showlegend=False),
+    go.Scatter(name='SDdown RMSE',
+               x=alphaslasso,
+               y=GridLasso.ScoresMean - GridLasso.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               fillcolor='rgba(68, 68, 68, .3)',
+               fill='tonexty',
+               showlegend=False)
+])
+
+fig2 = px.line(GridLasso,
+               x=alphaslasso,
+               y=[
+                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                   'ScoresSplit3', 'ScoresSplit4'
+               ])
+
+fig3 = go.Figure(data=fig1.data + fig2.data)
+fig3.update_xaxes(type='log', title='alpha')
+fig3.update_yaxes(title='RMSE')
+fig3.update_layout(
+    title="RMSE du modèle Lasso en fonction de l'hyperparamètre alpha")
+fig3.show()
+if write_data is True:
+    fig3.write_image('./Figures/graphRMSELasso.pdf')
+
+# %%
+alphasEN = np.logspace(0, 7, 200)
 l1ratioEN = np.linspace(0, 1, 6)
 param_gridEN = {
     'elasticnet__alpha': alphasEN,
     'elasticnet__l1_ratio': l1ratioEN
 }
 
-GridParamsEN, \
-grid_scoresEN, \
-grid_scores_meanEN, \
-grid_scores_sdEN, \
+GridEN, \
 BestParametresEN, \
 ScoresEN = reg_modelGrid(model=ElasticNet(),
-                         scaler=RobustScaler(quantile_range=(10, 90)),
+                         scaler=scaler,
                          X_train=BEBM_train,
                          X_test=BEBM_test,
                          y_train=SiteEnergyUse_train,
@@ -147,10 +242,67 @@ ScoresEN = reg_modelGrid(model=ElasticNet(),
                          score=score,
                          param_grid=param_gridEN)
 
+print(BestParametresEN)
 ScoresEN
 
 # %%
-# modèle kNN
+# graph visualisation RMSE ElasticNet pour tout les paramètres de GridSearchCV
+for i in BestParametresEN['ElasticNet()'][BestParametresEN['paramètre'] ==
+                                          'elasticnet__l1_ratio']:
+    fig1 = go.Figure([
+        go.Scatter(name='RMSE moyenne',
+                   x=alphasEN,
+                   y=GridEN.ScoresMean.where(
+                       GridEN.elasticnet__l1_ratio == i).dropna(),
+                   mode='lines',
+                   marker=dict(color='red', size=2),
+                   showlegend=True),
+        go.Scatter(
+            name='SDup RMSE',
+            x=alphasEN,
+            y=GridEN.ScoresMean.where(
+                GridEN.elasticnet__l1_ratio == i).dropna() +
+            GridEN.ScoresSD.where(GridEN.elasticnet__l1_ratio == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            showlegend=False),
+        go.Scatter(
+            name='SDdown RMSE',
+            x=alphasEN,
+            y=GridEN.ScoresMean.where(
+                GridEN.elasticnet__l1_ratio == i).dropna() -
+            GridEN.ScoresSD.where(GridEN.elasticnet__l1_ratio == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            fillcolor='rgba(68, 68, 68, .3)',
+            fill='tonexty',
+            showlegend=False)
+    ])
+
+    fig2 = px.line(GridEN.where(GridEN.elasticnet__l1_ratio == i).dropna(),
+                   x=alphasEN,
+                   y=[
+                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                       'ScoresSplit3', 'ScoresSplit4'
+                   ])
+
+    fig3 = go.Figure(data=fig1.data + fig2.data)
+    fig3.update_xaxes(type='log', title='alpha')
+    fig3.update_yaxes(title='RMSE')
+    fig3.update_layout(
+        title=
+        "RMSE du modèle EN pour le paramètre l1={:.2} en fonction de l'hyperparamètre alpha"
+        .format(i))
+    fig3.show()
+    if write_data is True:
+        fig3.write_image('./Figures/graphRMSEEN{:.2}.pdf'.format(i))
+
+# %%
+
+# %%
+"""# modèle kNN
 pipekNN = make_pipeline(scaler, KNeighborsRegressor(n_jobs=-1))
 
 # Fixer les valeurs des hyperparamètres à tester
@@ -228,130 +380,4 @@ rmsekNN = metrics.mean_squared_error(SiteEnergyUse_test,
                                      squared=False)
 print(rmsekNN)
 
-# %%
-#modèle Rige
-piperige = make_pipeline(scaler, Ridge())
-
-alphas = np.logspace(2, 5, 1000)
-
-# %%
-# Validation croisée
-param_grid = {'ridge__alpha': alphas}
-gridpiperige = GridSearchCV(piperige,
-                            param_grid,
-                            cv=5,
-                            scoring=score,
-                            refit='neg_mean_squared_log_error',
-                            n_jobs=-1)
-
-gridpiperige.fit(BEBM_train, SiteEnergyUse_train)
-
-# %%
-# Afficher l'hyperparamètre optimal
-print("Meilleur(s) hyperparamètre(s) sur le jeu d'entraînement:")
-best_parameters = gridpiperige.best_estimator_.get_params()
-for param_name in sorted(param_grid.keys()):
-    print("\t%s: %r" % (param_name, best_parameters[param_name]))
-
-# %%
-# Erreur rigde
-SiteEnergyUse_predrige = gridpiperige.predict(BEBM_test)
-r2rige = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predrige)
-print(r2rige)
-rmslerige = metrics.mean_squared_log_error(SiteEnergyUse_test,
-                                           SiteEnergyUse_predrige,
-                                           squared=False)
-print(rmslerige)
-rmserige = metrics.mean_squared_error(SiteEnergyUse_test,
-                                      SiteEnergyUse_predrige,
-                                      squared=False)
-print(rmserige)
-
-# %%
-# graph R² en fonction de alpha
-scoresR2_mean = gridpiperige.cv_results_[('mean_test_r2')]
-scoresR2_sd = gridpiperige.cv_results_[('std_test_r2')]
-
-fig = px.line(x=alphas,
-              y=scoresR2_mean,
-              log_x=True,
-              labels={
-                  'x': 'alpha',
-                  'y': 'R²'
-              },
-              title='R² en fonction de alpha')  #, error_y=scoresR2_sd)
-fig.show()
-
-# %%
-# graph RMSE en fonction de alpha
-scores1MSLE_mean = gridpiperige.cv_results_[(
-    'split0_test_neg_mean_squared_log_error')]
-scores2MSLE_mean = gridpiperige.cv_results_[(
-    'split1_test_neg_mean_squared_log_error')]
-scores3MSLE_mean = gridpiperige.cv_results_[(
-    'split2_test_neg_mean_squared_log_error')]
-scores4MSLE_mean = gridpiperige.cv_results_[(
-    'split3_test_neg_mean_squared_log_error')]
-scores5MSLE_mean = gridpiperige.cv_results_[(
-    'split4_test_neg_mean_squared_log_error')]
-scoresMSLE_mean = gridpiperige.cv_results_[(
-    'mean_test_neg_mean_squared_log_error')]
-scoresMSLE_sd = gridpiperige.cv_results_[(
-    'std_test_neg_mean_squared_log_error')]
-
-fig = px.line(x=alphas,
-              y=-scoresMSLE_mean,
-              log_x=True,
-              labels={
-                  'x': 'alpha',
-                  'y': 'RMSLE'
-              },
-              title='RMSLE en fonction de alpha')  #, error_y=scoresRMSE_mean)
-fig.add_scatter(x=alphas, y=-scores1MSLE_mean, mode='lines')
-fig.add_scatter(x=alphas, y=-scores2MSLE_mean, mode='lines')
-fig.add_scatter(x=alphas, y=-scores3MSLE_mean, mode='lines')
-fig.add_scatter(x=alphas, y=-scores4MSLE_mean, mode='lines')
-fig.add_scatter(x=alphas, y=-scores5MSLE_mean, mode='lines')
-fig.show()
-
-# %%
-# modèle elastic net
-pipeEN = make_pipeline(scaler, ElasticNet())
-
-alphas = np.logspace(-5, 1, 100)
-l1ratio = np.linspace(0, 1, 5)
-
-# %%
-# Validation croisée
-param_grid = {'elasticnet__alpha': alphas, 'elasticnet__l1_ratio': l1ratio}
-gridpipeEN = GridSearchCV(pipeEN,
-                          param_grid,
-                          cv=5,
-                          scoring=score,
-                          refit='neg_mean_squared_log_error',
-                          n_jobs=-1)
-
-gridpipeEN.fit(BEBM_train, SiteEnergyUse_train)
-
-# %%
-# Afficher l'hyperparamètre optimal
-print("Meilleur(s) hyperparamètre(s) sur le jeu d'entraînement:")
-best_parameters = gridpipeEN.best_estimator_.get_params()
-for param_name in sorted(param_grid.keys()):
-    print("\t%s: %r" % (param_name, best_parameters[param_name]))
-
-# %%
-# Erreur ElasticNet
-SiteEnergyUse_predEN = gridpipeEN.predict(BEBM_test)
-r2EN = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predEN)
-print(r2EN)
-rmsleEN = metrics.mean_squared_log_error(SiteEnergyUse_test,
-                                         SiteEnergyUse_predEN,
-                                         squared=False)
-print(rmsleEN)
-rmseEN = metrics.mean_squared_error(SiteEnergyUse_test,
-                                    SiteEnergyUse_predEN,
-                                    squared=False)
-print(rmseEN)
-
-# %%
+"""
