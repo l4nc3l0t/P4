@@ -91,7 +91,7 @@ pipeLR = make_pipeline(scaler, LinearRegression())
 
 pipeLR.fit(BEBM_train, SiteEnergyUse_train)
 
-SiteEnergyUse_pred = pipeLR.predict(BEBM_test)
+SiteEnergyUse_predLR = pipeLR.predict(BEBM_test)
 
 LRr2 = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_pred)
 print("r2 :", LRr2)
@@ -100,6 +100,16 @@ LRrmse = metrics.mean_squared_error(SiteEnergyUse_test,
                                     squared=False)
 print("rmse :", LRrmse)
 
+fig = px.scatter(
+        x=SiteEnergyUse_predLR.squeeze(),
+        y=SiteEnergyUse_test.squeeze(),
+        labels={
+            'x': f'{SiteEnergyUse_predLR=}'.partition('=')[0],
+            'y': f'{SiteEnergyUse_test=}'.partition('=')[0]
+        },
+        title=
+        'Visualisation des données prédites par le modèle de régression linéaire vs les données test')
+fig.show()
 #%%
 alphasridge = np.logspace(-3, 5, 1000)
 param_gridRidge = {'ridge__alpha': alphasridge}
