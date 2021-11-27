@@ -106,18 +106,22 @@ param_gridRidge = {'ridge__alpha': alphasridge}
 
 GridRidge, \
 BestParametresRidge, \
-ScoresRidge = reg_modelGrid(model=Ridge(),
+ScoresRidge, \
+SiteEnergyUse_predRidge, \
+figRidge = reg_modelGrid(model=Ridge(),
                             scaler=scaler,
                             X_train=BEBM_train,
                             X_test=BEBM_test,
                             y_train=SiteEnergyUse_train,
                             y_test=SiteEnergyUse_test,
+                            y_test_name='SiteEnergyUse_test',
+                            y_pred_name='SiteEnergyUse_predRidge',
                             score=score,
                             param_grid=param_gridRidge)
 
 print(BestParametresRidge)
 ScoresRidge
-
+figRidge.show()
 # %%
 # graph visualisation RMSE Ridge pour tout les paramètres de GridSearchCV
 fig1 = go.Figure([
@@ -166,17 +170,22 @@ param_gridLasso = {'lasso__alpha': alphaslasso}
 
 GridLasso, \
 BestParametresLasso, \
-ScoresLasso = reg_modelGrid(model=Lasso(),
+ScoresLasso, \
+SiteEnergyUse_predLasso, \
+figLasso = reg_modelGrid(model=Lasso(),
                             scaler=RobustScaler(quantile_range=(10, 90)),
                             X_train=BEBM_train,
                             X_test=BEBM_test,
                             y_train=SiteEnergyUse_train,
                             y_test=SiteEnergyUse_test,
+                            y_test_name='SiteEnergyUse_test',
+                            y_pred_name='SiteEnergyUse_predLasso',
                             score=score,
                             param_grid=param_gridLasso)
 
 print(BestParametresLasso)
 ScoresLasso
+figLasso.show()
 
 # %%
 # graph visualisation RMSE Lasso pour tout les paramètres de GridSearchCV
@@ -231,17 +240,22 @@ param_gridEN = {
 
 GridEN, \
 BestParametresEN, \
-ScoresEN = reg_modelGrid(model=ElasticNet(),
+ScoresEN, \
+SiteEnergyUse_predEN, \
+figEN = reg_modelGrid(model=ElasticNet(),
                          scaler=scaler,
                          X_train=BEBM_train,
                          X_test=BEBM_test,
                          y_train=SiteEnergyUse_train,
                          y_test=SiteEnergyUse_test,
+                         y_test_name='SiteEnergyUse_test',
+                         y_pred_name='SiteEnergyUse_predEN',
                          score=score,
                          param_grid=param_gridEN)
 
 print(BestParametresEN)
 ScoresEN
+figEN.show()
 
 # %%
 # graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
@@ -304,17 +318,22 @@ param_gridkNN = {'kneighborsregressor__n_neighbors': n_neighbors}
 
 GridkNN, \
 BestParametreskNN, \
-ScoreskNN = reg_modelGrid(model=KNeighborsRegressor(n_jobs=-1),
+ScoreskNN, \
+SiteEnergyUse_predkNN, \
+figkNN = reg_modelGrid(model=KNeighborsRegressor(n_jobs=-1),
                          scaler=scaler,
                          X_train=BEBM_train,
                          X_test=BEBM_test,
                          y_train=SiteEnergyUse_train,
                          y_test=SiteEnergyUse_test,
+                         y_test_name='SiteEnergyUse_test',
+                         y_pred_name='SiteEnergyUse_predkNN',
                          score=score,
                          param_grid=param_gridkNN)
 
 print(BestParametreskNN)
 ScoreskNN
+figkNN.show()
 
 # %%
 # graph visualisation RMSE kNN pour tout les paramètres de GridSearchCV
@@ -364,43 +383,50 @@ if write_data is True:
 # %%
 n_estimatorsRF = np.logspace(0, 3, 10, dtype=int)
 param_gridRF = {
-    'randomforestregressor__n_estimators':
-    n_estimatorsRF,
+    'randomforestregressor__n_estimators': n_estimatorsRF,
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }
 
 GridRF, \
 BestParametresRF, \
-ScoresRF = reg_modelGrid(model=RandomForestRegressor(),
+ScoresRF, \
+SiteEnergyUse_predRF, \
+figRF = reg_modelGrid(model=RandomForestRegressor(),
                          scaler=scaler,
                          X_train=BEBM_train,
                          X_test=BEBM_test,
                          y_train=SiteEnergyUse_train.ravel(),
                          y_test=SiteEnergyUse_test,
+                         y_test_name='SiteEnergyUse_test',
+                         y_pred_name='SiteEnergyUse_predRF',
                          score=score,
                          param_grid=param_gridRF)
 
 print(BestParametresRF)
 ScoresRF
+figRF.show()
 
 # %%
-# graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
-for i in BestParametresRF['RandomForestRegressor()'][BestParametresRF['paramètre'] ==
-                                          'randomforestregressor__max_features']:
+# graph visualisation RMSE ElasticNet pour tout le meilleur paramètre max features
+for i in BestParametresRF['RandomForestRegressor()'][
+        BestParametresRF['paramètre'] ==
+        'randomforestregressor__max_features']:
     fig1 = go.Figure([
-        go.Scatter(name='RMSE moyenne',
-                   x=n_estimatorsRF,
-                   y=GridRF.ScoresMean.where(
-                       GridRF.randomforestregressor__max_features == i).dropna(),
-                   mode='lines',
-                   marker=dict(color='red', size=2),
-                   showlegend=True),
+        go.Scatter(
+            name='RMSE moyenne',
+            x=n_estimatorsRF,
+            y=GridRF.ScoresMean.where(
+                GridRF.randomforestregressor__max_features == i).dropna(),
+            mode='lines',
+            marker=dict(color='red', size=2),
+            showlegend=True),
         go.Scatter(
             name='SDup RMSE',
             x=n_estimatorsRF,
             y=GridRF.ScoresMean.where(
                 GridRF.randomforestregressor__max_features == i).dropna() +
-            GridRF.ScoresSD.where(GridRF.randomforestregressor__max_features == i).dropna(),
+            GridRF.ScoresSD.where(
+                GridRF.randomforestregressor__max_features == i).dropna(),
             mode='lines',
             marker=dict(color="#444"),
             line=dict(width=1),
@@ -410,7 +436,8 @@ for i in BestParametresRF['RandomForestRegressor()'][BestParametresRF['paramètr
             x=n_estimatorsRF,
             y=GridEN.ScoresMean.where(
                 GridRF.randomforestregressor__max_features == i).dropna() -
-            GridRF.ScoresSD.where(GridRF.randomforestregressor__max_features == i).dropna(),
+            GridRF.ScoresSD.where(
+                GridRF.randomforestregressor__max_features == i).dropna(),
             mode='lines',
             marker=dict(color="#444"),
             line=dict(width=1),
@@ -419,12 +446,13 @@ for i in BestParametresRF['RandomForestRegressor()'][BestParametresRF['paramètr
             showlegend=False)
     ])
 
-    fig2 = px.line(GridRF.where(GridRF.randomforestregressor__max_features == i).dropna(),
-                   x=n_estimatorsRF,
-                   y=[
-                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                       'ScoresSplit3', 'ScoresSplit4'
-                   ])
+    fig2 = px.line(
+        GridRF.where(GridRF.randomforestregressor__max_features == i).dropna(),
+        x=n_estimatorsRF,
+        y=[
+            'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2', 'ScoresSplit3',
+            'ScoresSplit4'
+        ])
 
     fig3 = go.Figure(data=fig1.data + fig2.data)
     fig3.update_xaxes(type='log', title='n_estimators')

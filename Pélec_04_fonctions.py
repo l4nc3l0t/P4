@@ -41,8 +41,16 @@ from sklearn import metrics
 
 
 # gridsearch pour modèles regression, retourne dataframe avec R², RMSE, RMSLE
-def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, param_grid,
-                  score):
+def reg_modelGrid(model,
+                  scaler,
+                  X_train,
+                  X_test,
+                  y_train,
+                  y_test,
+                  param_grid,
+                  score,
+                  y_test_name=None,
+                  y_pred_name=None):
 
     pipemod = make_pipeline(scaler, model)
     gridpipemod = GridSearchCV(
@@ -59,15 +67,15 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, param_grid,
     GridParams = pd.DataFrame(grid_params)
     grid_scores = {}
     for i in range(0, 5):
-        grid_scores['ScoresSplit{}'.format(i)] = -gridpipemod.cv_results_[(
-            'split{}_test_score'.format(i))]
+        grid_scores['ScoresSplit{}'.format(i)] = -gridpipemod.cv_results_[
+            ('split{}_test_score'.format(i))]
     grid_scores_mean = gridpipemod.cv_results_[('mean_test_score')]
     grid_scores_sd = gridpipemod.cv_results_[('std_test_score')]
     GridScores = pd.DataFrame(grid_scores).join(
         pd.Series(-grid_scores_mean, name='ScoresMean')).join(
             pd.Series(grid_scores_sd, name='ScoresSD'))
     GridModele = GridParams.join(GridScores)
-    
+
     # meilleurs paramètres
     best_parameters = gridpipemod.best_estimator_.get_params()
     BestParam = {}
@@ -89,4 +97,16 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, param_grid,
     ScoreModele = pd.DataFrame({model: [scoreR2, scoreRMSE]},
                                index=['R²', 'RMSE'])
 
-    return (GridModele, BestParametres, ScoreModele)
+    # graph pred vs test
+    fig = px.scatter(
+        x=y_pred.squeeze(),
+        y=y_test.squeeze(),
+        labels={
+            'x': y_pred_name,
+            'y': y_test_name
+        },
+        title=
+        'Visualisation des données prédites par le modèle {} vs les données test'
+        .format(model))
+
+    return (GridModele, BestParametres, ScoreModele, y_pred, fig)
