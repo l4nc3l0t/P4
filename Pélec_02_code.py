@@ -4,7 +4,6 @@ import pandas as pd
 
 pd.options.plotting.backend = 'plotly'
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn import metrics
@@ -15,7 +14,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import LinearSVC
 
 from Pélec_04_fonctions import *
 
@@ -246,7 +244,7 @@ print(BestParametresEN)
 ScoresEN
 
 # %%
-# graph visualisation RMSE ElasticNet pour tout les paramètres de GridSearchCV
+# graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
 for i in BestParametresEN['ElasticNet()'][BestParametresEN['paramètre'] ==
                                           'elasticnet__l1_ratio']:
     fig1 = go.Figure([
@@ -300,84 +298,143 @@ for i in BestParametresEN['ElasticNet()'][BestParametresEN['paramètre'] ==
         fig3.write_image('./Figures/graphRMSEEN{:.2}.pdf'.format(i))
 
 # %%
+n_neighbors = np.linspace(0, 100, dtype=int)
+param_gridkNN = {'kneighborsregressor__n_neighbors': n_neighbors}
+
+
+GridkNN, \
+BestParametreskNN, \
+ScoreskNN = reg_modelGrid(model=KNeighborsRegressor(n_jobs=-1),
+                         scaler=scaler,
+                         X_train=BEBM_train,
+                         X_test=BEBM_test,
+                         y_train=SiteEnergyUse_train,
+                         y_test=SiteEnergyUse_test,
+                         score=score,
+                         param_grid=param_gridkNN)
+
+print(BestParametreskNN)
+ScoreskNN
 
 # %%
-"""# modèle kNN
-pipekNN = make_pipeline(scaler, KNeighborsRegressor(n_jobs=-1))
+# graph visualisation RMSE kNN pour tout les paramètres de GridSearchCV
+fig1 = go.Figure([
+    go.Scatter(name='RMSE moyenne',
+               x=n_neighbors,
+               y=GridkNN.ScoresMean,
+               mode='lines',
+               marker=dict(color='red', size=2),
+               showlegend=True),
+    go.Scatter(name='SDup RMSE',
+               x=n_neighbors,
+               y=GridkNN.ScoresMean + GridkNN.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               showlegend=False),
+    go.Scatter(name='SDdown RMSE',
+               x=n_neighbors,
+               y=GridkNN.ScoresMean - GridkNN.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               fillcolor='rgba(68, 68, 68, .3)',
+               fill='tonexty',
+               showlegend=False)
+])
 
-# Fixer les valeurs des hyperparamètres à tester
-n_neighbors = np.linspace(10, 100, dtype=int)
+fig2 = px.line(GridkNN,
+               x=n_neighbors,
+               y=[
+                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                   'ScoresSplit3', 'ScoresSplit4'
+               ])
 
-# %%
-param_grid = {'kneighborsregressor__n_neighbors': n_neighbors}
-# optimisation score
-score = ['r2', 'neg_mean_squared_error', 'neg_mean_squared_log_error']
-
-# Classifieur kNN avec recherche d'hyperparamètre par validation croisée
-gridpipekNN = GridSearchCV(
-    pipekNN,  # un classifieur kNN
-    param_grid,  # hyperparamètres à tester
-    cv=5,  # nombre de folds de validation croisée
-    scoring=score,  # score à optimiser
-    refit='neg_mean_squared_log_error',
-    n_jobs=-1)
-
-# Optimisation du classifieur sur le jeu d'entraînement
-gridpipekNN.fit(BEBM_train, SiteEnergyUse_train)
-
-# %%
-# graph R² en fonction de alpha
-scoresR2_mean = gridpipekNN.cv_results_[('mean_test_r2')]
-scoresR2_sd = gridpipekNN.cv_results_[('std_test_r2')]
-
-fig = px.line(
-    x=n_neighbors,
-    y=scoresR2_mean,
-    error_y=scoresR2_sd,
-    labels={
-        'x': 'n neighbors',
-        'y': 'R²'
-    },
-    title='R² en fonction du nombre de voisins')  #, error_y=scoresR2_sd)
-fig.show()
-
-# %%
-# graph RMSE en fonction de alpha
-scoresMSLE_mean = gridpipekNN.cv_results_[(
-    'mean_test_neg_mean_squared_log_error')]
-scoresMSLE_sd = gridpipekNN.cv_results_[(
-    'std_test_neg_mean_squared_log_error')]
-
-fig = px.line(x=n_neighbors,
-              y=-scoresMSLE_mean,
-              error_y=scoresMSLE_sd,
-              labels={
-                  'x': 'n neighbors',
-                  'y': 'RMSLE'
-              },
-              title='RMSLE en fonction du nombre de voisins'
-              )  #, error_y=scoresRMSE_mean)
-fig.show()
+fig3 = go.Figure(data=fig1.data + fig2.data)
+fig3.update_xaxes(type='log', title='n neighbors')
+fig3.update_yaxes(title='RMSE')
+fig3.update_layout(
+    title=
+    "RMSE du modèle kNN en fonction de l'hyperparamètre n le nombre de voisins"
+)
+fig3.show()
+if write_data is True:
+    fig3.write_image('./Figures/graphRMSEkNN.pdf')
 
 # %%
-# Afficher l'hyperparamètre optimal
-print("Meilleur(s) hyperparamètre(s) sur le jeu d'entraînement:")
-best_parameters = gridpipekNN.best_estimator_.get_params()
-for param_name in sorted(param_grid.keys()):
-    print("\t%s: %r" % (param_name, best_parameters[param_name]))
+n_estimatorsRF = np.logspace(0, 3, 10, dtype=int)
+param_gridRF = {
+    'randomforestregressor__n_estimators':
+    n_estimatorsRF,
+    'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
+}
+
+GridRF, \
+BestParametresRF, \
+ScoresRF = reg_modelGrid(model=RandomForestRegressor(),
+                         scaler=scaler,
+                         X_train=BEBM_train,
+                         X_test=BEBM_test,
+                         y_train=SiteEnergyUse_train.ravel(),
+                         y_test=SiteEnergyUse_test,
+                         score=score,
+                         param_grid=param_gridRF)
+
+print(BestParametresRF)
+ScoresRF
 
 # %%
-# Erreur kNN
-SiteEnergyUse_predkNN = gridpipekNN.predict(BEBM_test)
-r2kNN = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predkNN)
-print(r2kNN)
-rmslekNN = metrics.mean_squared_log_error(SiteEnergyUse_test,
-                                          SiteEnergyUse_predkNN,
-                                          squared=False)
-print(rmslekNN)
-rmsekNN = metrics.mean_squared_error(SiteEnergyUse_test,
-                                     SiteEnergyUse_predkNN,
-                                     squared=False)
-print(rmsekNN)
+# graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
+for i in BestParametresRF['RandomForestRegressor()'][BestParametresRF['paramètre'] ==
+                                          'randomforestregressor__max_features']:
+    fig1 = go.Figure([
+        go.Scatter(name='RMSE moyenne',
+                   x=n_estimatorsRF,
+                   y=GridRF.ScoresMean.where(
+                       GridRF.randomforestregressor__max_features == i).dropna(),
+                   mode='lines',
+                   marker=dict(color='red', size=2),
+                   showlegend=True),
+        go.Scatter(
+            name='SDup RMSE',
+            x=n_estimatorsRF,
+            y=GridRF.ScoresMean.where(
+                GridRF.randomforestregressor__max_features == i).dropna() +
+            GridRF.ScoresSD.where(GridRF.randomforestregressor__max_features == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            showlegend=False),
+        go.Scatter(
+            name='SDdown RMSE',
+            x=n_estimatorsRF,
+            y=GridEN.ScoresMean.where(
+                GridRF.randomforestregressor__max_features == i).dropna() -
+            GridRF.ScoresSD.where(GridRF.randomforestregressor__max_features == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            fillcolor='rgba(68, 68, 68, .3)',
+            fill='tonexty',
+            showlegend=False)
+    ])
 
-"""
+    fig2 = px.line(GridRF.where(GridRF.randomforestregressor__max_features == i).dropna(),
+                   x=n_estimatorsRF,
+                   y=[
+                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                       'ScoresSplit3', 'ScoresSplit4'
+                   ])
+
+    fig3 = go.Figure(data=fig1.data + fig2.data)
+    fig3.update_xaxes(type='log', title='n_estimators')
+    fig3.update_yaxes(title='RMSE')
+    fig3.update_layout(
+        title=
+        "RMSE du modèle RF pour le paramètre max_features={} en fonction de l'hyperparamètre alpha"
+        .format(i))
+    fig3.show()
+    if write_data is True:
+        fig3.write_image('./Figures/graphRMSERF{}.pdf'.format(i))
+
+# %%
