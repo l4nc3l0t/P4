@@ -85,6 +85,10 @@ for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
                         width=1100,
                         height=1100)
 
+# %% [markdown]
+## 1. Modèle de prédiction sur la consommation énergétique (SiteEnergyUse)
+### 1.1 Consommation énergétique brute 
+
 # %%
 # modèle régression linéaire
 pipeLR = make_pipeline(scaler, LinearRegression())
@@ -93,10 +97,10 @@ pipeLR.fit(BEBM_train, SiteEnergyUse_train)
 
 SiteEnergyUse_predLR = pipeLR.predict(BEBM_test)
 
-LRr2 = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_pred)
+LRr2 = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predLR)
 print("r2 :", LRr2)
 LRrmse = metrics.mean_squared_error(SiteEnergyUse_test,
-                                    SiteEnergyUse_pred,
+                                    SiteEnergyUse_predLR,
                                     squared=False)
 print("rmse :", LRrmse)
 
@@ -108,7 +112,7 @@ fig = px.scatter(
             'y': f'{SiteEnergyUse_test=}'.partition('=')[0]
         },
         title=
-        'Visualisation des données prédites par le modèle de régression linéaire vs les données test')
+        'Visualisation des données de consommation prédites par le modèle de régression linéaire vs les données test')
 fig.show()
 #%%
 alphasridge = np.logspace(-3, 5, 1000)
@@ -409,6 +413,406 @@ figRF = reg_modelGrid(model=RandomForestRegressor(),
                          y_test=SiteEnergyUse_test,
                          y_test_name='SiteEnergyUse_test',
                          y_pred_name='SiteEnergyUse_predRF',
+                         score=score,
+                         param_grid=param_gridRF)
+
+print(BestParametresRF)
+ScoresRF
+figRF.show()
+
+# %%
+# graph visualisation RMSE ElasticNet pour tout le meilleur paramètre max features
+for i in BestParametresRF['RandomForestRegressor()'][
+        BestParametresRF['paramètre'] ==
+        'randomforestregressor__max_features']:
+    fig1 = go.Figure([
+        go.Scatter(
+            name='RMSE moyenne',
+            x=n_estimatorsRF,
+            y=GridRF.ScoresMean.where(
+                GridRF.randomforestregressor__max_features == i).dropna(),
+            mode='lines',
+            marker=dict(color='red', size=2),
+            showlegend=True),
+        go.Scatter(
+            name='SDup RMSE',
+            x=n_estimatorsRF,
+            y=GridRF.ScoresMean.where(
+                GridRF.randomforestregressor__max_features == i).dropna() +
+            GridRF.ScoresSD.where(
+                GridRF.randomforestregressor__max_features == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            showlegend=False),
+        go.Scatter(
+            name='SDdown RMSE',
+            x=n_estimatorsRF,
+            y=GridEN.ScoresMean.where(
+                GridRF.randomforestregressor__max_features == i).dropna() -
+            GridRF.ScoresSD.where(
+                GridRF.randomforestregressor__max_features == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            fillcolor='rgba(68, 68, 68, .3)',
+            fill='tonexty',
+            showlegend=False)
+    ])
+
+    fig2 = px.line(
+        GridRF.where(GridRF.randomforestregressor__max_features == i).dropna(),
+        x=n_estimatorsRF,
+        y=[
+            'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2', 'ScoresSplit3',
+            'ScoresSplit4'
+        ])
+
+    fig3 = go.Figure(data=fig1.data + fig2.data)
+    fig3.update_xaxes(type='log', title='n_estimators')
+    fig3.update_yaxes(title='RMSE')
+    fig3.update_layout(
+        title=
+        "RMSE du modèle RF pour le paramètre max_features={} en fonction de l'hyperparamètre alpha"
+        .format(i))
+    fig3.show()
+    if write_data is True:
+        fig3.write_image('./Figures/graphRMSERF{}.pdf'.format(i))
+
+# %%
+
+# %% [markdown]
+### 1.2 Consommation énergétique au log
+
+# %%
+SiteEnergyUse_train_log = np.log2(1+SiteEnergyUse_train)
+SiteEnergyUse_test_log = np.log2(1+SiteEnergyUse_test)
+
+# %%
+# modèle régression linéaire
+pipeLR = make_pipeline(scaler, LinearRegression())
+
+pipeLR.fit(BEBM_train, SiteEnergyUse_train_log)
+
+SiteEnergyUse_pred_logLR = pipeLR.predict(BEBM_test)
+
+LRr2_log = metrics.r2_score(SiteEnergyUse_test_log, SiteEnergyUse_pred_logLR)
+print("r2 :", LRr2)
+LRrmse_log = metrics.mean_squared_error(SiteEnergyUse_test_log,
+                                    SiteEnergyUse_pred_logLR,
+                                    squared=False)
+print("rmse :", LRrmse)
+
+fig = px.scatter(
+        x=SiteEnergyUse_pred_logLR.squeeze(),
+        y=SiteEnergyUse_test_log.squeeze(),
+        labels={
+            'x': f'{SiteEnergyUse_pred_logLR=}'.partition('=')[0],
+            'y': f'{SiteEnergyUse_test_log=}'.partition('=')[0]
+        },
+        title=
+        'Visualisation des données de consommation prédites par le modèle de régression linéaire vs les données test')
+fig.show()
+
+#%%
+alphasridge = np.logspace(-3, 5, 1000)
+param_gridRidge = {'ridge__alpha': alphasridge}
+
+GridRidge, \
+BestParametresRidge, \
+ScoresRidge, \
+SiteEnergyUse_pred_logRidge, \
+figRidge = reg_modelGrid(model=Ridge(),
+                            scaler=scaler,
+                            X_train=BEBM_train,
+                            X_test=BEBM_test,
+                            y_train=SiteEnergyUse_train_log,
+                            y_test=SiteEnergyUse_test_log,
+                            y_test_name='SiteEnergyUse_test_log',
+                            y_pred_name='SiteEnergyUse_pred_logRidge',
+                            score=score,
+                            param_grid=param_gridRidge)
+
+print(BestParametresRidge)
+ScoresRidge
+figRidge.show()
+# %%
+# graph visualisation RMSE Ridge pour tout les paramètres de GridSearchCV
+fig1 = go.Figure([
+    go.Scatter(name='RMSE moyenne',
+               x=alphasridge,
+               y=GridRidge.ScoresMean,
+               mode='lines',
+               marker=dict(color='red', size=2),
+               showlegend=True),
+    go.Scatter(name='SDup RMSE',
+               x=alphasridge,
+               y=GridRidge.ScoresMean + GridRidge.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               showlegend=False),
+    go.Scatter(name='SDdown RMSE',
+               x=alphasridge,
+               y=GridRidge.ScoresMean - GridRidge.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               fillcolor='rgba(68, 68, 68, .3)',
+               fill='tonexty',
+               showlegend=False)
+])
+
+fig2 = px.line(GridRidge,
+               x=alphasridge,
+               y=[
+                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                   'ScoresSplit3', 'ScoresSplit4'
+               ])
+
+fig3 = go.Figure(data=fig1.data + fig2.data)
+fig3.update_xaxes(type='log', title='alpha')
+fig3.update_yaxes(title='RMSE')
+fig3.update_layout(
+    title="RMSE du modèle Ridge en fonction de l'hyperparamètre alpha")
+fig3.show()
+if write_data is True:
+    fig3.write_image('./Figures/graphRMSERidge.pdf')
+# %%
+alphaslasso = np.linspace(0.1, 1, 5)
+param_gridLasso = {'lasso__alpha': alphaslasso}
+
+GridLasso, \
+BestParametresLasso, \
+ScoresLasso, \
+SiteEnergyUse_pred_logLasso, \
+figLasso = reg_modelGrid(model=Lasso(),
+                            scaler=RobustScaler(quantile_range=(10, 90)),
+                            X_train=BEBM_train,
+                            X_test=BEBM_test,
+                            y_train=SiteEnergyUse_train_log,
+                            y_test=SiteEnergyUse_test_log,
+                            y_test_name='SiteEnergyUse_test_log',
+                            y_pred_name='SiteEnergyUse_pred_logLasso',
+                            score=score,
+                            param_grid=param_gridLasso)
+
+print(BestParametresLasso)
+ScoresLasso
+figLasso.show()
+
+# %%
+# graph visualisation RMSE Lasso pour tout les paramètres de GridSearchCV
+fig1 = go.Figure([
+    go.Scatter(name='RMSE moyenne',
+               x=alphaslasso,
+               y=GridLasso.ScoresMean,
+               mode='lines',
+               marker=dict(color='red', size=2),
+               showlegend=True),
+    go.Scatter(name='SDup RMSE',
+               x=alphaslasso,
+               y=GridLasso.ScoresMean + GridLasso.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               showlegend=False),
+    go.Scatter(name='SDdown RMSE',
+               x=alphaslasso,
+               y=GridLasso.ScoresMean - GridLasso.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               fillcolor='rgba(68, 68, 68, .3)',
+               fill='tonexty',
+               showlegend=False)
+])
+
+fig2 = px.line(GridLasso,
+               x=alphaslasso,
+               y=[
+                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                   'ScoresSplit3', 'ScoresSplit4'
+               ])
+
+fig3 = go.Figure(data=fig1.data + fig2.data)
+fig3.update_xaxes(type='log', title='alpha')
+fig3.update_yaxes(title='RMSE')
+fig3.update_layout(
+    title="RMSE du modèle Lasso en fonction de l'hyperparamètre alpha")
+fig3.show()
+if write_data is True:
+    fig3.write_image('./Figures/graphRMSELasso.pdf')
+
+# %%
+alphasEN = np.logspace(0, 7, 200)
+l1ratioEN = np.linspace(0, 1, 6)
+param_gridEN = {
+    'elasticnet__alpha': alphasEN,
+    'elasticnet__l1_ratio': l1ratioEN
+}
+
+GridEN, \
+BestParametresEN, \
+ScoresEN, \
+SiteEnergyUse_pred_logEN, \
+figEN = reg_modelGrid(model=ElasticNet(),
+                         scaler=scaler,
+                         X_train=BEBM_train,
+                         X_test=BEBM_test,
+                         y_train=SiteEnergyUse_train_log,
+                         y_test=SiteEnergyUse_test_log,
+                         y_test_name='SiteEnergyUse_test_log',
+                         y_pred_name='SiteEnergyUse_pred_logEN',
+                         score=score,
+                         param_grid=param_gridEN)
+
+print(BestParametresEN)
+ScoresEN
+figEN.show()
+
+# %%
+# graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
+for i in BestParametresEN['ElasticNet()'][BestParametresEN['paramètre'] ==
+                                          'elasticnet__l1_ratio']:
+    fig1 = go.Figure([
+        go.Scatter(name='RMSE moyenne',
+                   x=alphasEN,
+                   y=GridEN.ScoresMean.where(
+                       GridEN.elasticnet__l1_ratio == i).dropna(),
+                   mode='lines',
+                   marker=dict(color='red', size=2),
+                   showlegend=True),
+        go.Scatter(
+            name='SDup RMSE',
+            x=alphasEN,
+            y=GridEN.ScoresMean.where(
+                GridEN.elasticnet__l1_ratio == i).dropna() +
+            GridEN.ScoresSD.where(GridEN.elasticnet__l1_ratio == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            showlegend=False),
+        go.Scatter(
+            name='SDdown RMSE',
+            x=alphasEN,
+            y=GridEN.ScoresMean.where(
+                GridEN.elasticnet__l1_ratio == i).dropna() -
+            GridEN.ScoresSD.where(GridEN.elasticnet__l1_ratio == i).dropna(),
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=1),
+            fillcolor='rgba(68, 68, 68, .3)',
+            fill='tonexty',
+            showlegend=False)
+    ])
+
+    fig2 = px.line(GridEN.where(GridEN.elasticnet__l1_ratio == i).dropna(),
+                   x=alphasEN,
+                   y=[
+                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                       'ScoresSplit3', 'ScoresSplit4'
+                   ])
+
+    fig3 = go.Figure(data=fig1.data + fig2.data)
+    fig3.update_xaxes(type='log', title='alpha')
+    fig3.update_yaxes(title='RMSE')
+    fig3.update_layout(
+        title=
+        "RMSE du modèle EN pour le paramètre l1={:.2} en fonction de l'hyperparamètre alpha"
+        .format(i))
+    fig3.show()
+    if write_data is True:
+        fig3.write_image('./Figures/graphRMSEEN{:.2}.pdf'.format(i))
+
+# %%
+n_neighbors = np.linspace(0, 100, dtype=int)
+param_gridkNN = {'kneighborsregressor__n_neighbors': n_neighbors}
+
+
+GridkNN, \
+BestParametreskNN, \
+ScoreskNN, \
+SiteEnergyUse_pred_logkNN, \
+figkNN = reg_modelGrid(model=KNeighborsRegressor(n_jobs=-1),
+                         scaler=scaler,
+                         X_train=BEBM_train,
+                         X_test=BEBM_test,
+                         y_train=SiteEnergyUse_train_log,
+                         y_test=SiteEnergyUse_test_log,
+                         y_test_name='SiteEnergyUse_test_log',
+                         y_pred_name='SiteEnergyUse_pred_logkNN',
+                         score=score,
+                         param_grid=param_gridkNN)
+
+print(BestParametreskNN)
+ScoreskNN
+figkNN.show()
+
+# %%
+# graph visualisation RMSE kNN pour tout les paramètres de GridSearchCV
+fig1 = go.Figure([
+    go.Scatter(name='RMSE moyenne',
+               x=n_neighbors,
+               y=GridkNN.ScoresMean,
+               mode='lines',
+               marker=dict(color='red', size=2),
+               showlegend=True),
+    go.Scatter(name='SDup RMSE',
+               x=n_neighbors,
+               y=GridkNN.ScoresMean + GridkNN.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               showlegend=False),
+    go.Scatter(name='SDdown RMSE',
+               x=n_neighbors,
+               y=GridkNN.ScoresMean - GridkNN.ScoresSD,
+               mode='lines',
+               marker=dict(color="#444"),
+               line=dict(width=1),
+               fillcolor='rgba(68, 68, 68, .3)',
+               fill='tonexty',
+               showlegend=False)
+])
+
+fig2 = px.line(GridkNN,
+               x=n_neighbors,
+               y=[
+                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                   'ScoresSplit3', 'ScoresSplit4'
+               ])
+
+fig3 = go.Figure(data=fig1.data + fig2.data)
+fig3.update_xaxes(type='log', title='n neighbors')
+fig3.update_yaxes(title='RMSE')
+fig3.update_layout(
+    title=
+    "RMSE du modèle kNN en fonction de l'hyperparamètre n le nombre de voisins"
+)
+fig3.show()
+if write_data is True:
+    fig3.write_image('./Figures/graphRMSEkNN.pdf')
+
+# %%
+n_estimatorsRF = np.logspace(0, 3, 10, dtype=int)
+param_gridRF = {
+    'randomforestregressor__n_estimators': n_estimatorsRF,
+    'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
+}
+
+GridRF, \
+BestParametresRF, \
+ScoresRF, \
+SiteEnergyUse_pred_logRF, \
+figRF = reg_modelGrid(model=RandomForestRegressor(),
+                         scaler=scaler,
+                         X_train=BEBM_train,
+                         X_test=BEBM_test,
+                         y_train=SiteEnergyUse_train_log.ravel(),
+                         y_test=SiteEnergyUse_test_log,
+                         y_test_name='SiteEnergyUse_test_log',
+                         y_pred_name='SiteEnergyUse_pred_log_logRF',
                          score=score,
                          param_grid=param_gridRF)
 
