@@ -89,13 +89,16 @@ def reg_modelGrid(model,
     # score modèle
     scoreR2 = metrics.r2_score(y_test, y_pred)
     scoreRMSE = metrics.mean_squared_error(y_test, y_pred, squared=False)
+    scoreMAE = metrics.mean_absolute_error(y_test, y_pred)
+    #scoreMAE100 = metrics.mean_absolute_percentage_error(y_test, y_pred)
     #scoreRMSLE = metrics.mean_squared_log_error(y_test, y_pred, squared=False)
     #    return (pd.DataFrame({model: [scoreR2, scoreRMSLE, scoreRMSE]},
     #                         index=['R²', 'RMSLE', 'RMSE']))
 
     # dataframe erreur
-    ScoreModele = pd.DataFrame({model: [scoreR2, scoreRMSE]},
-                               index=['R²', 'RMSE'])
+    ScoreModele = pd.DataFrame(
+        {str(model): [scoreR2, scoreRMSE, scoreMAE]},
+        index=['R²', 'RMSE', 'MAE'])
 
     # graph pred vs test
     fig = px.scatter(
