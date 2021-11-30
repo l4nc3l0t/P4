@@ -315,6 +315,47 @@ if write_data is True:
     FigRMSEGRidAB.write_image('./Figures/EmissionsGraphRMSEAB.pdf')
 
 # %% [markdown]
+#### 1.1.8 Modèle GradientBoostRegressor
+
+# %%
+# modèle GradientBoostRegressor
+# réglage des paramètre pour la gridsearch
+n_estimatorsGB = np.logspace(0, 3, 10, dtype=int)
+param_gridGB = {
+    'gradientboostingregressor__n_estimators':
+    n_estimatorsGB,
+    'gradientboostingregressor__loss':
+    ['squared_error', 'absolute_error', 'huber', 'quantile']
+}
+
+GridGB, \
+BestParametresGB, \
+ScoresGB, \
+SiteTotalGHGEmissions_predGB, \
+figGB = reg_modelGrid(model=GradientBoostingRegressor(),
+                         scaler=scaler,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
+                         y_train=TotalGHGEmissions_train.ravel(),
+                         y_test=TotalGHGEmissions_test,
+                         y_test_name='TotalGHGEmissions_test',
+                         y_pred_name='TotalGHGEmissions_predGB',
+                         score=score,
+                         param_grid=param_gridGB)
+
+print(BestParametresGB)
+print(ScoresGB)
+figGB.show()
+
+# %%
+FigRMSEGRidGB = visuRMSEGrid(GradientBoostingRegressor(), 'GB', n_estimatorsGB,
+                             'n estimators', GridGB, BestParametresGB,
+                             'gradientboostingregressor__loss')
+FigRMSEGRidGB.show()
+if write_data is True:
+    FigRMSEGRidGB.write_image('./Figures/EmissionGraphRMSEGB.pdf')
+
+# %% [markdown]
 ### 1.2 Émissions au log
 
 # %%
@@ -578,12 +619,54 @@ figAB_log.show()
 # graph visualisation RMSE AdaBoostRegressor
 # pour le meilleur paramètre loss
 FigRMSEGRidAB_log = visuRMSEGrid(AdaBoostRegressor(), 'AB', n_estimatorsAB_log,
-                             'n estimators', GridAB_log, BestParametresAB_log,
-                             'adaboostregressor__loss')
+                                 'n estimators', GridAB_log,
+                                 BestParametresAB_log,
+                                 'adaboostregressor__loss')
 FigRMSEGRidAB_log.show()
 if write_data is True:
     FigRMSEGRidAB_log.write_image('./Figures/EmissionsGraphRMSEAB_log.pdf')
 
+# %% [markdown]
+#### 1.2.8 Modèle GradientBoostRegressor
+
+# %%
+# modèle GradientBoostRegressor
+# réglage des paramètre pour la gridsearch
+n_estimatorsGB_log = np.logspace(0, 4, 10, dtype=int)
+param_gridGB_log = {
+    'gradientboostingregressor__n_estimators':
+    n_estimatorsGB_log,
+    'gradientboostingregressor__loss':
+    ['squared_error', 'absolute_error', 'huber', 'quantile']
+}
+
+GridGB_log, \
+BestParametresGB_log, \
+ScoresGB_log, \
+TotalGHGEmissions_pred_logGB, \
+figGB_log = reg_modelGrid(model=GradientBoostingRegressor(),
+                         scaler=scaler,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
+                         y_train=TotalGHGEmissions_train_log.ravel(),
+                         y_test=TotalGHGEmissionse_test_log,
+                         y_test_name='TotalGHGEmissions_test_log',
+                         y_pred_name='TotalGHGEmissions_predGB_log',
+                         score=score,
+                         param_grid=param_gridGB_log)
+
+print(BestParametresGB_log)
+print(ScoresGB_log)
+figGB_log.show()
+
+# %%
+FigRMSEGRidGB_log = visuRMSEGrid(GradientBoostingRegressor(), 'GB',
+                                 n_estimatorsGB_log, 'n estimators',
+                                 GridGB_log, BestParametresGB_log,
+                                 'gradientboostingregressor__loss')
+FigRMSEGRidGB_log.show()
+if write_data is True:
+    FigRMSEGRidGB_log.write_image('./Figures/EmissionsGraphRMSEGB_log.pdf')
 # %%
 Scores = ScoresLasso.append(
     [ScoresRidge, ScoresEN, ScoreskNN, ScoresRF, ScoresAB])
@@ -604,7 +687,7 @@ CompareScores
 # %%
 fig = make_subplots(3,
                     2,
-                    column_titles=("Consommation brute", "Consommation log2"),
+                    column_titles=("Émissions brutes", "Émissions log2"),
                     row_titles=('R²', 'RMSE', 'MAE'),
                     shared_xaxes=True)
 fig.add_trace(go.Bar(x=Scores.index, y=Scores['R²']), row=1, col=1)
@@ -613,13 +696,11 @@ fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE']), row=3, col=1)
 fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['R²']), row=1, col=2)
 fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['RMSE']), row=2, col=2)
 fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
-fig.update_layout(
-    title_text="Comparaison des scores des modèles d'émissions",
-    showlegend=False)
+fig.update_layout(title_text="Comparaison des scores des modèles d'émissions",
+                  showlegend=False)
 fig.show()
 
 # %% [markdown]
-## 2. Modèle de prédiction sur la consommation énergétique 
-#(SiteEnergyUse) avec les données catégorielles 
+## 2. Modèle de prédiction sur la consommation énergétique (SiteEnergyUse) avec les données catégorielles
 # %%
 BEBCat = pd.read_csv('BEBCat.csv')

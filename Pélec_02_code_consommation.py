@@ -52,8 +52,7 @@ score = 'neg_root_mean_squared_error'
 scaler = RobustScaler(quantile_range=(10, 90))
 
 # %% [markdown]
-## 1. Modèle de prédiction sur la consommation énergétique
-#(SiteEnergyUse) avec les données numériques uniquement
+## 1. Modèle de prédiction sur la consommation énergétique (SiteEnergyUse) avec les données numériques uniquement
 ### 1.1 Consommation énergétique brute
 
 # %% [markdown]
@@ -315,6 +314,47 @@ FigRMSEGRidAB = visuRMSEGrid(AdaBoostRegressor(), 'AB', n_estimatorsAB,
 FigRMSEGRidAB.show()
 if write_data is True:
     FigRMSEGRidAB.write_image('./Figures/ConsoGraphRMSEAB.pdf')
+
+# %% [markdown]
+#### 1.1.8 Modèle GradientBoostRegressor
+
+# %%
+# modèle GradientBoostRegressor
+# réglage des paramètre pour la gridsearch
+n_estimatorsGB = np.logspace(1, 3, 10, dtype=int)
+param_gridGB = {
+    'gradientboostingregressor__n_estimators':
+    n_estimatorsGB,
+    'gradientboostingregressor__loss':
+    ['squared_error', 'absolute_error', 'huber', 'quantile']
+}
+
+GridGB, \
+BestParametresGB, \
+ScoresGB, \
+SiteEnergyUse_predGB, \
+figGB = reg_modelGrid(model=GradientBoostingRegressor(),
+                         scaler=scaler,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
+                         y_train=SiteEnergyUse_train.ravel(),
+                         y_test=SiteEnergyUse_test,
+                         y_test_name='SiteEnergyUse_test',
+                         y_pred_name='SiteEnergyUse_predGB',
+                         score=score,
+                         param_grid=param_gridGB)
+
+print(BestParametresGB)
+print(ScoresGB)
+figGB.show()
+
+# %%
+FigRMSEGRidGB = visuRMSEGrid(GradientBoostingRegressor(), 'GB', n_estimatorsGB,
+                             'n estimators', GridGB, BestParametresGB,
+                             'gradientboostingregressor__loss')
+FigRMSEGRidGB.show()
+if write_data is True:
+    FigRMSEGRidGB.write_image('./Figures/ConsoGraphRMSEGB.pdf')
 
 # %% [markdown]
 ### 1.2 Consommation énergétique au log
@@ -585,15 +625,57 @@ FigRMSEGRidAB_log.show()
 if write_data is True:
     FigRMSEGRidAB_log.write_image('./Figures/ConsoGraphRMSEAB_log.pdf')
 
+# %% [markdown]
+#### 1.2.8 Modèle GradientBoostRegressor
+
+# %%
+# modèle GradientBoostRegressor
+# réglage des paramètre pour la gridsearch
+n_estimatorsGB_log = np.logspace(1, 4, 10, dtype=int)
+param_gridGB_log = {
+    'gradientboostingregressor__n_estimators':
+    n_estimatorsGB_log,
+    'gradientboostingregressor__loss':
+    ['squared_error', 'absolute_error', 'huber', 'quantile']
+}
+
+GridGB_log, \
+BestParametresGB_log, \
+ScoresGB_log, \
+SiteEnergyUse_pred_logGB, \
+figGB_log = reg_modelGrid(model=GradientBoostingRegressor(),
+                         scaler=scaler,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
+                         y_train=SiteEnergyUse_train_log.ravel(),
+                         y_test=SiteEnergyUse_test_log,
+                         y_test_name='SiteEnergyUse_test_log',
+                         y_pred_name='SiteEnergyUse_predGB_log',
+                         score=score,
+                         param_grid=param_gridGB_log)
+
+print(BestParametresGB_log)
+print(ScoresGB_log)
+figGB_log.show()
+
+# %%
+FigRMSEGRidGB_log = visuRMSEGrid(GradientBoostingRegressor(), 'GB',
+                                 n_estimatorsGB_log, 'n estimators',
+                                 GridGB_log, BestParametresGB_log,
+                                 'gradientboostingregressor__loss')
+FigRMSEGRidGB_log.show()
+if write_data is True:
+    FigRMSEGRidGB_log.write_image('./Figures/ConsoGraphRMSEGB_log.pdf')
+
 # %%
 Scores = ScoresLasso.append(
-    [ScoresRidge, ScoresEN, ScoreskNN, ScoresRF, ScoresAB])
+    [ScoresRidge, ScoresEN, ScoreskNN, ScoresRF, ScoresAB, ScoresGB])
 Scores
 
 # %%
 ScoresLog = ScoresLasso_log.append(
     [ScoresRidge_log, ScoresEN_log, ScoreskNN_log, ScoresRF_log,
-     ScoresAB_log]).rename('{}_log'.format)
+     ScoresAB_log, ScoresGB_log]).rename('{}_log'.format)
 ScoresLog
 
 # %%
@@ -620,7 +702,7 @@ fig.update_layout(
 fig.show()
 
 # %% [markdown]
-## 2. Modèle de prédiction sur la consommation énergétique
-#(SiteEnergyUse) avec les données catégorielles
+## 2. Modèle de prédiction sur la consommation énergétique (SiteEnergyUse) avec les données catégorielles
 # %%
 BEBCat = pd.read_csv('BEBCat.csv')
+# %% [markdown]
