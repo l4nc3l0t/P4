@@ -7,8 +7,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn import metrics
-from sklearn.preprocessing import RobustScaler, StandardScaler
-from sklearn.decomposition import PCA
+from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
@@ -16,7 +15,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, \
                              GradientBoostingRegressor
 
-from Pélec_04_fonctions import *
+from Pélec_04_fonctions import reg_modelGrid, visuRMSEGrid
 
 # %%
 write_data = True
@@ -50,42 +49,6 @@ score = 'neg_root_mean_squared_error'
 # Scaler moins sensible aux outlier d'après la doc
 scaler = RobustScaler(quantile_range=(10, 90))
 
-# %%
-# ACP sur toutes les colonnes
-numPCA = BEBM.select_dtypes('number').drop(columns='DataYear').dropna().values
-RobPCA = make_pipeline(StandardScaler(), PCA())
-components = RobPCA.fit_transform(numPCA)
-pca = RobPCA.named_steps['pca']
-loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
-
-# %%
-# visualisation de la variance expliquée de chaque composante (cumulée)
-exp_var_cum = np.cumsum(pca.explained_variance_ratio_)
-fig = px.area(x=range(1, exp_var_cum.shape[0] + 1),
-              y=exp_var_cum,
-              labels={
-                  'x': 'Composantes',
-                  'y': 'Variance expliquée cumulée'
-              })
-fig.update_layout(title='Scree plot')
-fig.show()
-if write_data is True:
-    fig.write_image('./Figures/ScreePlot.pdf', height=300)
-# %%
-# création des graphiques
-for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
-    fig = visuPCA(
-        BEBM.select_dtypes('number').drop(columns='DataYear').dropna(),
-        pca,
-        components,
-        loadings, [(a1, a2)],
-        color=None)
-    fig.show()
-    if write_data is True:
-        fig.write_image('./Figures/PCAF{}F{}.pdf'.format(a1 + 1, a2 + 1),
-                        width=1100,
-                        height=1100)
-
 # %% [markdown]
 # # 1. Modèle de prédiction sur les émissions (TotalGHGEmissions)
 # ## 1.1 Émissions brutes
@@ -116,7 +79,7 @@ fig = px.scatter(
         'y': f'{TotalGHGEmissions_test=}'.partition('=')[0]
     },
     title=
-    "Visualisation des données d'émissions prédites par le modèle de régression linéaire vs les données test"
+    "Visualisation des données d'émissions prédites par le modèle de régression linéaire<br>vs les données test"
 )
 fig.show()
 
@@ -383,7 +346,7 @@ fig = px.scatter(
         'y': f'{TotalGHGEmissions_test_log=}'.partition('=')[0]
     },
     title=
-    "Visualisation des données d'émissions prédites par le modèle de régression linéaire vs les données test"
+    "Visualisation des données d'émissions prédites par le modèle de régression linéaire<br>vs les données test"
 )
 fig.show()
 # %% [markdown]

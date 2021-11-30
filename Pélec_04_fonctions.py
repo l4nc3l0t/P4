@@ -109,7 +109,7 @@ def reg_modelGrid(model,
             'y': y_test_name
         },
         title=
-        'Visualisation des données prédites par le modèle {} vs les données test'
+        'Visualisation des données prédites par le modèle {}<br>vs les données test'
         .format(model))
 
     return (GridModele, BestParametres, ScoreModele, y_pred, fig)

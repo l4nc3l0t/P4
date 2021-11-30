@@ -12,7 +12,12 @@ from ast import literal_eval
 import plotly.express as px
 import plotly.graph_objects as go
 import folium
+from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+from Pélec_04_fonctions import visuPCA
 
 # %%
 write_data = True
@@ -294,7 +299,7 @@ for i in BEBFullClean.loc[:,
     rsqrt = LinReg.score(X, y)
     print(rsqrt)
 
-    fig = px.scatter(LR, x=i, y='SiteEnergyUse(kBtu)', opacity=.1)
+    fig = px.scatter(LR, x=i, y='SiteEnergyUse(kBtu)')
     fig.add_traces(
         go.Scatter(x=x_range,
                    y=y_range,
@@ -380,5 +385,44 @@ if write_data is True:
 BEBESSClean = usefull_num.dropna()
 if write_data is True:
     BEBESSClean.to_csv('BEBESS.csv', index=False)
+
+# %%
+# ACP sur toutes les colonnes
+numPCA = BEBClean.select_dtypes('number').drop(
+    columns=['DataYear', 'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'
+             ]).dropna().values
+RobPCA = make_pipeline(StandardScaler(), PCA())
+components = RobPCA.fit_transform(numPCA)
+pca = RobPCA.named_steps['pca']
+loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
+
+# %%
+# visualisation de la variance expliquée de chaque composante (cumulée)
+exp_var_cum = np.cumsum(pca.explained_variance_ratio_)
+fig = px.area(x=range(1, exp_var_cum.shape[0] + 1),
+              y=exp_var_cum,
+              labels={
+                  'x': 'Composantes',
+                  'y': 'Variance expliquée cumulée'
+              })
+fig.update_layout(title='Scree plot')
+fig.show()
+if write_data is True:
+    fig.write_image('./Figures/ScreePlot.pdf', height=300)
+# %%
+# création des graphiques
+for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
+    fig = visuPCA(BEBClean.select_dtypes('number').drop(
+        columns=['DataYear', 'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'
+                 ]).dropna(),
+                  pca,
+                  components,
+                  loadings, [(a1, a2)],
+                  color=None)
+    fig.show()
+    if write_data is True:
+        fig.write_image('./Figures/PCAF{}F{}.pdf'.format(a1 + 1, a2 + 1),
+                        width=1100,
+                        height=1100)
 
 # %%
