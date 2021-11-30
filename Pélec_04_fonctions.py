@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 # graphique visualisation vecteurs et données
@@ -96,9 +97,8 @@ def reg_modelGrid(model,
     #                         index=['R²', 'RMSLE', 'RMSE']))
 
     # dataframe erreur
-    ScoreModele = pd.DataFrame(
-        {str(model): [scoreR2, scoreRMSE, scoreMAE]},
-        index=['R²', 'RMSE', 'MAE'])
+    ScoreModele = pd.DataFrame({str(model): [scoreR2, scoreRMSE, scoreMAE]},
+                               index=['R²', 'RMSE', 'MAE'])
 
     # graph pred vs test
     fig = px.scatter(
@@ -113,3 +113,106 @@ def reg_modelGrid(model,
         .format(model))
 
     return (GridModele, BestParametres, ScoreModele, y_pred, fig)
+
+
+# graph visu RMSE
+def visuRMSEGrid(model,
+                 modelname,
+                 paramx,
+                 paramxname,
+                 gridscoresy,
+                 bestparametres=None,
+                 parametre=None):
+    # graph visualisation RMSE RandomForestRegressor
+    # pour le meilleur paramètre max features
+    if parametre == None:
+        fig1 = go.Figure([
+            go.Scatter(name='RMSE moyenne',
+                       x=paramx,
+                       y=gridscoresy.ScoresMean,
+                       mode='lines',
+                       marker=dict(color='red', size=2),
+                       showlegend=True),
+            go.Scatter(name='SDup RMSE',
+                       x=paramx,
+                       y=gridscoresy.ScoresMean + gridscoresy.ScoresSD,
+                       mode='lines',
+                       marker=dict(color="#444"),
+                       line=dict(width=1),
+                       showlegend=False),
+            go.Scatter(name='SDdown RMSE',
+                       x=paramx,
+                       y=gridscoresy.ScoresMean - gridscoresy.ScoresSD,
+                       mode='lines',
+                       marker=dict(color="#444"),
+                       line=dict(width=1),
+                       fillcolor='rgba(68, 68, 68, .3)',
+                       fill='tonexty',
+                       showlegend=False)
+        ])
+
+        fig2 = px.line(gridscoresy,
+                       x=paramx,
+                       y=[
+                           'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                           'ScoresSplit3', 'ScoresSplit4'
+                       ])
+
+        fig3 = go.Figure(data=fig1.data + fig2.data)
+        fig3.update_xaxes(type='log', title=paramxname)
+        fig3.update_yaxes(title='RMSE')
+        fig3.update_layout(
+            title="RMSE du modèle {} en fonction de {}".format(modelname, paramxname))
+
+    else:
+        for i in bestparametres[str(model)][bestparametres['paramètre'] ==
+                                            parametre]:
+            fig1 = go.Figure([
+                go.Scatter(name='RMSE moyenne',
+                           x=paramx,
+                           y=gridscoresy.ScoresMean.where(
+                               gridscoresy[parametre] == i).dropna(),
+                           mode='lines',
+                           marker=dict(color='red', size=2),
+                           showlegend=True),
+                go.Scatter(name='SDup RMSE',
+                           x=paramx,
+                           y=gridscoresy.ScoresMean.where(
+                               gridscoresy[parametre] == i).dropna() +
+                           gridscoresy.ScoresSD.where(
+                               gridscoresy[parametre] == i).dropna(),
+                           mode='lines',
+                           marker=dict(color="#444"),
+                           line=dict(width=1),
+                           showlegend=False),
+                go.Scatter(name='SDdown RMSE',
+                           x=paramx,
+                           y=gridscoresy.ScoresMean.where(
+                               gridscoresy[parametre] == i).dropna() -
+                           gridscoresy.ScoresSD.where(
+                               gridscoresy[parametre] == i).dropna(),
+                           mode='lines',
+                           marker=dict(color="#444"),
+                           line=dict(width=1),
+                           fillcolor='rgba(68, 68, 68, .3)',
+                           fill='tonexty',
+                           showlegend=False)
+            ])
+
+            fig2 = px.line(
+                gridscoresy.where(gridscoresy[parametre] == i).dropna(),
+                x=paramx,
+                y=[
+                    'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
+                    'ScoresSplit3', 'ScoresSplit4'
+                ])
+
+            fig3 = go.Figure(data=fig1.data + fig2.data)
+            fig3.update_xaxes(type='log', title=paramxname)
+            fig3.update_yaxes(title='RMSE')
+            fig3.update_layout(
+                title=
+                "RMSE du modèle {} pour le paramètre<br>{}={}<br>en fonction de l'hyperparamètre {}"
+                .format(modelname, parametre, i, paramxname))
+
+    return (fig3)

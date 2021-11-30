@@ -148,47 +148,12 @@ print(BestParametresRidge)
 print(ScoresRidge)
 figRidge.show()
 # %%
-# graph visualisation RMSE Ridge pour tout les paramètres de GridSearchCV
-fig1 = go.Figure([
-    go.Scatter(name='RMSE moyenne',
-               x=alphasridge,
-               y=GridRidge.ScoresMean,
-               mode='lines',
-               marker=dict(color='red', size=2),
-               showlegend=True),
-    go.Scatter(name='SDup RMSE',
-               x=alphasridge,
-               y=GridRidge.ScoresMean + GridRidge.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               showlegend=False),
-    go.Scatter(name='SDdown RMSE',
-               x=alphasridge,
-               y=GridRidge.ScoresMean - GridRidge.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               fillcolor='rgba(68, 68, 68, .3)',
-               fill='tonexty',
-               showlegend=False)
-])
-
-fig2 = px.line(GridRidge,
-               x=alphasridge,
-               y=[
-                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                   'ScoresSplit3', 'ScoresSplit4'
-               ])
-
-fig3 = go.Figure(data=fig1.data + fig2.data)
-fig3.update_xaxes(type='log', title='alpha')
-fig3.update_yaxes(title='RMSE')
-fig3.update_layout(
-    title="RMSE du modèle Ridge en fonction de l'hyperparamètre alpha")
-fig3.show()
+# graph visualisation RMSE Ridge pour les paramètres de GridSearchCV
+FigRMSEGRidRidge = visuRMSEGrid(Ridge(), 'Ridge', alphasridge, 'alpha',
+                                GridRidge)
+FigRMSEGRidRidge.show()
 if write_data is True:
-    fig3.write_image('./Figures/EmissionsGraphRMSERidge.pdf')
+    FigRMSEGRidRidge.write_image('./Figures/EmissionsGraphRMSERidge.pdf')
 
 # %% [markdown]
 # ### 1.1.3 Modèle Lasso
@@ -219,47 +184,12 @@ print(ScoresLasso)
 figLasso.show()
 
 # %%
-# graph visualisation RMSE Lasso pour tout les paramètres de GridSearchCV
-fig1 = go.Figure([
-    go.Scatter(name='RMSE moyenne',
-               x=alphaslasso,
-               y=GridLasso.ScoresMean,
-               mode='lines',
-               marker=dict(color='red', size=2),
-               showlegend=True),
-    go.Scatter(name='SDup RMSE',
-               x=alphaslasso,
-               y=GridLasso.ScoresMean + GridLasso.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               showlegend=False),
-    go.Scatter(name='SDdown RMSE',
-               x=alphaslasso,
-               y=GridLasso.ScoresMean - GridLasso.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               fillcolor='rgba(68, 68, 68, .3)',
-               fill='tonexty',
-               showlegend=False)
-])
-
-fig2 = px.line(GridLasso,
-               x=alphaslasso,
-               y=[
-                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                   'ScoresSplit3', 'ScoresSplit4'
-               ])
-
-fig3 = go.Figure(data=fig1.data + fig2.data)
-fig3.update_xaxes(type='log', title='alpha')
-fig3.update_yaxes(title='RMSE')
-fig3.update_layout(
-    title="RMSE du modèle Lasso en fonction de l'hyperparamètre alpha")
-fig3.show()
+# graph visualisation RMSE Lasso pour les paramètres de GridSearchCV
+FigRMSEGRidLasso = visuRMSEGrid(Lasso(), 'Lasso', alphaslasso, 'alpha',
+                                GridLasso, None, None)
+FigRMSEGRidLasso.show()
 if write_data is True:
-    fig3.write_image('./Figures/EmissionsGraphRMSELasso.pdf')
+    FigRMSEGRidLasso.write_image('./Figures/EmissionsGraphRMSELasso.pdf')
 
 # %% [markdown]
 # ### 1.1.4 Modèle ElasticNet
@@ -295,57 +225,11 @@ figEN.show()
 
 # %%
 # graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
-for i in BestParametresEN['ElasticNet()'][BestParametresEN['paramètre'] ==
-                                          'elasticnet__l1_ratio']:
-    fig1 = go.Figure([
-        go.Scatter(name='RMSE moyenne',
-                   x=alphasEN,
-                   y=GridEN.ScoresMean.where(
-                       GridEN.elasticnet__l1_ratio == i).dropna(),
-                   mode='lines',
-                   marker=dict(color='red', size=2),
-                   showlegend=True),
-        go.Scatter(
-            name='SDup RMSE',
-            x=alphasEN,
-            y=GridEN.ScoresMean.where(
-                GridEN.elasticnet__l1_ratio == i).dropna() +
-            GridEN.ScoresSD.where(GridEN.elasticnet__l1_ratio == i).dropna(),
-            mode='lines',
-            marker=dict(color="#444"),
-            line=dict(width=1),
-            showlegend=False),
-        go.Scatter(
-            name='SDdown RMSE',
-            x=alphasEN,
-            y=GridEN.ScoresMean.where(
-                GridEN.elasticnet__l1_ratio == i).dropna() -
-            GridEN.ScoresSD.where(GridEN.elasticnet__l1_ratio == i).dropna(),
-            mode='lines',
-            marker=dict(color="#444"),
-            line=dict(width=1),
-            fillcolor='rgba(68, 68, 68, .3)',
-            fill='tonexty',
-            showlegend=False)
-    ])
-
-    fig2 = px.line(GridEN.where(GridEN.elasticnet__l1_ratio == i).dropna(),
-                   x=alphasEN,
-                   y=[
-                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                       'ScoresSplit3', 'ScoresSplit4'
-                   ])
-
-    fig3 = go.Figure(data=fig1.data + fig2.data)
-    fig3.update_xaxes(type='log', title='alpha')
-    fig3.update_yaxes(title='RMSE')
-    fig3.update_layout(
-        title=
-        "RMSE du modèle EN pour le paramètre l1={:.2}<br>en fonction de l'hyperparamètre alpha"
-        .format(i))
-    fig3.show()
-    if write_data is True:
-        fig3.write_image('./Figures/EmissionsGraphRMSEEN{:.2}.pdf'.format(i))
+FigRMSEGRidEN = visuRMSEGrid(ElasticNet(), 'EN', alphasEN, 'alpha', GridEN,
+                             BestParametresEN, 'elasticnet__l1_ratio')
+FigRMSEGRidEN.show()
+if write_data is True:
+    FigRMSEGRidEN.write_image('./Figures/EmissionsGraphRMSEEN.pdf')
 
 # %% [markdown]
 # ### 1.1.5 Modèle kNeighborsRegressor
@@ -377,48 +261,11 @@ figkNN.show()
 
 # %%
 # graph visualisation RMSE kNN pour tout les paramètres de GridSearchCV
-fig1 = go.Figure([
-    go.Scatter(name='RMSE moyenne',
-               x=n_neighbors,
-               y=GridkNN.ScoresMean,
-               mode='lines',
-               marker=dict(color='red', size=2),
-               showlegend=True),
-    go.Scatter(name='SDup RMSE',
-               x=n_neighbors,
-               y=GridkNN.ScoresMean + GridkNN.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               showlegend=False),
-    go.Scatter(name='SDdown RMSE',
-               x=n_neighbors,
-               y=GridkNN.ScoresMean - GridkNN.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               fillcolor='rgba(68, 68, 68, .3)',
-               fill='tonexty',
-               showlegend=False)
-])
-
-fig2 = px.line(GridkNN,
-               x=n_neighbors,
-               y=[
-                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                   'ScoresSplit3', 'ScoresSplit4'
-               ])
-
-fig3 = go.Figure(data=fig1.data + fig2.data)
-fig3.update_xaxes(type='log', title='n neighbors')
-fig3.update_yaxes(title='RMSE')
-fig3.update_layout(
-    title=
-    "RMSE du modèle kNN en fonction de l'hyperparamètre n le nombre de voisins"
-)
-fig3.show()
+FigRMSEGRidkNN = visuRMSEGrid(KNeighborsRegressor(), 'kNN', n_neighbors,
+                              'n neighbors', GridkNN)
+FigRMSEGRidkNN.show()
 if write_data is True:
-    fig3.write_image('./Figures/EmissionsGraphRMSEkNN.pdf')
+    FigRMSEGRidkNN.write_image('./Figures/EmissionsGraphRMSEkNN.pdf')
 
 # %% [markdown]
 # ### 1.1.6 Modèle RandomForestRegressor
@@ -454,62 +301,12 @@ figRF.show()
 # %%
 # graph visualisation RMSE RandomForestRegressor
 # pour le meilleur paramètre max features
-for i in BestParametresRF['RandomForestRegressor()'][
-        BestParametresRF['paramètre'] ==
-        'randomforestregressor__max_features']:
-    fig1 = go.Figure([
-        go.Scatter(
-            name='RMSE moyenne',
-            x=n_estimatorsRF,
-            y=GridRF.ScoresMean.where(
-                GridRF.randomforestregressor__max_features == i).dropna(),
-            mode='lines',
-            marker=dict(color='red', size=2),
-            showlegend=True),
-        go.Scatter(
-            name='SDup RMSE',
-            x=n_estimatorsRF,
-            y=GridRF.ScoresMean.where(
-                GridRF.randomforestregressor__max_features == i).dropna() +
-            GridRF.ScoresSD.where(
-                GridRF.randomforestregressor__max_features == i).dropna(),
-            mode='lines',
-            marker=dict(color="#444"),
-            line=dict(width=1),
-            showlegend=False),
-        go.Scatter(
-            name='SDdown RMSE',
-            x=n_estimatorsRF,
-            y=GridRF.ScoresMean.where(
-                GridRF.randomforestregressor__max_features == i).dropna() -
-            GridRF.ScoresSD.where(
-                GridRF.randomforestregressor__max_features == i).dropna(),
-            mode='lines',
-            marker=dict(color="#444"),
-            line=dict(width=1),
-            fillcolor='rgba(68, 68, 68, .3)',
-            fill='tonexty',
-            showlegend=False)
-    ])
-
-    fig2 = px.line(
-        GridRF.where(GridRF.randomforestregressor__max_features == i).dropna(),
-        x=n_estimatorsRF,
-        y=[
-            'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2', 'ScoresSplit3',
-            'ScoresSplit4'
-        ])
-
-    fig3 = go.Figure(data=fig1.data + fig2.data)
-    fig3.update_xaxes(type='log', title='n_estimators')
-    fig3.update_yaxes(title='RMSE')
-    fig3.update_layout(
-        title=
-        "RMSE du modèle RF pour le paramètre max_features={}<br>en fonction de l'hyperparamètre alpha"
-        .format(i))
-    fig3.show()
-    if write_data is True:
-        fig3.write_image('./Figures/EmissionsGraphRMSERF{}.pdf'.format(i))
+FigRMSEGRidRF = visuRMSEGrid(RandomForestRegressor(), 'RF', n_estimatorsRF,
+                             'n estimators', GridRF, BestParametresRF,
+                             'randomforestregressor__max_features')
+FigRMSEGRidRF.show()
+if write_data is True:
+    FigRMSEGRidRF.write_image('./Figures/EmissionsGraphRMSERF.pdf')
 
 # %% [markdown]
 # ### 1.1.7 Modèle AdaboostRegressor
@@ -545,57 +342,12 @@ figAB.show()
 # %%
 # graph visualisation RMSE AdaBoostRegressor
 # pour le meilleur paramètre loss
-for i in BestParametresAB['AdaBoostRegressor()'][BestParametresAB['paramètre']
-                                                 == 'adaboostregressor__loss']:
-    fig1 = go.Figure([
-        go.Scatter(name='RMSE moyenne',
-                   x=n_estimatorsAB,
-                   y=GridAB.ScoresMean.where(
-                       GridAB.adaboostregressor__loss == i).dropna(),
-                   mode='lines',
-                   marker=dict(color='red', size=2),
-                   showlegend=True),
-        go.Scatter(name='SDup RMSE',
-                   x=n_estimatorsAB,
-                   y=GridAB.ScoresMean.where(
-                       GridAB.adaboostregressor__loss == i).dropna() +
-                   GridAB.ScoresSD.where(
-                       GridAB.adaboostregressor__loss == i).dropna(),
-                   mode='lines',
-                   marker=dict(color="#444"),
-                   line=dict(width=1),
-                   showlegend=False),
-        go.Scatter(name='SDdown RMSE',
-                   x=n_estimatorsAB,
-                   y=GridAB.ScoresMean.where(
-                       GridAB.adaboostregressor__loss == i).dropna() -
-                   GridAB.ScoresSD.where(
-                       GridAB.adaboostregressor__loss == i).dropna(),
-                   mode='lines',
-                   marker=dict(color="#444"),
-                   line=dict(width=1),
-                   fillcolor='rgba(68, 68, 68, .3)',
-                   fill='tonexty',
-                   showlegend=False)
-    ])
-
-    fig2 = px.line(GridAB.where(GridAB.adaboostregressor__loss == i).dropna(),
-                   x=n_estimatorsAB,
-                   y=[
-                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                       'ScoresSplit3', 'ScoresSplit4'
-                   ])
-
-    fig3 = go.Figure(data=fig1.data + fig2.data)
-    fig3.update_xaxes(type='log', title='n_estimators')
-    fig3.update_yaxes(title='RMSE')
-    fig3.update_layout(
-        title=
-        "RMSE du modèle AB pour le paramètre max_features={}<br>en fonction de l'hyperparamètre alpha"
-        .format(i))
-    fig3.show()
-    if write_data is True:
-        fig3.write_image('./Figures/EmissionsGraphRMSEAB{}.pdf'.format(i))
+FigRMSEGRidAB = visuRMSEGrid(AdaBoostRegressor(), 'AB', n_estimatorsAB,
+                             'n estimators', GridAB, BestParametresAB,
+                             'adaboostregressor__loss')
+FigRMSEGRidAB.show()
+if write_data is True:
+    FigRMSEGRidAB.write_image('./Figures/EmissionsGraphRMSEAB.pdf')
 
 # %% [markdown]
 ### 1.2 Émissions au log
@@ -615,7 +367,8 @@ pipeLR.fit(BEBM_train, TotalGHGEmissions_train_log)
 
 TotalGHGEmissions_pred_logLR = pipeLR.predict(BEBM_test)
 
-LRr2_log = metrics.r2_score(TotalGHGEmissions_test_log, TotalGHGEmissions_pred_logLR)
+LRr2_log = metrics.r2_score(TotalGHGEmissions_test_log,
+                            TotalGHGEmissions_pred_logLR)
 print("r2 :", LRr2)
 LRrmse_log = metrics.mean_squared_error(TotalGHGEmissions_test_log,
                                         TotalGHGEmissions_pred_logLR,
@@ -663,47 +416,12 @@ figRidge_log.show()
 
 # %%
 # graph visualisation RMSE Ridge pour tout les paramètres de GridSearchCV
-fig1 = go.Figure([
-    go.Scatter(name='RMSE moyenne',
-               x=alphasridge,
-               y=GridRidge_log.ScoresMean,
-               mode='lines',
-               marker=dict(color='red', size=2),
-               showlegend=True),
-    go.Scatter(name='SDup RMSE',
-               x=alphasridge,
-               y=GridRidge_log.ScoresMean + GridRidge_log.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               showlegend=False),
-    go.Scatter(name='SDdown RMSE',
-               x=alphasridge,
-               y=GridRidge_log.ScoresMean - GridRidge_log.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               fillcolor='rgba(68, 68, 68, .3)',
-               fill='tonexty',
-               showlegend=False)
-])
-
-fig2 = px.line(GridRidge_log,
-               x=alphasridge,
-               y=[
-                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                   'ScoresSplit3', 'ScoresSplit4'
-               ])
-
-fig3 = go.Figure(data=fig1.data + fig2.data)
-fig3.update_xaxes(type='log', title='alpha')
-fig3.update_yaxes(title='RMSE')
-fig3.update_layout(
-    title="RMSE du modèle Ridge en fonction de l'hyperparamètre alpha")
-fig3.show()
+FigRMSEGRidRidge_log = visuRMSEGrid(Ridge(), 'Ridge', alphasridge_log, 'alpha',
+                                    GridRidge_log)
+FigRMSEGRidRidge_log.show()
 if write_data is True:
-    fig3.write_image('./Figures/EmissionsGraphRMSERidge_log.pdf')
-
+    FigRMSEGRidRidge_log.write_image(
+        './Figures/EmissionsGraphRMSERidge_log.pdf')
 # %% [markdown]
 # ### 1.2.3 Modèle Lasso
 
@@ -734,46 +452,12 @@ figLasso_log.show()
 
 # %%
 # graph visualisation RMSE Lasso pour tout les paramètres de GridSearchCV
-fig1 = go.Figure([
-    go.Scatter(name='RMSE moyenne',
-               x=alphaslasso,
-               y=GridLasso_log.ScoresMean,
-               mode='lines',
-               marker=dict(color='red', size=2),
-               showlegend=True),
-    go.Scatter(name='SDup RMSE',
-               x=alphaslasso,
-               y=GridLasso_log.ScoresMean + GridLasso_log.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               showlegend=False),
-    go.Scatter(name='SDdown RMSE',
-               x=alphaslasso,
-               y=GridLasso_log.ScoresMean - GridLasso_log.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               fillcolor='rgba(68, 68, 68, .3)',
-               fill='tonexty',
-               showlegend=False)
-])
-
-fig2 = px.line(GridLasso_log,
-               x=alphaslasso,
-               y=[
-                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                   'ScoresSplit3', 'ScoresSplit4'
-               ])
-
-fig3 = go.Figure(data=fig1.data + fig2.data)
-fig3.update_xaxes(type='log', title='alpha')
-fig3.update_yaxes(title='RMSE')
-fig3.update_layout(
-    title="RMSE du modèle Lasso en fonction de l'hyperparamètre alpha")
-fig3.show()
+FigRMSEGRidLasso_log = visuRMSEGrid(Lasso(), 'Lasso', alphaslasso_log, 'alpha',
+                                    GridLasso_log, None, None)
+FigRMSEGRidLasso_log.show()
 if write_data is True:
-    fig3.write_image('./Figures/EmissionsGraphRMSELasso_log.pdf')
+    FigRMSEGRidLasso_log.write_image(
+        './Figures/EmissionsGraphRMSELasso_log.pdf')
 
 # %% [markdown]
 # ### 1.2.4 Modèle ElasticNet
@@ -781,7 +465,7 @@ if write_data is True:
 # %%
 # régression elasticnet
 # réglage des paramètre pour la gridsearch
-alphasEN_log = np.logspace(-1, 3, 200)
+alphasEN_log = np.logspace(-3, 1, 30)
 l1ratioEN_log = np.linspace(0, 1, 6)
 param_gridEN_log = {
     'elasticnet__alpha': alphasEN_log,
@@ -809,58 +493,12 @@ figEN_log.show()
 
 # %%
 # graph visualisation RMSE ElasticNet pour tout le meilleur paramètre l1 ratio
-for i in BestParametresEN_log['ElasticNet()'][BestParametresEN_log['paramètre']
-                                              == 'elasticnet__l1_ratio']:
-    fig1 = go.Figure([
-        go.Scatter(name='RMSE moyenne',
-                   x=alphasEN_log,
-                   y=GridEN_log.ScoresMean.where(
-                       GridEN_log.elasticnet__l1_ratio == i).dropna(),
-                   mode='lines',
-                   marker=dict(color='red', size=2),
-                   showlegend=True),
-        go.Scatter(name='SDup RMSE',
-                   x=alphasEN_log,
-                   y=GridEN_log.ScoresMean.where(
-                       GridEN_log.elasticnet__l1_ratio == i).dropna() +
-                   GridEN_log.ScoresSD.where(
-                       GridEN_log.elasticnet__l1_ratio == i).dropna(),
-                   mode='lines',
-                   marker=dict(color="#444"),
-                   line=dict(width=1),
-                   showlegend=False),
-        go.Scatter(name='SDdown RMSE',
-                   x=alphasEN_log,
-                   y=GridEN_log.ScoresMean.where(
-                       GridEN_log.elasticnet__l1_ratio == i).dropna() -
-                   GridEN_log.ScoresSD.where(
-                       GridEN_log.elasticnet__l1_ratio == i).dropna(),
-                   mode='lines',
-                   marker=dict(color="#444"),
-                   line=dict(width=1),
-                   fillcolor='rgba(68, 68, 68, .3)',
-                   fill='tonexty',
-                   showlegend=False)
-    ])
-
-    fig2 = px.line(
-        GridEN_log.where(GridEN_log.elasticnet__l1_ratio == i).dropna(),
-        x=alphasEN_log,
-        y=[
-            'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2', 'ScoresSplit3',
-            'ScoresSplit4'
-        ])
-
-    fig3 = go.Figure(data=fig1.data + fig2.data)
-    fig3.update_xaxes(type='log', title='alpha')
-    fig3.update_yaxes(title='RMSE')
-    fig3.update_layout(
-        title=
-        "RMSE du modèle EN pour le paramètre l1={:.2}<br>en fonction de l'hyperparamètre alpha"
-        .format(i))
-    fig3.show()
-    if write_data is True:
-        fig3.write_image('./Figures/EmissionsGraphRMSEEN_log{:.2}.pdf'.format(i))
+FigRMSEGRidEN_log = visuRMSEGrid(ElasticNet(), 'EN', alphasEN_log, 'alpha',
+                                 GridEN_log, BestParametresEN_log,
+                                 'elasticnet__l1_ratio')
+FigRMSEGRidEN_log.show()
+if write_data is True:
+    FigRMSEGRidEN_log.write_image('./Figures/EmissionsGraphRMSEEN_log.pdf')
 
 # %% [markdown]
 # ### 1.2.5 Modèle kNeighborsRegressor
@@ -892,48 +530,11 @@ figkNN_log.show()
 
 # %%
 # graph visualisation RMSE kNN pour les paramètres de GridSearchCV
-fig1 = go.Figure([
-    go.Scatter(name='RMSE moyenne',
-               x=n_neighbors,
-               y=GridkNN_log.ScoresMean,
-               mode='lines',
-               marker=dict(color='red', size=2),
-               showlegend=True),
-    go.Scatter(name='SDup RMSE',
-               x=n_neighbors,
-               y=GridkNN_log.ScoresMean + GridkNN_log.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               showlegend=False),
-    go.Scatter(name='SDdown RMSE',
-               x=n_neighbors,
-               y=GridkNN_log.ScoresMean - GridkNN_log.ScoresSD,
-               mode='lines',
-               marker=dict(color="#444"),
-               line=dict(width=1),
-               fillcolor='rgba(68, 68, 68, .3)',
-               fill='tonexty',
-               showlegend=False)
-])
-
-fig2 = px.line(GridkNN_log,
-               x=n_neighbors,
-               y=[
-                   'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                   'ScoresSplit3', 'ScoresSplit4'
-               ])
-
-fig3 = go.Figure(data=fig1.data + fig2.data)
-fig3.update_xaxes(type='log', title='n neighbors')
-fig3.update_yaxes(title='RMSE')
-fig3.update_layout(
-    title=
-    "RMSE du modèle kNN en fonction de l'hyperparamètre n le nombre de voisins"
-)
-fig3.show()
+FigRMSEGRidkNN_log = visuRMSEGrid(KNeighborsRegressor(), 'kNN',
+                                  n_neighbors_log, 'n neighbors', GridkNN_log)
+FigRMSEGRidkNN_log.show()
 if write_data is True:
-    fig3.write_image('./Figures/EmissionsGraphRMSEkNN_log.pdf')
+    FigRMSEGRidkNN_log.write_image('./Figures/EmissionsGraphRMSEkNN_log.pdf')
 
 # %% [markdown]
 # ### 1.2.5 Modèle RandomForestRegressor
@@ -969,62 +570,13 @@ figRF_log.show()
 # %%
 # graph visualisation RMSE RandomForestRegressor
 # pour le meilleur paramètre max features
-for i in BestParametresRF_log['RandomForestRegressor()'][
-        BestParametresRF_log['paramètre'] ==
-        'randomforestregressor__max_features']:
-    fig1 = go.Figure([
-        go.Scatter(
-            name='RMSE moyenne',
-            x=n_estimatorsRF_log,
-            y=GridRF_log.ScoresMean.where(
-                GridRF_log.randomforestregressor__max_features == i).dropna(),
-            mode='lines',
-            marker=dict(color='red', size=2),
-            showlegend=True),
-        go.Scatter(
-            name='SDup RMSE',
-            x=n_estimatorsRF_log,
-            y=GridRF_log.ScoresMean.where(
-                GridRF_log.randomforestregressor__max_features == i).dropna() +
-            GridRF_log.ScoresSD.where(
-                GridRF_log.randomforestregressor__max_features == i).dropna(),
-            mode='lines',
-            marker=dict(color="#444"),
-            line=dict(width=1),
-            showlegend=False),
-        go.Scatter(
-            name='SDdown RMSE',
-            x=n_estimatorsRF_log,
-            y=GridRF_log.ScoresMean.where(
-                GridRF_log.randomforestregressor__max_features == i).dropna() -
-            GridRF_log.ScoresSD.where(
-                GridRF_log.randomforestregressor__max_features == i).dropna(),
-            mode='lines',
-            marker=dict(color="#444"),
-            line=dict(width=1),
-            fillcolor='rgba(68, 68, 68, .3)',
-            fill='tonexty',
-            showlegend=False)
-    ])
-
-    fig2 = px.line(GridRF_log.where(
-        GridRF_log.randomforestregressor__max_features == i).dropna(),
-                   x=n_estimatorsRF_log,
-                   y=[
-                       'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
-                       'ScoresSplit3', 'ScoresSplit4'
-                   ])
-
-    fig3 = go.Figure(data=fig1.data + fig2.data)
-    fig3.update_xaxes(type='log', title='n_estimators')
-    fig3.update_yaxes(title='RMSE')
-    fig3.update_layout(
-        title=
-        "RMSE du modèle RF pour le paramètre max_features={}<br>en fonction de l'hyperparamètre alpha"
-        .format(i))
-    fig3.show()
-    if write_data is True:
-        fig3.write_image('./Figures/EmissionsGraphRMSERF_log{}.pdf'.format(i))
+FigRMSEGRidRF_log = visuRMSEGrid(RandomForestRegressor(), 'RF',
+                                 n_estimatorsRF_log, 'n estimators',
+                                 GridRF_log, BestParametresRF_log,
+                                 'randomforestregressor__max_features')
+FigRMSEGRidRF_log.show()
+if write_data is True:
+    FigRMSEGRidRF_log.write_image('./Figures/EmissionsGraphRMSERF_log.pdf')
 
 # %% [markdown]
 # ### 1.2.7 Modèle AdaboostRegressor
@@ -1060,58 +612,13 @@ figAB_log.show()
 # %%
 # graph visualisation RMSE AdaBoostRegressor
 # pour le meilleur paramètre loss
-for i in BestParametresAB_log['AdaBoostRegressor()'][
-        BestParametresAB_log['paramètre'] == 'adaboostregressor__loss']:
-    fig1 = go.Figure([
-        go.Scatter(name='RMSE moyenne',
-                   x=n_estimatorsAB_log,
-                   y=GridAB_log.ScoresMean.where(
-                       GridAB_log.adaboostregressor__loss == i).dropna(),
-                   mode='lines',
-                   marker=dict(color='red', size=2),
-                   showlegend=True),
-        go.Scatter(name='SDup RMSE',
-                   x=n_estimatorsAB_log,
-                   y=GridAB_log.ScoresMean.where(
-                       GridAB_log.adaboostregressor__loss == i).dropna() +
-                   GridAB_log.ScoresSD.where(
-                       GridAB_log.adaboostregressor__loss == i).dropna(),
-                   mode='lines',
-                   marker=dict(color="#444"),
-                   line=dict(width=1),
-                   showlegend=False),
-        go.Scatter(name='SDdown RMSE',
-                   x=n_estimatorsAB_log,
-                   y=GridAB_log.ScoresMean.where(
-                       GridAB_log.adaboostregressor__loss == i).dropna() -
-                   GridAB_log.ScoresSD.where(
-                       GridAB_log.adaboostregressor__loss == i).dropna(),
-                   mode='lines',
-                   marker=dict(color="#444"),
-                   line=dict(width=1),
-                   fillcolor='rgba(68, 68, 68, .3)',
-                   fill='tonexty',
-                   showlegend=False)
-    ])
+FigRMSEGRidAB_log = visuRMSEGrid(AdaBoostRegressor(), 'AB', n_estimatorsAB_log,
+                             'n estimators', GridAB_log, BestParametresAB_log,
+                             'adaboostregressor__loss')
+FigRMSEGRidAB_log.show()
+if write_data is True:
+    FigRMSEGRidAB_log.write_image('./Figures/EmissionsGraphRMSEAB_log.pdf')
 
-    fig2 = px.line(
-        GridAB_log.where(GridAB_log.adaboostregressor__loss == i).dropna(),
-        x=n_estimatorsAB_log,
-        y=[
-            'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2', 'ScoresSplit3',
-            'ScoresSplit4'
-        ])
-
-    fig3 = go.Figure(data=fig1.data + fig2.data)
-    fig3.update_xaxes(type='log', title='n_estimators')
-    fig3.update_yaxes(title='RMSE')
-    fig3.update_layout(
-        title=
-        "RMSE du modèle AB pour le paramètre max_features={}<br>en fonction de l'hyperparamètre alpha"
-        .format(i))
-    fig3.show()
-    if write_data is True:
-        fig3.write_image('./Figures/EmissionsGraphRMSEAB{}.pdf'.format(i))
 # %%
 Scores = ScoresLasso.join(
     [ScoresRidge, ScoresEN, ScoreskNN, ScoresRF, ScoresAB])
