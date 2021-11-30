@@ -100,6 +100,7 @@ BEB2015 = BEB2015.rename(
 
 # %%
 BEB2015.columns.difference(BEB2016.columns)
+
 # %%
 BEB2016.columns.difference(BEB2015.columns)
 # %% [markdown]
@@ -118,8 +119,10 @@ BEB2015.rename(
 
 # %%
 BEB2015.columns.difference(BEB2016.columns)
+
 # %%
 BEB2016.columns.difference(BEB2015.columns)
+
 # %%
 BEB2016.Comments.unique()
 
@@ -128,8 +131,10 @@ BEB2016.Comments.unique()
 # %%
 # sup. col. comments
 BEB2016.drop(columns="Comments", inplace=True)
+
 # %%
 BEB2015.Comment.unique()
+
 # %% [markdown]
 # présence de commentaires dans les données de 2015
 
@@ -149,6 +154,7 @@ pd.DataFrame([BEB2015.dtypes, BEB2016.dtypes])
 BEB2015[['Latitude', 'Longitude',
          'ZipCode']] = BEB2015[['Latitude', 'Longitude',
                                 'ZipCode']].astype('float64')
+
 # %% [markdown]
 # Nous allons joindre nos données pour n'avoir qu'un seul fichier
 # sur lequel travailler lors des test de modèles
@@ -239,18 +245,34 @@ BEBFullClean.dropna(
 # %%
 # liste des valeurs dans la colonne City
 BEBFullClean.City.unique()
+
 # %%
 BEBFullClean.drop(columns=['State', 'City'], inplace=True)
 
 # %%
+# uniformisation des quartiers
 BEBFullClean.Neighborhood.unique()
+
 # %%
 BEBFullClean.Neighborhood.replace('DELRIDGE NEIGHBORHOODS',
                                   'DELRIDGE',
                                   inplace=True)
 BEBFullClean.Neighborhood = BEBFullClean.Neighborhood.map(lambda x: x.upper())
+
 # %%
 BEBFullClean.Neighborhood.unique()
+
+# %%
+# uniformisation des type de batiments
+BEBFullClean.PrimaryPropertyType.unique()
+
+# %%
+BEBFullClean.PrimaryPropertyType = BEBFullClean.PrimaryPropertyType.str.replace(
+    '\n', '')
+
+# %%
+BEBFullClean.PrimaryPropertyType.unique()
+
 # %%
 # selection des colonnes de type numérique
 columns_num = BEBFullClean.select_dtypes('number')
@@ -324,6 +346,7 @@ fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
 fig.show(renderer='notebook')
 if write_data is True:
     fig.write_image('./Figures/DataNbDrop.pdf')
+
 # %%
 map = folium.Map(
     location=[BEBFullClean.Latitude.mean(),
@@ -344,10 +367,7 @@ map
 # Nous retirons les autres catégories de la matrices que nous utiliserons
 # pour l'entrainement des modèles
 # %%
-useful_cat = [
-    'BuildingType', 'PrimaryPropertyType', 'LargestPropertyUseType',
-    'Neighborhood'
-]
+usefull_cat = ['BuildingType', 'PrimaryPropertyType', 'Neighborhood']
 #%%
 # selection des données numériques n'étant pas des relevés de consommation
 usefull_num = BEBFullClean.select_dtypes('number').drop(columns=[
@@ -375,20 +395,34 @@ if write_data is True:
 # %%
 # création dataframe pour étudier les émissions de CO2 et la consommation
 # totale d’énergie
-BEBClean = usefull_num.drop(columns='ENERGYSTARScore')
-BEBClean.dropna(inplace=True)
+BEBNumClean = usefull_num.drop(columns='ENERGYSTARScore')
+BEBNumClean.dropna(inplace=True)
 if write_data is True:
-    BEBClean.to_csv('BEB.csv', index=False)
+    BEBNumClean.to_csv('BEBNum.csv', index=False)
 
 # %%
 # création dataframe pour étudier EnergyStarScore
-BEBESSClean = usefull_num.dropna()
+BEBESSNumClean = usefull_num.dropna()
 if write_data is True:
-    BEBESSClean.to_csv('BEBESS.csv', index=False)
+    BEBESSNumClean.to_csv('BEBESSNum.csv', index=False)
+
+# %%
+# création dataframe avec données catégorielles
+BEBCatClean = usefull_num.join(
+    BEBFullClean[usefull_cat]).drop(columns='ENERGYSTARScore')
+BEBCatClean.dropna(inplace=True)
+if write_data is True:
+    BEBCatClean.to_csv('BEBCat.csv', index=False)
+
+# %%
+BEBESSCatClean = usefull_num.join(BEBFullClean[usefull_cat])
+BEBESSCatClean.dropna(inplace=True)
+if write_data is True:
+    BEBESSCatClean.to_csv('BEBESSCat.csv', index=False)
 
 # %%
 # ACP sur toutes les colonnes
-numPCA = BEBClean.select_dtypes('number').drop(
+numPCA = BEBESSNumClean.select_dtypes('number').drop(
     columns=['DataYear', 'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'
              ]).dropna().values
 RobPCA = make_pipeline(StandardScaler(), PCA())
@@ -409,10 +443,11 @@ fig.update_layout(title='Scree plot')
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/ScreePlot.pdf', height=300)
+
 # %%
 # création des graphiques
 for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
-    fig = visuPCA(BEBClean.select_dtypes('number').drop(
+    fig = visuPCA(BEBESSNumClean.select_dtypes('number').drop(
         columns=['DataYear', 'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'
                  ]).dropna(),
                   pca,

@@ -6,6 +6,7 @@ pd.options.plotting.backend = 'plotly'
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from sklearn import metrics
 from sklearn.preprocessing import RobustScaler, StandardScaler
 from sklearn.decomposition import PCA
@@ -35,14 +36,14 @@ else:
     pas de création de figures ni de tableaux""")
 
 # %%
-BEB = pd.read_csv('BEB.csv')
+BEBNum = pd.read_csv('BEBNum.csv')
 
-BEBM = BEB.drop(columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
-SiteEnergyUse = np.array(BEB['SiteEnergyUse(kBtu)']).reshape(-1, 1)
-TotalGHGEmissions = np.array(BEB.TotalGHGEmissions).reshape(-1, 1)
+BEBNumM = BEBNum.drop(columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
+SiteEnergyUse = np.array(BEBNum['SiteEnergyUse(kBtu)']).reshape(-1, 1)
+TotalGHGEmissions = np.array(BEBNum.TotalGHGEmissions).reshape(-1, 1)
 
-BEBM_train, BEBM_test, SiteEnergyUse_train, SiteEnergyUse_test = train_test_split(
-    BEBM, SiteEnergyUse, test_size=.2)
+BEBNumM_train, BEBNumM_test, SiteEnergyUse_train, SiteEnergyUse_test = train_test_split(
+    BEBNumM, SiteEnergyUse, test_size=.2)
 
 score = 'neg_root_mean_squared_error'
 
@@ -51,19 +52,20 @@ score = 'neg_root_mean_squared_error'
 scaler = RobustScaler(quantile_range=(10, 90))
 
 # %% [markdown]
-# # 1. Modèle de prédiction sur la consommation énergétique (SiteEnergyUse)
-# ## 1.1 Consommation énergétique brute
+## 1. Modèle de prédiction sur la consommation énergétique
+#(SiteEnergyUse) avec les données numériques uniquement
+### 1.1 Consommation énergétique brute
 
 # %% [markdown]
-# ### 1.1.1 Modèle LinearRegression
+#### 1.1.1 Modèle LinearRegression
 
 # %%
-# modèle régression linéaire
+#modèle régression linéaire
 pipeLR = make_pipeline(scaler, LinearRegression())
 
-pipeLR.fit(BEBM_train, SiteEnergyUse_train)
+pipeLR.fit(BEBNumM_train, SiteEnergyUse_train)
 
-SiteEnergyUse_predLR = pipeLR.predict(BEBM_test)
+SiteEnergyUse_predLR = pipeLR.predict(BEBNumM_test)
 
 LRr2 = metrics.r2_score(SiteEnergyUse_test, SiteEnergyUse_predLR)
 print("r2 :", LRr2)
@@ -85,7 +87,7 @@ fig = px.scatter(
 fig.show()
 
 # %% [markdown]
-# ### 1.1.2 Modèle Ridge
+#### 1.1.2 Modèle Ridge
 
 #%%
 # régression ridge
@@ -99,8 +101,8 @@ ScoresRidge, \
 SiteEnergyUse_predRidge, \
 figRidge = reg_modelGrid(model=Ridge(),
                             scaler=scaler,
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=SiteEnergyUse_train,
                             y_test=SiteEnergyUse_test,
                             y_test_name='SiteEnergyUse_test',
@@ -120,7 +122,7 @@ if write_data is True:
     FigRMSEGRidRidge.write_image('./Figures/ConsoGraphRMSERidge.pdf')
 
 # %% [markdown]
-# ### 1.1.3 Modèle Lasso
+#### 1.1.3 Modèle Lasso
 
 # %%
 # régression lasso
@@ -134,8 +136,8 @@ ScoresLasso, \
 SiteEnergyUse_predLasso, \
 figLasso = reg_modelGrid(model=Lasso(),
                             scaler=RobustScaler(quantile_range=(10, 90)),
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=SiteEnergyUse_train,
                             y_test=SiteEnergyUse_test,
                             y_test_name='SiteEnergyUse_test',
@@ -156,7 +158,7 @@ if write_data is True:
     FigRMSEGRidLasso.write_image('./Figures/ConsoGraphRMSELasso.pdf')
 
 # %% [markdown]
-# ### 1.1.4 Modèle ElasticNet
+#### 1.1.4 Modèle ElasticNet
 
 # %%
 # régression elasticnet
@@ -174,8 +176,8 @@ ScoresEN, \
 SiteEnergyUse_predEN, \
 figEN = reg_modelGrid(model=ElasticNet(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train,
                          y_test=SiteEnergyUse_test,
                          y_test_name='SiteEnergyUse_test',
@@ -196,7 +198,7 @@ if write_data is True:
     FigRMSEGRidEN.write_image('./Figures/ConsoGraphRMSEEN.pdf')
 
 # %% [markdown]
-# ### 1.1.5 Modèle kNeighborsRegressor
+#### 1.1.5 Modèle kNeighborsRegressor
 
 # %%
 # modèle kNN
@@ -211,8 +213,8 @@ ScoreskNN, \
 SiteEnergyUse_predkNN, \
 figkNN = reg_modelGrid(model=KNeighborsRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train,
                          y_test=SiteEnergyUse_test,
                          y_test_name='SiteEnergyUse_test',
@@ -233,7 +235,7 @@ if write_data is True:
     FigRMSEGRidkNN.write_image('./Figures/ConsoGraphRMSEkNN.pdf')
 
 # %% [markdown]
-# ### 1.1.6 Modèle RandomForestRegressor
+#### 1.1.6 Modèle RandomForestRegressor
 
 # %%
 # modèle RandomForestRegressor
@@ -250,8 +252,8 @@ ScoresRF, \
 SiteEnergyUse_predRF, \
 figRF = reg_modelGrid(model=RandomForestRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train.ravel(),
                          y_test=SiteEnergyUse_test,
                          y_test_name='SiteEnergyUse_test',
@@ -274,7 +276,7 @@ if write_data is True:
     FigRMSEGRidRF.write_image('./Figures/ConsoGraphRMSERF.pdf')
 
 # %% [markdown]
-# ### 1.1.7 Modèle AdaboostRegressor
+#### 1.1.7 Modèle AdaboostRegressor
 
 # %%
 # modèle AdaBoostRegressor
@@ -291,8 +293,8 @@ ScoresAB, \
 SiteEnergyUse_predAB, \
 figAB = reg_modelGrid(model=AdaBoostRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train.ravel(),
                          y_test=SiteEnergyUse_test,
                          y_test_name='SiteEnergyUse_test',
@@ -315,22 +317,22 @@ if write_data is True:
     FigRMSEGRidAB.write_image('./Figures/ConsoGraphRMSEAB.pdf')
 
 # %% [markdown]
-# ## 1.2 Consommation énergétique au log
+### 1.2 Consommation énergétique au log
 
 # %%
 SiteEnergyUse_train_log = np.log2(1 + SiteEnergyUse_train)
 SiteEnergyUse_test_log = np.log2(1 + SiteEnergyUse_test)
 
 # %% [markdown]
-# ### 1.2.1 Modèle LinearRegression
+#### 1.2.1 Modèle LinearRegression
 
 # %%
 # modèle régression linéaire
 pipeLR = make_pipeline(scaler, LinearRegression())
 
-pipeLR.fit(BEBM_train, SiteEnergyUse_train_log)
+pipeLR.fit(BEBNumM_train, SiteEnergyUse_train_log)
 
-SiteEnergyUse_pred_logLR = pipeLR.predict(BEBM_test)
+SiteEnergyUse_pred_logLR = pipeLR.predict(BEBNumM_test)
 
 LRr2_log = metrics.r2_score(SiteEnergyUse_test_log, SiteEnergyUse_pred_logLR)
 print("r2 :", LRr2)
@@ -351,7 +353,7 @@ fig = px.scatter(
 )
 fig.show()
 # %% [markdown]
-# ### 1.2.2 Modèle Ridge
+#### 1.2.2 Modèle Ridge
 
 #%%
 # régression ridge
@@ -365,8 +367,8 @@ ScoresRidge_log, \
 SiteEnergyUse_pred_logRidge_log, \
 figRidge_log = reg_modelGrid(model=Ridge(),
                             scaler=scaler,
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=SiteEnergyUse_train_log,
                             y_test=SiteEnergyUse_test_log,
                             y_test_name='SiteEnergyUse_test_log',
@@ -384,11 +386,10 @@ FigRMSEGRidRidge_log = visuRMSEGrid(Ridge(), 'Ridge', alphasridge_log, 'alpha',
                                     GridRidge_log)
 FigRMSEGRidRidge_log.show()
 if write_data is True:
-    FigRMSEGRidRidge_log.write_image(
-        './Figures/ConsoGraphRMSERidge_log.pdf')
+    FigRMSEGRidRidge_log.write_image('./Figures/ConsoGraphRMSERidge_log.pdf')
 
 # %% [markdown]
-# ### 1.2.3 Modèle Lasso
+#### 1.2.3 Modèle Lasso
 
 # %%
 # régression lasso
@@ -402,8 +403,8 @@ ScoresLasso_log, \
 SiteEnergyUse_pred_logLasso_log, \
 figLasso_log = reg_modelGrid(model=Lasso(),
                             scaler=RobustScaler(quantile_range=(10, 90)),
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=SiteEnergyUse_train_log,
                             y_test=SiteEnergyUse_test_log,
                             y_test_name='SiteEnergyUse_test_log',
@@ -421,11 +422,10 @@ FigRMSEGRidLasso_log = visuRMSEGrid(Lasso(), 'Lasso', alphaslasso_log, 'alpha',
                                     GridLasso_log, None, None)
 FigRMSEGRidLasso_log.show()
 if write_data is True:
-    FigRMSEGRidLasso_log.write_image(
-        './Figures/ConsoGraphRMSELasso_log.pdf')
+    FigRMSEGRidLasso_log.write_image('./Figures/ConsoGraphRMSELasso_log.pdf')
 
 # %% [markdown]
-# ### 1.2.4 Modèle ElasticNet
+#### 1.2.4 Modèle ElasticNet
 
 # %%
 # régression elasticnet
@@ -443,8 +443,8 @@ ScoresEN_log, \
 SiteEnergyUse_pred_logEN, \
 figEN_log = reg_modelGrid(model=ElasticNet(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train_log,
                          y_test=SiteEnergyUse_test_log,
                          y_test_name='SiteEnergyUse_test_log',
@@ -466,7 +466,7 @@ if write_data is True:
     FigRMSEGRidEN_log.write_image('./Figures/ConsoGraphRMSEEN_log.pdf')
 
 # %% [markdown]
-# ### 1.2.5 Modèle kNeighborsRegressor
+#### 1.2.5 Modèle kNeighborsRegressor
 # %%
 # modèle kNN
 # réglage des paramètre pour la gridsearch
@@ -480,8 +480,8 @@ ScoreskNN_log, \
 SiteEnergyUse_pred_logkNN_log, \
 figkNN_log = reg_modelGrid(model=KNeighborsRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train_log,
                          y_test=SiteEnergyUse_test_log,
                          y_test_name='SiteEnergyUse_test_log',
@@ -502,7 +502,7 @@ if write_data is True:
     FigRMSEGRidkNN_log.write_image('./Figures/ConsoGraphRMSEkNN_log.pdf')
 
 # %% [markdown]
-# ### 1.2.6 Modèle RandomForestRegressor
+#### 1.2.6 Modèle RandomForestRegressor
 
 # %%
 # modèle RandomForestRegressor
@@ -519,8 +519,8 @@ ScoresRF_log, \
 SiteEnergyUse_pred_logRF_log, \
 figRF_log = reg_modelGrid(model=RandomForestRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train_log.ravel(),
                          y_test=SiteEnergyUse_test_log,
                          y_test_name='SiteEnergyUse_test_log',
@@ -544,7 +544,7 @@ if write_data is True:
     FigRMSEGRidRF_log.write_image('./Figures/ConsoGraphRMSERF_log.pdf')
 
 # %% [markdown]
-# ### 1.2.7 Modèle AdaboostRegressor
+#### 1.2.7 Modèle AdaboostRegressor
 
 # %%
 # modèle AdaBoostRegressor
@@ -561,8 +561,8 @@ ScoresAB_log, \
 SiteEnergyUse_pred_logAB, \
 figAB_log = reg_modelGrid(model=AdaBoostRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=SiteEnergyUse_train_log.ravel(),
                          y_test=SiteEnergyUse_test_log,
                          y_test_name='SiteEnergyUse_test_log',
@@ -578,23 +578,49 @@ figAB_log.show()
 # graph visualisation RMSE AdaBoostRegressor
 # pour le meilleur paramètre loss
 FigRMSEGRidAB_log = visuRMSEGrid(AdaBoostRegressor(), 'AB', n_estimatorsAB_log,
-                             'n estimators', GridAB_log, BestParametresAB_log,
-                             'adaboostregressor__loss')
+                                 'n estimators', GridAB_log,
+                                 BestParametresAB_log,
+                                 'adaboostregressor__loss')
 FigRMSEGRidAB_log.show()
 if write_data is True:
     FigRMSEGRidAB_log.write_image('./Figures/ConsoGraphRMSEAB_log.pdf')
-        
+
 # %%
-Scores = ScoresLasso.join(
+Scores = ScoresLasso.append(
     [ScoresRidge, ScoresEN, ScoreskNN, ScoresRF, ScoresAB])
+Scores
 
 # %%
-ScoresLog = ScoresLasso_log.join(
-    [ScoresRidge_log, ScoresEN_log, ScoreskNN_log, ScoresRF_log, ScoresAB_log])
+ScoresLog = ScoresLasso_log.append(
+    [ScoresRidge_log, ScoresEN_log, ScoreskNN_log, ScoresRF_log,
+     ScoresAB_log]).rename('{}_log'.format)
+ScoresLog
 
 # %%
-CompareScores = Scores.join(ScoresLog, rsuffix='_log')
+CompareScores = Scores.append(ScoresLog)
 if write_data is True:
     CompareScores.to_latex('./Tableaux/ConsoScoresModèles.tex')
+CompareScores
 
 # %%
+fig = make_subplots(3,
+                    2,
+                    column_titles=("Consommation brute", "Consommation log2"),
+                    row_titles=('R²', 'RMSE', 'MAE'),
+                    shared_xaxes=True)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['R²']), row=1, col=1)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['RMSE']), row=2, col=1)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE']), row=3, col=1)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['R²']), row=1, col=2)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['RMSE']), row=2, col=2)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
+fig.update_layout(
+    title_text="Comparaison des scores des modèles de consommation",
+    showlegend=False)
+fig.show()
+
+# %% [markdown]
+## 2. Modèle de prédiction sur la consommation énergétique
+#(SiteEnergyUse) avec les données catégorielles
+# %%
+BEBCat = pd.read_csv('BEBCat.csv')

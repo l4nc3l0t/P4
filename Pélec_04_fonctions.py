@@ -97,8 +97,8 @@ def reg_modelGrid(model,
     #                         index=['R²', 'RMSLE', 'RMSE']))
 
     # dataframe erreur
-    ScoreModele = pd.DataFrame({str(model): [scoreR2, scoreRMSE, scoreMAE]},
-                               index=['R²', 'RMSE', 'MAE'])
+    ScoreModele = pd.DataFrame({'R²': scoreR2, 'RMSE' : scoreRMSE, 'MAE' : scoreMAE},
+                               index=[str(model)])
 
     # graph pred vs test
     fig = px.scatter(

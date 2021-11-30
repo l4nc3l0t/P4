@@ -6,6 +6,7 @@ pd.options.plotting.backend = 'plotly'
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from sklearn import metrics
 from sklearn.preprocessing import RobustScaler
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
@@ -34,14 +35,14 @@ else:
     pas de création de figures ni de tableaux""")
 
 # %%
-BEB = pd.read_csv('BEB.csv')
+BEBNum = pd.read_csv('BEBNum.csv')
 
-BEBM = BEB.drop(columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
-SiteEnergyUse = np.array(BEB['SiteEnergyUse(kBtu)']).reshape(-1, 1)
-TotalGHGEmissions = np.array(BEB.TotalGHGEmissions).reshape(-1, 1)
+BEBNumM = BEBNum.drop(columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
+SiteEnergyUse = np.array(BEBNum['SiteEnergyUse(kBtu)']).reshape(-1, 1)
+TotalGHGEmissions = np.array(BEBNum.TotalGHGEmissions).reshape(-1, 1)
 
-BEBM_train, BEBM_test, TotalGHGEmissions_train, TotalGHGEmissions_test = train_test_split(
-    BEBM, TotalGHGEmissions, test_size=.2)
+BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train, TotalGHGEmissions_test = train_test_split(
+    BEBNumM, TotalGHGEmissions, test_size=.2)
 
 score = 'neg_root_mean_squared_error'
 
@@ -50,19 +51,20 @@ score = 'neg_root_mean_squared_error'
 scaler = RobustScaler(quantile_range=(10, 90))
 
 # %% [markdown]
-# # 1. Modèle de prédiction sur les émissions (TotalGHGEmissions)
-# ## 1.1 Émissions brutes
+## 1. Modèle de prédiction sur les émissions (TotalGHGEmissions)
+#avec les données numériques uniquement
+### 1.1 Émissions brutes
 
 # %% [markdown]
-# ### 1.1.1 Modèle LinearRegression
+#### 1.1.1 Modèle LinearRegression
 
 # %%
 # modèle régression linéaire
 pipeLR = make_pipeline(scaler, LinearRegression())
 
-pipeLR.fit(BEBM_train, TotalGHGEmissions_train)
+pipeLR.fit(BEBNumM_train, TotalGHGEmissions_train)
 
-TotalGHGEmissions_predLR = pipeLR.predict(BEBM_test)
+TotalGHGEmissions_predLR = pipeLR.predict(BEBNumM_test)
 
 LRr2 = metrics.r2_score(TotalGHGEmissions_test, TotalGHGEmissions_predLR)
 print("r2 :", LRr2)
@@ -84,7 +86,7 @@ fig = px.scatter(
 fig.show()
 
 # %% [markdown]
-# ### 1.1.2 Modèle Ridge
+#### 1.1.2 Modèle Ridge
 
 #%%
 # régression ridge
@@ -98,8 +100,8 @@ ScoresRidge, \
 TotalGHGEmissions_predRidge, \
 figRidge = reg_modelGrid(model=Ridge(),
                             scaler=scaler,
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=TotalGHGEmissions_train,
                             y_test=TotalGHGEmissions_test,
                             y_test_name='TotalGHGEmissions_test',
@@ -119,7 +121,7 @@ if write_data is True:
     FigRMSEGRidRidge.write_image('./Figures/EmissionsGraphRMSERidge.pdf')
 
 # %% [markdown]
-# ### 1.1.3 Modèle Lasso
+#### 1.1.3 Modèle Lasso
 
 # %%
 # régression lasso
@@ -133,8 +135,8 @@ ScoresLasso, \
 TotalGHGEmissions_predLasso, \
 figLasso = reg_modelGrid(model=Lasso(),
                             scaler=RobustScaler(quantile_range=(10, 90)),
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=TotalGHGEmissions_train,
                             y_test=TotalGHGEmissions_test,
                             y_test_name='TotalGHGEmissions_test',
@@ -155,7 +157,7 @@ if write_data is True:
     FigRMSEGRidLasso.write_image('./Figures/EmissionsGraphRMSELasso.pdf')
 
 # %% [markdown]
-# ### 1.1.4 Modèle ElasticNet
+#### 1.1.4 Modèle ElasticNet
 
 # %%
 # régression elasticnet
@@ -173,8 +175,8 @@ ScoresEN, \
 TotalGHGEmissions_predEN, \
 figEN = reg_modelGrid(model=ElasticNet(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train,
                          y_test=TotalGHGEmissions_test,
                          y_test_name='TotalGHGEmissions_test',
@@ -195,7 +197,7 @@ if write_data is True:
     FigRMSEGRidEN.write_image('./Figures/EmissionsGraphRMSEEN.pdf')
 
 # %% [markdown]
-# ### 1.1.5 Modèle kNeighborsRegressor
+#### 1.1.5 Modèle kNeighborsRegressor
 # %%
 # modèle kNN
 # réglage des paramètre pour la gridsearch
@@ -209,8 +211,8 @@ ScoreskNN, \
 TotalGHGEmissions_predkNN, \
 figkNN = reg_modelGrid(model=KNeighborsRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train,
                          y_test=TotalGHGEmissions_test,
                          y_test_name='TotalGHGEmissions_test',
@@ -231,7 +233,7 @@ if write_data is True:
     FigRMSEGRidkNN.write_image('./Figures/EmissionsGraphRMSEkNN.pdf')
 
 # %% [markdown]
-# ### 1.1.6 Modèle RandomForestRegressor
+#### 1.1.6 Modèle RandomForestRegressor
 
 # %%
 # modèle RandomForestRegressor
@@ -248,8 +250,8 @@ ScoresRF, \
 TotalGHGEmissions_predRF, \
 figRF = reg_modelGrid(model=RandomForestRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train.ravel(),
                          y_test=TotalGHGEmissions_test,
                          y_test_name='TotalGHGEmissions_test',
@@ -272,7 +274,7 @@ if write_data is True:
     FigRMSEGRidRF.write_image('./Figures/EmissionsGraphRMSERF.pdf')
 
 # %% [markdown]
-# ### 1.1.7 Modèle AdaboostRegressor
+#### 1.1.7 Modèle AdaboostRegressor
 
 # %%
 # modèle AdaBoostRegressor
@@ -289,8 +291,8 @@ ScoresAB, \
 TotalGHGEmissions_predAB, \
 figAB = reg_modelGrid(model=AdaBoostRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train.ravel(),
                          y_test=TotalGHGEmissions_test,
                          y_test_name='TotalGHGEmissions_test',
@@ -320,15 +322,15 @@ TotalGHGEmissions_train_log = np.log2(1 + TotalGHGEmissions_train)
 TotalGHGEmissions_test_log = np.log2(1 + TotalGHGEmissions_test)
 
 # %% [markdown]
-# ### 1.2.1 Modèle LinearRegression
+#### 1.2.1 Modèle LinearRegression
 
 # %%
 # modèle régression linéaire
 pipeLR = make_pipeline(scaler, LinearRegression())
 
-pipeLR.fit(BEBM_train, TotalGHGEmissions_train_log)
+pipeLR.fit(BEBNumM_train, TotalGHGEmissions_train_log)
 
-TotalGHGEmissions_pred_logLR = pipeLR.predict(BEBM_test)
+TotalGHGEmissions_pred_logLR = pipeLR.predict(BEBNumM_test)
 
 LRr2_log = metrics.r2_score(TotalGHGEmissions_test_log,
                             TotalGHGEmissions_pred_logLR)
@@ -350,7 +352,7 @@ fig = px.scatter(
 )
 fig.show()
 # %% [markdown]
-# ### 1.2.2 Modèle Ridge
+#### 1.2.2 Modèle Ridge
 
 #%%
 # régression ridge
@@ -364,8 +366,8 @@ ScoresRidge_log, \
 TotalGHGEmissions_pred_logRidge_log, \
 figRidge_log = reg_modelGrid(model=Ridge(),
                             scaler=scaler,
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=TotalGHGEmissions_train_log,
                             y_test=TotalGHGEmissions_test_log,
                             y_test_name='TotalGHGEmissions_test_log',
@@ -386,7 +388,7 @@ if write_data is True:
     FigRMSEGRidRidge_log.write_image(
         './Figures/EmissionsGraphRMSERidge_log.pdf')
 # %% [markdown]
-# ### 1.2.3 Modèle Lasso
+#### 1.2.3 Modèle Lasso
 
 # %%
 # régression lasso
@@ -400,8 +402,8 @@ ScoresLasso_log, \
 TotalGHGEmissions_pred_logLasso_log, \
 figLasso_log = reg_modelGrid(model=Lasso(),
                             scaler=RobustScaler(quantile_range=(10, 90)),
-                            X_train=BEBM_train,
-                            X_test=BEBM_test,
+                            X_train=BEBNumM_train,
+                            X_test=BEBNumM_test,
                             y_train=TotalGHGEmissions_train_log,
                             y_test=TotalGHGEmissions_test_log,
                             y_test_name='TotalGHGEmissions_test_log',
@@ -423,7 +425,7 @@ if write_data is True:
         './Figures/EmissionsGraphRMSELasso_log.pdf')
 
 # %% [markdown]
-# ### 1.2.4 Modèle ElasticNet
+#### 1.2.4 Modèle ElasticNet
 
 # %%
 # régression elasticnet
@@ -441,8 +443,8 @@ ScoresEN_log, \
 TotalGHGEmissions_pred_logEN, \
 figEN_log = reg_modelGrid(model=ElasticNet(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train_log,
                          y_test=TotalGHGEmissions_test_log,
                          y_test_name='TotalGHGEmissions_test_log',
@@ -464,7 +466,7 @@ if write_data is True:
     FigRMSEGRidEN_log.write_image('./Figures/EmissionsGraphRMSEEN_log.pdf')
 
 # %% [markdown]
-# ### 1.2.5 Modèle kNeighborsRegressor
+#### 1.2.5 Modèle kNeighborsRegressor
 # %%
 # modèle kNN
 # réglage des paramètre pour la gridsearch
@@ -478,8 +480,8 @@ ScoreskNN_log, \
 TotalGHGEmissions_pred_logkNN_log, \
 figkNN_log = reg_modelGrid(model=KNeighborsRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train_log,
                          y_test=TotalGHGEmissions_test_log,
                          y_test_name='TotalGHGEmissions_test_log',
@@ -500,7 +502,7 @@ if write_data is True:
     FigRMSEGRidkNN_log.write_image('./Figures/EmissionsGraphRMSEkNN_log.pdf')
 
 # %% [markdown]
-# ### 1.2.5 Modèle RandomForestRegressor
+#### 1.2.6 Modèle RandomForestRegressor
 
 # %%
 # modèle RandomForestRegressor
@@ -517,8 +519,8 @@ ScoresRF_log, \
 TotalGHGEmissions_pred_logRF_log, \
 figRF_log = reg_modelGrid(model=RandomForestRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train_log.ravel(),
                          y_test=TotalGHGEmissions_test_log,
                          y_test_name='TotalGHGEmissions_test_log',
@@ -542,7 +544,7 @@ if write_data is True:
     FigRMSEGRidRF_log.write_image('./Figures/EmissionsGraphRMSERF_log.pdf')
 
 # %% [markdown]
-# ### 1.2.7 Modèle AdaboostRegressor
+#### 1.2.7 Modèle AdaboostRegressor
 
 # %%
 # modèle AdaBoostRegressor
@@ -559,8 +561,8 @@ ScoresAB_log, \
 TotalGHGEmissions_pred_logAB, \
 figAB_log = reg_modelGrid(model=AdaBoostRegressor(),
                          scaler=scaler,
-                         X_train=BEBM_train,
-                         X_test=BEBM_test,
+                         X_train=BEBNumM_train,
+                         X_test=BEBNumM_test,
                          y_train=TotalGHGEmissions_train_log.ravel(),
                          y_test=TotalGHGEmissions_test_log,
                          y_test_name='TotalGHGEmissions_test_log',
@@ -583,16 +585,41 @@ if write_data is True:
     FigRMSEGRidAB_log.write_image('./Figures/EmissionsGraphRMSEAB_log.pdf')
 
 # %%
-Scores = ScoresLasso.join(
+Scores = ScoresLasso.append(
     [ScoresRidge, ScoresEN, ScoreskNN, ScoresRF, ScoresAB])
+Scores
 
 # %%
-ScoresLog = ScoresLasso_log.join(
-    [ScoresRidge_log, ScoresEN_log, ScoreskNN_log, ScoresRF_log, ScoresAB_log])
+ScoresLog = ScoresLasso_log.append(
+    [ScoresRidge_log, ScoresEN_log, ScoreskNN_log, ScoresRF_log,
+     ScoresAB_log]).rename('{}_log'.format)
+ScoresLog
 
 # %%
-CompareScores = Scores.join(ScoresLog, rsuffix='_log')
+CompareScores = Scores.append(ScoresLog)
 if write_data is True:
     CompareScores.to_latex('./Tableaux/EmmisionsScoresModèles.tex')
+CompareScores
 
 # %%
+fig = make_subplots(3,
+                    2,
+                    column_titles=("Consommation brute", "Consommation log2"),
+                    row_titles=('R²', 'RMSE', 'MAE'),
+                    shared_xaxes=True)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['R²']), row=1, col=1)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['RMSE']), row=2, col=1)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE']), row=3, col=1)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['R²']), row=1, col=2)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['RMSE']), row=2, col=2)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
+fig.update_layout(
+    title_text="Comparaison des scores des modèles d'émissions",
+    showlegend=False)
+fig.show()
+
+# %% [markdown]
+## 2. Modèle de prédiction sur la consommation énergétique 
+#(SiteEnergyUse) avec les données catégorielles 
+# %%
+BEBCat = pd.read_csv('BEBCat.csv')
