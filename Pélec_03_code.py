@@ -135,7 +135,7 @@ ResultEmissions = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train,
                        TotalGHGEmissions_test, 'TotalGHGEmissions', paramlist,
-                       score, write_data)
+                       score, write_data, 'Emissions')
 
 # %% [markdown]
 #### 1.1.2 Émissions au log
@@ -226,7 +226,7 @@ ResultEmissions_log = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train_log,
                            TotalGHGEmissions_test_log, 'TotalGHGEmissions_log',
-                           paramlist_log, score, write_data)
+                           paramlist_log, score, write_data, 'Emissions', '_log')
 
 # %%
 Scores = pd.DataFrame().append([val for key, val in ResultEmissions.items()
@@ -257,6 +257,8 @@ fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
 fig.update_layout(title_text="Comparaison des scores des modèles d'émissions",
                   showlegend=False)
 fig.show()
+if write_data is True:
+    fig.write_image('./Figures/EmissionsCompareScores.pdf')
 
 """
 # %% [markdown]
@@ -341,14 +343,14 @@ ResultConso = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train,
                        SiteEnergyUse_test, 'SiteEnergyUse', paramlist,
-                       score, write_data)
+                       score, write_data, 'Conso')
 
 # %% [markdown]
 #### 2.1.2 Consommation énergétique au log
 
 # %%
-SiteEnergyUse_train_log = np.log2(1 + SiteEnergyUse_train)
-SiteEnergyUse_test_log = np.log2(1 + SiteEnergyUse_test)
+SiteEnergyUse_train_log = np.log(SiteEnergyUse_train)
+SiteEnergyUse_test_log = np.log(SiteEnergyUse_test)
 
 # %% [markdown]
 ##### 2.1.2.1 Modèle LinearRegression
@@ -409,7 +411,7 @@ ResultConso_log = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train_log,
                            SiteEnergyUse_test_log, 'SiteEnergyUse_log',
-                           paramlist_log, score, write_data)
+                           paramlist_log, score, write_data, 'Conso', '_log')
 
 # %%
 Scores = pd.DataFrame().append([val for key, val in ResultConso.items()
@@ -435,3 +437,5 @@ fig.update_layout(
     title_text="Comparaison des scores des modèles de consommation",
     showlegend=False)
 fig.show()
+if write_data is True:
+    fig.write_image('./Figures/ConsoCompareScores.pdf')

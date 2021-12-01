@@ -172,8 +172,9 @@ def visuRMSEGrid(model,
         fig3 = go.Figure(data=fig1.data + fig2.data)
         fig3.update_xaxes(type='log', title=paramxname)
         fig3.update_yaxes(title='RMSE')
-        fig3.update_layout(title="RMSE du modèle<br>{}<br>en fonction de {}".format(
-            modelname, paramxname))
+        fig3.update_layout(
+            title="RMSE du modèle<br>{}<br>en fonction de {}".format(
+                modelname, paramxname))
 
     else:
         for i in bestparametres[str(model)][bestparametres['paramètre'] ==
@@ -224,13 +225,24 @@ def visuRMSEGrid(model,
             fig3.update_layout(
                 title=
                 "RMSE du modèle {} pour le paramètre<br>{}={}<br>en fonction de l'hyperparamètre {}"
-                .format(modelname, parametre.split('__')[1], i, paramxname))
+                .format(modelname,
+                        parametre.split('__')[1], i, paramxname))
 
     return (fig3)
 
 
-def compareModels(modelslist, scaler, X_train, X_test, y_train, y_test, yname,
-                  paramlist, score, write_data):
+def compareModels(modelslist,
+                  scaler,
+                  X_train,
+                  X_test,
+                  y_train,
+                  y_test,
+                  yname,
+                  paramlist,
+                  score,
+                  write_data=False,
+                  prefix='',
+                  sufix=''):
     Result = dict()
     for m, p in zip(modelslist, paramlist):
         modelname = f'{m=}'.split('m=')[1].replace('()', '')
@@ -242,8 +254,8 @@ def compareModels(modelslist, scaler, X_train, X_test, y_train, y_test, yname,
         Result[yname + '_pred' + modelname] = y_pred
         figPredTest.show()
         if write_data is True:
-            figPredTest.write_image(
-                './Figures/EmissionsTestvsPred{}.pdf'.format(modelname))
+            figPredTest.write_image('./Figures/{}TestvsPred{}{}.pdf'.format(
+                prefix, modelname, sufix))
         if len(BestParametres) == 1:
             FigRMSEGRid = visuRMSEGrid(m, modelname,
                                        list(p.values())[0],
@@ -257,6 +269,6 @@ def compareModels(modelslist, scaler, X_train, X_test, y_train, y_test, yname,
                                        BestParametres['paramètre'][1])
         FigRMSEGRid.show()
         if write_data is True:
-            FigRMSEGRid.write_image(
-                './Figures/EmissionsGraphRMSE{}.pdf'.format(modelname))
+            FigRMSEGRid.write_image('./Figures/{}GraphRMSE{}{}.pdf'.format(
+                prefix, modelname, sufix))
     return (Result)
