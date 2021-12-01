@@ -37,23 +37,26 @@ def visuPCA(df, pca, components, loadings, axis, color=None):
 
 
 from sklearn.pipeline import make_pipeline
+from sklearn.compose import make_column_selector, make_column_transformer
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 
 
 # gridsearch pour modèles regression, retourne dataframe avec R², RMSE, RMSLE
-def reg_modelGrid(model,
-                  scaler,
-                  X_train,
-                  X_test,
-                  y_train,
-                  y_test,
-                  param_grid,
-                  score,
-                  y_test_name=None,
-                  y_pred_name=None):
-
-    pipemod = make_pipeline(scaler, model)
+def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
+                  param_grid, score):
+    if str(
+            model
+    ) == 'RandomForest()' or 'AdaBoostRegressor()' or 'GradientBoostingRegressor()':
+        y_train = y_train.ravel()
+    #y_test_name=None,
+    #y_pred_name=None):
+    preprocessing = make_column_transformer(
+        (scaler, make_column_selector(dtype_include='number')),
+        (OneHotEncoder(sparse=False, dtype=int, handle_unknown='ignore'),
+         make_column_selector(dtype_include=object)))
+    pipemod = make_pipeline(preprocessing, model)
     gridpipemod = GridSearchCV(
         pipemod,
         param_grid=param_grid,  # hyperparamètres à tester
@@ -91,15 +94,23 @@ def reg_modelGrid(model,
     scoreR2 = metrics.r2_score(y_test, y_pred)
     scoreRMSE = metrics.mean_squared_error(y_test, y_pred, squared=False)
     scoreMAE = metrics.mean_absolute_error(y_test, y_pred)
-    #scoreMAE100 = metrics.mean_absolute_percentage_error(y_test, y_pred)
+    scoreMAE100 = metrics.mean_absolute_percentage_error(y_test, y_pred)
     #scoreRMSLE = metrics.mean_squared_log_error(y_test, y_pred, squared=False)
     #    return (pd.DataFrame({model: [scoreR2, scoreRMSLE, scoreRMSE]},
     #                         index=['R²', 'RMSLE', 'RMSE']))
 
     # dataframe erreur
-    ScoreModele = pd.DataFrame({'R²': scoreR2, 'RMSE' : scoreRMSE, 'MAE' : scoreMAE},
-                               index=[str(model)])
+    ScoreModele = pd.DataFrame(
+        {
+            'R²': scoreR2,
+            'RMSE': scoreRMSE,
+            'MAE': scoreMAE,
+            'MAE%': scoreMAE100
+        },
+        index=[str(model)])
 
+    y_test_name = yname + '_test'
+    y_pred_name = yname + '_pred'
     # graph pred vs test
     fig = px.scatter(
         x=y_pred.squeeze(),
@@ -109,7 +120,7 @@ def reg_modelGrid(model,
             'y': y_test_name
         },
         title=
-        'Visualisation des données prédites par le modèle {}<br>vs les données test'
+        'Visualisation des données prédites par le modèle<br>{}<br>vs les données test'
         .format(model))
 
     return (GridModele, BestParametres, ScoreModele, y_pred, fig)
@@ -161,8 +172,8 @@ def visuRMSEGrid(model,
         fig3 = go.Figure(data=fig1.data + fig2.data)
         fig3.update_xaxes(type='log', title=paramxname)
         fig3.update_yaxes(title='RMSE')
-        fig3.update_layout(
-            title="RMSE du modèle {} en fonction de {}".format(modelname, paramxname))
+        fig3.update_layout(title="RMSE du modèle<br>{}<br>en fonction de {}".format(
+            modelname, paramxname))
 
     else:
         for i in bestparametres[str(model)][bestparametres['paramètre'] ==
@@ -213,6 +224,39 @@ def visuRMSEGrid(model,
             fig3.update_layout(
                 title=
                 "RMSE du modèle {} pour le paramètre<br>{}={}<br>en fonction de l'hyperparamètre {}"
-                .format(modelname, parametre, i, paramxname))
+                .format(modelname, parametre.split('__')[1], i, paramxname))
 
     return (fig3)
+
+
+def compareModels(modelslist, scaler, X_train, X_test, y_train, y_test, yname,
+                  paramlist, score, write_data):
+    Result = dict()
+    for m, p in zip(modelslist, paramlist):
+        modelname = f'{m=}'.split('m=')[1].replace('()', '')
+        GridModel, BestParametres, ScoreModele, y_pred, figPredTest = reg_modelGrid(
+            m, scaler, X_train, X_test, y_train, y_test, yname, p, score)
+        Result['Grid' + modelname] = GridModel
+        Result['BestParam' + modelname] = BestParametres
+        Result['Score' + modelname] = ScoreModele
+        Result[yname + '_pred' + modelname] = y_pred
+        figPredTest.show()
+        if write_data is True:
+            figPredTest.write_image(
+                './Figures/EmissionsTestvsPred{}.pdf'.format(modelname))
+        if len(BestParametres) == 1:
+            FigRMSEGRid = visuRMSEGrid(m, modelname,
+                                       list(p.values())[0],
+                                       list(p.keys())[0].split('__')[1],
+                                       GridModel, None, None)
+        else:
+            FigRMSEGRid = visuRMSEGrid(m, modelname,
+                                       list(p.values())[0],
+                                       list(p.keys())[0].split('__')[1],
+                                       GridModel, BestParametres,
+                                       BestParametres['paramètre'][1])
+        FigRMSEGRid.show()
+        if write_data is True:
+            FigRMSEGRid.write_image(
+                './Figures/EmissionsGraphRMSE{}.pdf'.format(modelname))
+    return (Result)

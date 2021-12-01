@@ -181,7 +181,9 @@ StatsNum
 # %%
 # sup. val < 0 dans les valeurs de surface et de consommation et d'emmission
 BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
-                                    | (BEBFull.PropertyGFAParking < 0)].index)
+                                    | (BEBFull.PropertyGFAParking < 0)
+                                    | (BEBFull.TotalGHGEmissions <= 0)
+                                    | (BEBFull['SiteEnergyUse(kBtu)'] <= 0)].index)
 
 # %% [markdown]
 # Le batiment le plus haut de Seattle fait 76 étages d'après
@@ -367,12 +369,13 @@ map
 # Nous retirons les autres catégories de la matrices que nous utiliserons
 # pour l'entrainement des modèles
 # %%
-usefull_cat = ['BuildingType', 'PrimaryPropertyType', 'Neighborhood']
+usefull_cat = ['BuildingType', 'Neighborhood']
+
 #%%
 # selection des données numériques n'étant pas des relevés de consommation
 usefull_num = BEBFullClean.select_dtypes('number').drop(columns=[
     'OSEBuildingID', 'CouncilDistrictCode', 'YearBuilt',
-    'GHGEmissionsIntensity', 'Latitude', 'Longitude', 'ZipCode'
+    'GHGEmissionsIntensity', 'Latitude', 'Longitude', 'ZipCode', 'DataYear'
 ])
 usefull_num = usefull_num.loc[:, ~usefull_num.columns.str.
                               contains('kbtu', case=False)].join(
@@ -423,8 +426,7 @@ if write_data is True:
 # %%
 # ACP sur toutes les colonnes
 numPCA = BEBESSNumClean.select_dtypes('number').drop(
-    columns=['DataYear', 'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'
-             ]).dropna().values
+    columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions']).dropna().values
 RobPCA = make_pipeline(StandardScaler(), PCA())
 components = RobPCA.fit_transform(numPCA)
 pca = RobPCA.named_steps['pca']
@@ -448,8 +450,7 @@ if write_data is True:
 # création des graphiques
 for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
     fig = visuPCA(BEBESSNumClean.select_dtypes('number').drop(
-        columns=['DataYear', 'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'
-                 ]).dropna(),
+        columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions']).dropna(),
                   pca,
                   components,
                   loadings, [(a1, a2)],
