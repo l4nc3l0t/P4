@@ -90,12 +90,12 @@ fig.show()
 
 # %%
 # paramètre Ridge
-alphasridge = np.logspace(-3, 5, 1000)
+alphasridge = np.logspace(1, 5, 100)
 # paramètre Lasso
-alphaslasso = np.linspace(0.1, 1, 5)
+alphaslasso = np.logspace(0, 3, 100)
 # paramètre ElasticNet
-alphasEN = np.logspace(-3, 3, 200)
-l1ratioEN = np.linspace(0, 1, 6)
+alphasEN = np.logspace(0, 3, 100)
+l1ratioEN = np.linspace(0.1, 1, 6)
 # paramètre kNN
 n_neighbors = np.linspace(1, 100, dtype=int)
 # paramètre RandomForest
@@ -103,7 +103,7 @@ n_estimatorsRF = np.logspace(0, 3, 10, dtype=int)
 # paramètre AdaBoost
 n_estimatorsAB = np.logspace(0, 2, 30, dtype=int)
 # paramètre GradientBoost
-n_estimatorsGB = np.logspace(0, 3, 10, dtype=int)
+n_estimatorsGB = np.logspace(0, 3, 5, dtype=int)
 paramlist = [{
     'ridge__alpha': alphasridge
 }, {
@@ -134,8 +134,8 @@ ResultEmissions = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train,
-                       TotalGHGEmissions_test, 'TotalGHGEmissions', paramlist,
-                       score, write_data, 'Emissions')
+                                TotalGHGEmissions_test, 'TotalGHGEmissions',
+                                paramlist, score, write_data, 'Emissions')
 
 # %% [markdown]
 #### 1.1.2 Émissions au log
@@ -178,12 +178,12 @@ fig.show()
 ##### 1.1.2.2 Comparaison des modèles sur les émissions au log
 
 # %%
-alphasridge_log = np.logspace(3, 5, 1000)
+alphasridge_log = np.logspace(3, 6, 100)
 
-alphaslasso_log = np.linspace(0.1, 1, 5)
+alphaslasso_log = np.logspace(-2, 1, 100)
 
-alphasEN_log = np.logspace(0, 2, 30)
-l1ratioEN_log = np.linspace(0, 1, 6)
+alphasEN_log = np.logspace(0, 2, 10)
+l1ratioEN_log = np.linspace(0.1, 1, 6)
 
 n_neighbors_log = np.linspace(1, 100, dtype=int)
 
@@ -191,7 +191,7 @@ n_estimatorsRF_log = np.logspace(0, 3, 10, dtype=int)
 
 n_estimatorsAB_log = np.logspace(0, 2, 30, dtype=int)
 
-n_estimatorsGB_log = np.logspace(0, 4, 10, dtype=int)
+n_estimatorsGB_log = np.logspace(0, 4, 5, dtype=int)
 
 paramlist_log = [{
     'ridge__alpha': alphasridge_log
@@ -225,16 +225,18 @@ ResultEmissions_log = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train_log,
-                           TotalGHGEmissions_test_log, 'TotalGHGEmissions_log',
-                           paramlist_log, score, write_data, 'Emissions', '_log')
+                                    TotalGHGEmissions_test_log,
+                                    'TotalGHGEmissions_log', paramlist_log,
+                                    score, write_data, 'Emissions', '_log')
 
 # %%
-Scores = pd.DataFrame().append([val for key, val in ResultEmissions.items()
-                               if key.startswith('Score')])
+Scores = pd.DataFrame().append(
+    [val for key, val in ResultEmissions.items() if key.startswith('Score')])
 
 # %%
-ScoresLog = pd.DataFrame().append([val for key, val in ResultEmissions_log.items()
-                               if key.startswith('Score')])
+ScoresLog = pd.DataFrame().append([
+    val for key, val in ResultEmissions_log.items() if key.startswith('Score')
+]).rename('{}_log'.format)
 
 # %%
 CompareScores = Scores.append(ScoresLog)
@@ -243,23 +245,24 @@ if write_data is True:
 CompareScores
 
 # %%
-fig = make_subplots(3,
+fig = make_subplots(4,
                     2,
                     column_titles=("Émissions brutes", "Émissions log"),
-                    row_titles=('R²', 'RMSE', 'MAE'),
+                    row_titles=('R²', 'RMSE', 'MAE', 'MAE%'),
                     shared_xaxes=True)
 fig.add_trace(go.Bar(x=Scores.index, y=Scores['R²']), row=1, col=1)
 fig.add_trace(go.Bar(x=Scores.index, y=Scores['RMSE']), row=2, col=1)
 fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE']), row=3, col=1)
+fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE%']), row=4, col=1)
 fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['R²']), row=1, col=2)
 fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['RMSE']), row=2, col=2)
 fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
+fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE%']), row=4, col=2)
 fig.update_layout(title_text="Comparaison des scores des modèles d'émissions",
                   showlegend=False)
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/EmissionsCompareScores.pdf')
-
 """
 # %% [markdown]
 ### 1.2 Avec les données catégorielles
@@ -342,8 +345,8 @@ ResultConso = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train,
-                       SiteEnergyUse_test, 'SiteEnergyUse', paramlist,
-                       score, write_data, 'Conso')
+                            SiteEnergyUse_test, 'SiteEnergyUse', paramlist,
+                            score, write_data, 'Conso')
 
 # %% [markdown]
 #### 2.1.2 Consommation énergétique au log
@@ -410,16 +413,18 @@ ResultConso_log = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train_log,
-                           SiteEnergyUse_test_log, 'SiteEnergyUse_log',
-                           paramlist_log, score, write_data, 'Conso', '_log')
+                                SiteEnergyUse_test_log, 'SiteEnergyUse_log',
+                                paramlist_log, score, write_data, 'Conso',
+                                '_log')
 
 # %%
-Scores = pd.DataFrame().append([val for key, val in ResultConso.items()
-                               if key.startswith('Score')])
+Scores = pd.DataFrame().append(
+    [val for key, val in ResultConso.items() if key.startswith('Score')])
 
 # %%
-ScoresLog = pd.DataFrame().append([val for key, val in ResultConso_log.items()
-                               if key.startswith('Score')])
+ScoresLog = pd.DataFrame().append([
+    val for key, val in ResultConso_log.items() if key.startswith('Score')
+]).rename('{}_log'.format)
 
 # %%
 fig = make_subplots(3,

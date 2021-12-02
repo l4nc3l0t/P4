@@ -50,8 +50,6 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
             model
     ) == 'RandomForest()' or 'AdaBoostRegressor()' or 'GradientBoostingRegressor()':
         y_train = y_train.ravel()
-    #y_test_name=None,
-    #y_pred_name=None):
     preprocessing = make_column_transformer(
         (scaler, make_column_selector(dtype_include='number')),
         (OneHotEncoder(sparse=False, dtype=int, handle_unknown='ignore'),
@@ -91,10 +89,19 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
                  ]).reset_index().rename(columns={'index': 'paramètre'})
 
     # score modèle
-    scoreR2 = metrics.r2_score(y_test, y_pred)
-    scoreRMSE = metrics.mean_squared_error(y_test, y_pred, squared=False)
-    scoreMAE = metrics.mean_absolute_error(y_test, y_pred)
-    scoreMAE100 = metrics.mean_absolute_percentage_error(y_test, y_pred)
+    if '_log' in yname:
+        scoreR2 = metrics.r2_score(y_test, y_pred)
+        scoreRMSE = metrics.mean_squared_error(np.exp(y_test),
+                                               np.exp(y_pred),
+                                               squared=False)
+        scoreMAE = metrics.mean_absolute_error(np.exp(y_test), np.exp(y_pred))
+        scoreMAE100 = metrics.mean_absolute_percentage_error(
+            np.exp(y_test), np.exp(y_pred))
+    else:
+        scoreR2 = metrics.r2_score(y_test, y_pred)
+        scoreRMSE = metrics.mean_squared_error(y_test, y_pred, squared=False)
+        scoreMAE = metrics.mean_absolute_error(y_test, y_pred)
+        scoreMAE100 = metrics.mean_absolute_percentage_error(y_test, y_pred)
     #scoreRMSLE = metrics.mean_squared_log_error(y_test, y_pred, squared=False)
     #    return (pd.DataFrame({model: [scoreR2, scoreRMSLE, scoreRMSE]},
     #                         index=['R²', 'RMSLE', 'RMSE']))
@@ -109,20 +116,34 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
         },
         index=[str(model)])
 
-    y_test_name = yname + '_test'
-    y_pred_name = yname + '_pred'
     # graph pred vs test
-    fig = px.scatter(
-        x=y_pred.squeeze(),
-        y=y_test.squeeze(),
-        labels={
-            'x': y_pred_name,
-            'y': y_test_name
-        },
-        title=
-        'Visualisation des données prédites par le modèle<br>{}<br>vs les données test'
-        .format(model))
-
+    if '_log' in yname:
+        y_test_name = yname.replace('_log', '_test')
+        y_pred_name = yname.replace('_log', '_pred')
+        fig = px.scatter(
+            x=np.exp(y_pred.squeeze()),
+            y=np.exp(y_test.squeeze()),
+            labels={
+                'x': y_pred_name,
+                'y': y_test_name
+            },
+            title=
+            'Visualisation des données de {}<br>prédites par le modèle {}<br>vs les données test'
+            .format(yname, model))
+    else:
+        y_test_name = yname + '_test'
+        y_pred_name = yname + '_pred'
+        # graph pred vs test
+        fig = px.scatter(
+            x=y_pred.squeeze(),
+            y=y_test.squeeze(),
+            labels={
+                'x': y_pred_name,
+                'y': y_test_name
+            },
+            title=
+            'Visualisation des données de {}<br>prédites par le modèle {}<br>vs les données test'
+            .format(yname, model))
     return (GridModele, BestParametres, ScoreModele, y_pred, fig)
 
 
@@ -134,9 +155,9 @@ def visuRMSEGrid(model,
                  gridscoresy,
                  bestparametres=None,
                  parametre=None):
-    # graph visualisation RMSE RandomForestRegressor
-    # pour le meilleur paramètre max features
+    # modèle à 1 seul paramètre
     if parametre == None:
+        # graph RMSE moyenne ± sd
         fig1 = go.Figure([
             go.Scatter(name='RMSE moyenne',
                        x=paramx,
@@ -161,7 +182,7 @@ def visuRMSEGrid(model,
                        fill='tonexty',
                        showlegend=False)
         ])
-
+        # graph RMSE pour chaque split
         fig2 = px.line(gridscoresy,
                        x=paramx,
                        y=[
@@ -175,7 +196,7 @@ def visuRMSEGrid(model,
         fig3.update_layout(
             title="RMSE du modèle<br>{}<br>en fonction de {}".format(
                 modelname, paramxname))
-
+    # modèle à 2 paramètres (1 fixe et graph évolution du 2nd)
     else:
         for i in bestparametres[str(model)][bestparametres['paramètre'] ==
                                             parametre]:
@@ -242,20 +263,22 @@ def compareModels(modelslist,
                   score,
                   write_data=False,
                   prefix='',
-                  sufix=''):
+                  suffix=''):
     Result = dict()
+    # pour chaques modèles
     for m, p in zip(modelslist, paramlist):
         modelname = f'{m=}'.split('m=')[1].replace('()', '')
-        GridModel, BestParametres, ScoreModele, y_pred, figPredTest = reg_modelGrid(
+        # utilisation de la fonction pour faire GridSearch par modèle
+        GridModel, BestParametres, ScoreModele, \
+        y_pred, figPredTest = reg_modelGrid(
             m, scaler, X_train, X_test, y_train, y_test, yname, p, score)
+        # résultats sous forme de dictionnaire
         Result['Grid' + modelname] = GridModel
         Result['BestParam' + modelname] = BestParametres
         Result['Score' + modelname] = ScoreModele
         Result[yname + '_pred' + modelname] = y_pred
-        figPredTest.show()
-        if write_data is True:
-            figPredTest.write_image('./Figures/{}TestvsPred{}{}.pdf'.format(
-                prefix, modelname, sufix))
+        # utilisation de la fonction pour visualiser la RMSE
+        # pour 1 paramètre de la GridSearch
         if len(BestParametres) == 1:
             FigRMSEGRid = visuRMSEGrid(m, modelname,
                                        list(p.values())[0],
@@ -270,5 +293,14 @@ def compareModels(modelslist,
         FigRMSEGRid.show()
         if write_data is True:
             FigRMSEGRid.write_image('./Figures/{}GraphRMSE{}{}.pdf'.format(
-                prefix, modelname, sufix))
+                prefix, modelname, suffix))
+        # affiches les meilleurs paramètres
+        print(BestParametres)
+        # affiches les scores
+        print(ScoreModele)
+        # visualisation des données prédites vs données test
+        figPredTest.show()
+        if write_data is True:
+            figPredTest.write_image('./Figures/{}TestvsPred{}{}.pdf'.format(
+                prefix, modelname, suffix))
     return (Result)
