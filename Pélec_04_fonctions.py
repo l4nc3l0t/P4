@@ -153,6 +153,7 @@ def visuRMSEGrid(model,
                  paramx,
                  paramxname,
                  gridscoresy,
+                 yname,
                  bestparametres=None,
                  parametre=None):
     # modèle à 1 seul paramètre
@@ -194,8 +195,8 @@ def visuRMSEGrid(model,
         fig3.update_xaxes(type='log', title=paramxname)
         fig3.update_yaxes(title='RMSE')
         fig3.update_layout(
-            title="RMSE du modèle<br>{}<br>en fonction de {}".format(
-                modelname, paramxname))
+            title="RMSE du modèle {}<br>pour la variable {}<br>en fonction de {}"
+            .format(modelname, yname, paramxname))
     # modèle à 2 paramètres (1 fixe et graph évolution du 2nd)
     else:
         for i in bestparametres[str(model)][bestparametres['paramètre'] ==
@@ -245,8 +246,8 @@ def visuRMSEGrid(model,
             fig3.update_yaxes(title='RMSE')
             fig3.update_layout(
                 title=
-                "RMSE du modèle {} pour le paramètre<br>{}={}<br>en fonction de l'hyperparamètre {}"
-                .format(modelname,
+                "RMSE du modèle {} pour la variable<br>{} avec le paramètre {}={}<br>en fonction de l'hyperparamètre {}"
+                .format(modelname, yname,
                         parametre.split('__')[1], i, paramxname))
 
     return (fig3)
@@ -283,12 +284,12 @@ def compareModels(modelslist,
             FigRMSEGRid = visuRMSEGrid(m, modelname,
                                        list(p.values())[0],
                                        list(p.keys())[0].split('__')[1],
-                                       GridModel, None, None)
+                                       GridModel, yname, None, None)
         else:
             FigRMSEGRid = visuRMSEGrid(m, modelname,
                                        list(p.values())[0],
                                        list(p.keys())[0].split('__')[1],
-                                       GridModel, BestParametres,
+                                       GridModel, yname, BestParametres,
                                        BestParametres['paramètre'][1])
         FigRMSEGRid.show()
         if write_data is True:

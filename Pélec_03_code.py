@@ -89,39 +89,27 @@ fig.show()
 ##### 1.1.1.2 Comparaison de différents modèles sur les émissions brutes
 
 # %%
-# paramètre Ridge
-alphasridge = np.logspace(1, 5, 100)
-# paramètre Lasso
-alphaslasso = np.logspace(0, 3, 100)
-# paramètre ElasticNet
-alphasEN = np.logspace(0, 3, 100)
-l1ratioEN = np.linspace(0.1, 1, 6)
-# paramètre kNN
-n_neighbors = np.linspace(1, 100, dtype=int)
-# paramètre RandomForest
-n_estimatorsRF = np.logspace(0, 3, 10, dtype=int)
-# paramètre AdaBoost
-n_estimatorsAB = np.logspace(0, 2, 30, dtype=int)
-# paramètre GradientBoost
-n_estimatorsGB = np.logspace(0, 3, 5, dtype=int)
-paramlist = [{
-    'ridge__alpha': alphasridge
+paramlistEmissions = [{
+    'ridge__alpha': np.logspace(1, 5, 100)
 }, {
-    'lasso__alpha': alphaslasso
+    'lasso__alpha': np.logspace(0, 3, 100)
 }, {
-    'elasticnet__alpha': alphasEN,
-    'elasticnet__l1_ratio': l1ratioEN
+    'elasticnet__alpha': np.logspace(0, 3, 100),
+    'elasticnet__l1_ratio': np.linspace(0.1, 1, 6)
 }, {
-    'kneighborsregressor__n_neighbors': n_neighbors
+    'kneighborsregressor__n_neighbors':
+    np.linspace(1, 100, dtype=int)
 }, {
-    'randomforestregressor__n_estimators': n_estimatorsRF,
+    'randomforestregressor__n_estimators':
+    np.logspace(0, 3, 10, dtype=int),
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }, {
-    'adaboostregressor__n_estimators': n_estimatorsAB,
+    'adaboostregressor__n_estimators':
+    np.logspace(0, 2, 30, dtype=int),
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
-    n_estimatorsGB,
+    np.logspace(0, 3, 5, dtype=int),
     'gradientboostingregressor__loss':
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
@@ -135,7 +123,8 @@ ResultEmissions = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train,
                                 TotalGHGEmissions_test, 'TotalGHGEmissions',
-                                paramlist, score, write_data, 'Emissions')
+                                paramlistEmissions, score, write_data,
+                                'Emissions')
 
 # %% [markdown]
 #### 1.1.2 Émissions au log
@@ -178,40 +167,27 @@ fig.show()
 ##### 1.1.2.2 Comparaison des modèles sur les émissions au log
 
 # %%
-alphasridge_log = np.logspace(3, 6, 100)
-
-alphaslasso_log = np.logspace(-2, 1, 100)
-
-alphasEN_log = np.logspace(0, 2, 10)
-l1ratioEN_log = np.linspace(0.1, 1, 6)
-
-n_neighbors_log = np.linspace(1, 100, dtype=int)
-
-n_estimatorsRF_log = np.logspace(0, 3, 10, dtype=int)
-
-n_estimatorsAB_log = np.logspace(0, 2, 30, dtype=int)
-
-n_estimatorsGB_log = np.logspace(0, 4, 5, dtype=int)
-
-paramlist_log = [{
-    'ridge__alpha': alphasridge_log
+paramlistEmissions_log = [{
+    'ridge__alpha': np.logspace(3, 6, 100)
 }, {
-    'lasso__alpha': alphaslasso_log
+    'lasso__alpha': np.logspace(-2, 1, 100)
 }, {
-    'elasticnet__alpha': alphasEN_log,
-    'elasticnet__l1_ratio': l1ratioEN_log
+    'elasticnet__alpha': np.logspace(-1, 2, 10),
+    'elasticnet__l1_ratio': np.linspace(0.1, 1, 6)
 }, {
-    'kneighborsregressor__n_neighbors': n_neighbors_log
+    'kneighborsregressor__n_neighbors':
+    np.linspace(1, 100, dtype=int)
 }, {
     'randomforestregressor__n_estimators':
-    n_estimatorsRF_log,
+    np.logspace(0, 3, 10, dtype=int),
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }, {
-    'adaboostregressor__n_estimators': n_estimatorsAB_log,
+    'adaboostregressor__n_estimators':
+    np.logspace(0, 2, 30, dtype=int),
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
-    n_estimatorsGB_log,
+    np.logspace(0, 4, 5, dtype=int),
     'gradientboostingregressor__loss':
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
@@ -226,23 +202,24 @@ ResultEmissions_log = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train_log,
                                     TotalGHGEmissions_test_log,
-                                    'TotalGHGEmissions_log', paramlist_log,
-                                    score, write_data, 'Emissions', '_log')
+                                    'TotalGHGEmissions_log',
+                                    paramlistEmissions_log, score, write_data,
+                                    'Emissions', '_log')
 
 # %%
-Scores = pd.DataFrame().append(
+EmissionsScores = pd.DataFrame().append(
     [val for key, val in ResultEmissions.items() if key.startswith('Score')])
 
 # %%
-ScoresLog = pd.DataFrame().append([
+EmissionsScoresLog = pd.DataFrame().append([
     val for key, val in ResultEmissions_log.items() if key.startswith('Score')
 ]).rename('{}_log'.format)
 
 # %%
-CompareScores = Scores.append(ScoresLog)
+EmissionsCompareScores = EmissionsScores.append(EmissionsScoresLog)
 if write_data is True:
-    CompareScores.to_latex('./Tableaux/EmissionsScoresModèles.tex')
-CompareScores
+    EmissionsCompareScores.to_latex('./Tableaux/EmissionsScoresModèles.tex')
+EmissionsCompareScores
 
 # %%
 fig = make_subplots(4,
@@ -250,14 +227,30 @@ fig = make_subplots(4,
                     column_titles=("Émissions brutes", "Émissions log"),
                     row_titles=('R²', 'RMSE', 'MAE', 'MAE%'),
                     shared_xaxes=True)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['R²']), row=1, col=1)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['RMSE']), row=2, col=1)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE']), row=3, col=1)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE%']), row=4, col=1)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['R²']), row=1, col=2)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['RMSE']), row=2, col=2)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE%']), row=4, col=2)
+fig.add_trace(go.Bar(x=EmissionsScores.index, y=EmissionsScores['R²']),
+              row=1,
+              col=1)
+fig.add_trace(go.Bar(x=EmissionsScores.index, y=EmissionsScores['RMSE']),
+              row=2,
+              col=1)
+fig.add_trace(go.Bar(x=EmissionsScores.index, y=EmissionsScores['MAE']),
+              row=3,
+              col=1)
+fig.add_trace(go.Bar(x=EmissionsScores.index, y=EmissionsScores['MAE%']),
+              row=4,
+              col=1)
+fig.add_trace(go.Bar(x=EmissionsScoresLog.index, y=EmissionsScoresLog['R²']),
+              row=1,
+              col=2)
+fig.add_trace(go.Bar(x=EmissionsScoresLog.index, y=EmissionsScoresLog['RMSE']),
+              row=2,
+              col=2)
+fig.add_trace(go.Bar(x=EmissionsScoresLog.index, y=EmissionsScoresLog['MAE']),
+              row=3,
+              col=2)
+fig.add_trace(go.Bar(x=EmissionsScoresLog.index, y=EmissionsScoresLog['MAE%']),
+              row=4,
+              col=2)
 fig.update_layout(title_text="Comparaison des scores des modèles d'émissions",
                   showlegend=False)
 fig.show()
@@ -320,21 +313,30 @@ fig.show()
 # %% [markdown]
 ##### 2.1.1.2 Comparaison des modèles sur la consommation
 # %%
-
-alphasridge = np.logspace(-3, 5, 1000)
-
-alphaslasso = np.linspace(0.1, 1, 5)
-
-alphasEN = np.logspace(-3, 3, 200)
-l1ratioEN = np.linspace(0, 1, 6)
-
-n_neighbors = np.linspace(1, 100, dtype=int)
-
-n_estimatorsRF = np.logspace(0, 3, 10, dtype=int)
-
-n_estimatorsAB = np.logspace(0, 2, 30, dtype=int)
-
-n_estimatorsGB = np.logspace(1, 3, 10, dtype=int)
+paramlistConso = [{
+    'ridge__alpha': np.logspace(-3, 5, 100)
+}, {
+    'lasso__alpha': np.logspace(0.1, 3, 100)
+}, {
+    'elasticnet__alpha': np.logspace(-3, 3, 200),
+    'elasticnet__l1_ratio': np.linspace(0.1, 1, 6)
+}, {
+    'kneighborsregressor__n_neighbors':
+    np.linspace(1, 100, dtype=int)
+}, {
+    'randomforestregressor__n_estimators':
+    np.logspace(0, 3, 10, dtype=int),
+    'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
+}, {
+    'adaboostregressor__n_estimators':
+    np.logspace(0, 2, 30, dtype=int),
+    'adaboostregressor__loss': ['linear', 'square', 'exponential']
+}, {
+    'gradientboostingregressor__n_estimators':
+    np.logspace(0, 3, 5, dtype=int),
+    'gradientboostingregressor__loss':
+    ['squared_error', 'absolute_error', 'huber', 'quantile']
+}]
 
 ResultConso = compareModels([
     Ridge(),
@@ -345,8 +347,8 @@ ResultConso = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train,
-                            SiteEnergyUse_test, 'SiteEnergyUse', paramlist,
-                            score, write_data, 'Conso')
+                            SiteEnergyUse_test, 'SiteEnergyUse',
+                            paramlistConso, score, write_data, 'Conso')
 
 # %% [markdown]
 #### 2.1.2 Consommation énergétique au log
@@ -388,21 +390,30 @@ fig.show()
 ##### 2.1.2.2 Comparaison des modèles sur la consommation au log
 
 # %%
-
-alphasridge_log = np.logspace(-3, 5, 1000)
-
-alphaslasso_log = np.linspace(0.1, 1, 5)
-
-alphasEN_log = np.logspace(-1, 3, 200)
-l1ratioEN_log = np.linspace(0, 1, 6)
-
-n_neighbors_log = np.linspace(1, 100, dtype=int)
-
-n_estimatorsRF_log = np.logspace(0, 3, 10, dtype=int)
-
-n_estimatorsAB_log = np.logspace(0, 2, 30, dtype=int)
-
-n_estimatorsGB_log = np.logspace(1, 4, 10, dtype=int)
+paramlistConso_log = [{
+    'ridge__alpha': np.logspace(2, 5, 100)
+}, {
+    'lasso__alpha': np.logspace(-1, 3, 100)
+}, {
+    'elasticnet__alpha': np.logspace(-1, 3, 200),
+    'elasticnet__l1_ratio': np.linspace(0.1, 1, 6)
+}, {
+    'kneighborsregressor__n_neighbors':
+    np.linspace(1, 100, dtype=int)
+}, {
+    'randomforestregressor__n_estimators':
+    np.logspace(0, 3, 10, dtype=int),
+    'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
+}, {
+    'adaboostregressor__n_estimators':
+    np.logspace(0, 2, 30, dtype=int),
+    'adaboostregressor__loss': ['linear', 'square', 'exponential']
+}, {
+    'gradientboostingregressor__n_estimators':
+    np.logspace(1, 4, 5, dtype=int),
+    'gradientboostingregressor__loss':
+    ['squared_error', 'absolute_error', 'huber', 'quantile']
+}]
 
 ResultConso_log = compareModels([
     Ridge(),
@@ -414,30 +425,45 @@ ResultConso_log = compareModels([
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train_log,
                                 SiteEnergyUse_test_log, 'SiteEnergyUse_log',
-                                paramlist_log, score, write_data, 'Conso',
+                                paramlistConso_log, score, write_data, 'Conso',
                                 '_log')
 
 # %%
-Scores = pd.DataFrame().append(
+ConsoScores = pd.DataFrame().append(
     [val for key, val in ResultConso.items() if key.startswith('Score')])
 
 # %%
-ScoresLog = pd.DataFrame().append([
+ConsoScoresLog = pd.DataFrame().append([
     val for key, val in ResultConso_log.items() if key.startswith('Score')
 ]).rename('{}_log'.format)
 
 # %%
-fig = make_subplots(3,
+ConsoCompareScores = ConsoScores.append(ConsoScoresLog)
+if write_data is True:
+    ConsoCompareScores.to_latex('./Tableaux/ConsoScoresModèles.tex')
+ConsoCompareScores
+# %%
+fig = make_subplots(4,
                     2,
                     column_titles=("Consommation brute", "Consommation log2"),
-                    row_titles=('R²', 'RMSE', 'MAE'),
+                    row_titles=('R²', 'RMSE', 'MAE', 'MAE%'),
                     shared_xaxes=True)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['R²']), row=1, col=1)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['RMSE']), row=2, col=1)
-fig.add_trace(go.Bar(x=Scores.index, y=Scores['MAE']), row=3, col=1)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['R²']), row=1, col=2)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['RMSE']), row=2, col=2)
-fig.add_trace(go.Bar(x=ScoresLog.index, y=ScoresLog['MAE']), row=3, col=2)
+fig.add_trace(go.Bar(x=ConsoScores.index, y=ConsoScores['R²']), row=1, col=1)
+fig.add_trace(go.Bar(x=ConsoScores.index, y=ConsoScores['RMSE']), row=2, col=1)
+fig.add_trace(go.Bar(x=ConsoScores.index, y=ConsoScores['MAE']), row=3, col=1)
+fig.add_trace(go.Bar(x=ConsoScores.index, y=ConsoScores['MAE%']), row=4, col=1)
+fig.add_trace(go.Bar(x=ConsoScoresLog.index, y=ConsoScoresLog['R²']),
+              row=1,
+              col=2)
+fig.add_trace(go.Bar(x=ConsoScoresLog.index, y=ConsoScoresLog['RMSE']),
+              row=2,
+              col=2)
+fig.add_trace(go.Bar(x=ConsoScoresLog.index, y=ConsoScoresLog['MAE']),
+              row=3,
+              col=2)
+fig.add_trace(go.Bar(x=ConsoScoresLog.index, y=ConsoScoresLog['MAE%']),
+              row=4,
+              col=2)
 fig.update_layout(
     title_text="Comparaison des scores des modèles de consommation",
     showlegend=False)
