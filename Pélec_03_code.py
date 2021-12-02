@@ -262,7 +262,7 @@ fig.update_layout(title_text="Comparaison des scores des modèles d'émissions",
                   showlegend=False)
 fig.show()
 if write_data is True:
-    fig.write_image('./Figures/EmissionsCompareScores.pdf')
+    fig.write_image('./Figures/EmissionsCompareScores.pdf', height=600)
 """
 # %% [markdown]
 ### 1.2 Avec les données catégorielles
@@ -443,4 +443,4 @@ fig.update_layout(
     showlegend=False)
 fig.show()
 if write_data is True:
-    fig.write_image('./Figures/ConsoCompareScores.pdf')
+    fig.write_image('./Figures/ConsoCompareScores.pdf', height=600)
