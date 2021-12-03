@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 
 
 # graphique visualisation vecteurs et données
@@ -145,6 +144,9 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
             'Visualisation des données de {}<br>prédites par le modèle {}<br>vs les données test'
             .format(yname, model))
     return (GridModele, BestParametres, ScoreModele, y_pred, fig)
+
+
+import plotly.graph_objects as go
 
 
 # graph visu RMSE
@@ -305,3 +307,70 @@ def compareModels(modelslist,
             figPredTest.write_image('./Figures/{}TestvsPred{}{}.pdf'.format(
                 prefix, modelname, suffix))
     return (Result)
+
+from sklearn.preprocessing import RobustScaler
+from sklearn.feature_selection import RFECV
+from sklearn.svm import SVR
+
+
+def featureRFECV(X, y, yname):
+    scaler = RobustScaler(quantile_range=(10, 90))
+    X_scale = scaler.fit_transform(X)
+    svr = SVR(kernel='linear')
+    rfecv = RFECV(estimator=svr,
+                  scoring='neg_root_mean_squared_error',
+                  n_jobs=-1,
+                  verbose=1)
+    rfecv.fit(X_scale, y)
+    print("Nombre de features optimal pour {} : {}".format(
+        yname, rfecv.n_features_))
+    print("Noms des features optimales pour les émissions : {}".format(
+        rfecv.get_feature_names_out(X.columns)))
+    ListColumnsRFECV = []
+    ListColumnsRFECV = rfecv.get_feature_names_out(X.columns)
+    ScoresRFECV = pd.DataFrame.from_dict(rfecv.cv_results_).abs()
+
+    paramx = [*range(1, len(rfecv.cv_results_['mean_test_score']) + 1)]
+    fig1 = go.Figure([
+        go.Scatter(name='RMSE moyenne',
+                   x=paramx,
+                   y=ScoresRFECV.mean_test_score.dropna(),
+                   mode='lines',
+                   marker=dict(color='red', size=2),
+                   showlegend=True),
+        go.Scatter(name='SDup RMSE',
+                   x=paramx,
+                   y=ScoresRFECV.mean_test_score.dropna() +
+                   ScoresRFECV.std_test_score.dropna(),
+                   mode='lines',
+                   marker=dict(color="#444"),
+                   line=dict(width=1),
+                   showlegend=False),
+        go.Scatter(name='SDdown RMSE',
+                   x=paramx,
+                   y=ScoresRFECV.mean_test_score.dropna() -
+                   ScoresRFECV.std_test_score.dropna(),
+                   mode='lines',
+                   marker=dict(color="#444"),
+                   line=dict(width=1),
+                   fillcolor='rgba(68, 68, 68, .3)',
+                   fill='tonexty',
+                   showlegend=False)
+    ])
+
+    fig2 = px.line(ScoresRFECV.dropna(),
+                   x=paramx,
+                   y=[
+                       'split0_test_score', 'split1_test_score',
+                       'split2_test_score', 'split3_test_score',
+                       'split4_test_score'
+                   ])
+
+    figRFECV = go.Figure(data=fig1.data + fig2.data)
+    figRFECV.update_xaxes(title='Nombre de feature')
+    figRFECV.update_yaxes(title='RMSE')
+    figRFECV.update_layout(
+        title=
+        "RMSE pour la variable {} en fonction<br>du nombre de feature selectionnées<br>par recursive feature elimination (RFE)"
+        .format(yname))
+    return (ListColumnsRFECV, ScoresRFECV, figRFECV)

@@ -16,7 +16,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, \
                              GradientBoostingRegressor
 
-from Pélec_04_fonctions import reg_modelGrid, visuRMSEGrid, compareModels
+from Pélec_04_fonctions import reg_modelGrid, visuRMSEGrid, compareGridModels
 
 # %%
 write_data = True
@@ -113,7 +113,8 @@ paramlistEmissions = [{
     'gradientboostingregressor__loss':
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
-ResultEmissions = compareModels([
+
+ResultEmissions = compareGridModels([
     Ridge(),
     Lasso(),
     ElasticNet(),
@@ -122,9 +123,9 @@ ResultEmissions = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train,
-                                TotalGHGEmissions_test, 'TotalGHGEmissions',
-                                paramlistEmissions, score, write_data,
-                                'Emissions')
+                                    TotalGHGEmissions_test,
+                                    'TotalGHGEmissions', paramlistEmissions,
+                                    score, write_data, 'Emissions')
 
 # %% [markdown]
 #### 1.1.2 Émissions au log
@@ -192,7 +193,7 @@ paramlistEmissions_log = [{
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
 
-ResultEmissions_log = compareModels([
+ResultEmissions_log = compareGridModels([
     Ridge(),
     Lasso(),
     ElasticNet(),
@@ -201,10 +202,10 @@ ResultEmissions_log = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train_log,
-                                    TotalGHGEmissions_test_log,
-                                    'TotalGHGEmissions_log',
-                                    paramlistEmissions_log, score, write_data,
-                                    'Emissions', '_log')
+                                        TotalGHGEmissions_test_log,
+                                        'TotalGHGEmissions_log',
+                                        paramlistEmissions_log, score,
+                                        write_data, 'Emissions', '_log')
 
 # %%
 EmissionsScores = pd.DataFrame().append(
@@ -338,7 +339,7 @@ paramlistConso = [{
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
 
-ResultConso = compareModels([
+ResultConso = compareGridModels([
     Ridge(),
     Lasso(),
     ElasticNet(),
@@ -347,8 +348,8 @@ ResultConso = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train,
-                            SiteEnergyUse_test, 'SiteEnergyUse',
-                            paramlistConso, score, write_data, 'Conso')
+                                SiteEnergyUse_test, 'SiteEnergyUse',
+                                paramlistConso, score, write_data, 'Conso')
 
 # %% [markdown]
 #### 2.1.2 Consommation énergétique au log
@@ -415,7 +416,7 @@ paramlistConso_log = [{
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
 
-ResultConso_log = compareModels([
+ResultConso_log = compareGridModels([
     Ridge(),
     Lasso(),
     ElasticNet(),
@@ -424,9 +425,9 @@ ResultConso_log = compareModels([
     AdaBoostRegressor(),
     GradientBoostingRegressor()
 ], RobustScaler(), BEBNumM_train, BEBNumM_test, SiteEnergyUse_train_log,
-                                SiteEnergyUse_test_log, 'SiteEnergyUse_log',
-                                paramlistConso_log, score, write_data, 'Conso',
-                                '_log')
+                                    SiteEnergyUse_test_log,
+                                    'SiteEnergyUse_log', paramlistConso_log,
+                                    score, write_data, 'Conso', '_log')
 
 # %%
 ConsoScores = pd.DataFrame().append(

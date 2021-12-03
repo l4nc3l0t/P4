@@ -17,7 +17,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-from Pélec_04_fonctions import visuPCA
+from Pélec_04_fonctions import visuPCA, featureRFECV
 
 # %%
 write_data = True
@@ -180,10 +180,11 @@ StatsNum
 # nous allons supprimer ces batiments
 # %%
 # sup. val < 0 dans les valeurs de surface et de consommation et d'emmission
-BEBFullClean = BEBFull.drop(BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
-                                    | (BEBFull.PropertyGFAParking < 0)
-                                    | (BEBFull.TotalGHGEmissions <= 0)
-                                    | (BEBFull['SiteEnergyUse(kBtu)'] <= 0)].index)
+BEBFullClean = BEBFull.drop(
+    BEBFull[(BEBFull['PropertyGFABuilding(s)'] < 0)
+            | (BEBFull.PropertyGFAParking < 0)
+            | (BEBFull.TotalGHGEmissions <= 0)
+            | (BEBFull['SiteEnergyUse(kBtu)'] <= 0)].index)
 
 # %% [markdown]
 # Le batiment le plus haut de Seattle fait 76 étages d'après
@@ -363,27 +364,30 @@ for i in range(0, len(BEBFullClean)):
 map
 
 # %% [markdown]
-# Les catégories qui vont nous intéresser pour l'entrainement des modèles
-# sont les catégories permettant de classifier les batiments à savoir
-# BuildingType, PrimaryPropertyType, Neighborhood et LargestPropertyUseType.
-# Nous retirons les autres catégories de la matrices que nous utiliserons
-# pour l'entrainement des modèles
+# Sélection des features sans l'énergy stars score
 # %%
-usefull_cat = ['BuildingType', 'Neighborhood']
+BEBFeatures = BEBFullClean.loc[:, ~BEBFullClean.columns.str.contains(
+    'kbtu', case=False)].select_dtypes('number').join(
+        BEBFullClean['SiteEnergyUse(kBtu)']).drop(
+            columns='ENERGYSTARScore').dropna()
 
-#%%
-# selection des données numériques n'étant pas des relevés de consommation
-usefull_num = BEBFullClean.select_dtypes('number').drop(columns=[
-    'OSEBuildingID', 'CouncilDistrictCode', 'YearBuilt',
-    'GHGEmissionsIntensity', 'Latitude', 'Longitude', 'ZipCode', 'DataYear'
-])
-usefull_num = usefull_num.loc[:, ~usefull_num.columns.str.
-                              contains('kbtu', case=False)].join(
-                                  BEBFull['SiteEnergyUse(kBtu)'])
+BEBFeaturesM = BEBFeatures.drop(
+    columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
+SiteEnergyUse = np.array(BEBFeatures['SiteEnergyUse(kBtu)']).reshape(
+    -1, 1).ravel()
+TotalGHGEmissions = np.array(BEBFeatures.TotalGHGEmissions).reshape(-1,
+                                                                    1).ravel()
 
 # %%
-# heatmap à partir des colonnes numériques utiles
-usednum_corr = usefull_num.corr()
+# features pour les émissions
+ListColumnsRFECVEmissions, ScoresRFECVEmissions, figRFECVEmissions = featureRFECV(
+    BEBFeaturesM, TotalGHGEmissions, 'TotalGHGEmissions')
+figRFECVEmissions.show()
+
+# %%
+# heatmap à partir des colonnes numériques utiles pour les émissions
+usednum_corr = BEBFeatures[ListColumnsRFECVEmissions].join(
+    BEBFeatures['TotalGHGEmissions']).corr()
 usednum_corr = usednum_corr.where(
     np.tril(np.ones(usednum_corr.shape)).astype('bool'))
 fig = px.imshow(usednum_corr,
@@ -393,39 +397,54 @@ fig = px.imshow(usednum_corr,
 fig.update_layout(plot_bgcolor='white')
 fig.show()
 if write_data is True:
-    fig.write_image('./Figures/HeatmapUsedNum.pdf')
+    fig.write_image('./Figures/HeatmapUsedNumEmissions.pdf')
 
 # %%
-# création dataframe pour étudier les émissions de CO2 et la consommation
-# totale d’énergie
-BEBNumClean = usefull_num.drop(columns='ENERGYSTARScore')
-BEBNumClean.dropna(inplace=True)
+# features pour la consommation
+ListColumnsRFECVConso, ScoresRFECVConso, figRFECVConso = featureRFECV(
+    BEBFeaturesM, SiteEnergyUse, 'SiteEnergyUse')
+figRFECVConso.show()
+
+# %%
+# heatmap à partir des colonnes numériques utiles pour la consommation
+usednum_corr = BEBFeatures[ListColumnsRFECVConso].join(
+    BEBFeatures['SiteEnergyUse(kBtu)']).corr()
+usednum_corr = usednum_corr.where(
+    np.tril(np.ones(usednum_corr.shape)).astype('bool'))
+fig = px.imshow(usednum_corr,
+                height=500,
+                width=500,
+                color_continuous_scale='balance')
+fig.update_layout(plot_bgcolor='white')
+fig.show()
 if write_data is True:
-    BEBNumClean.to_csv('BEBNum.csv', index=False)
+    fig.write_image('./Figures/HeatmapUsedNumConso.pdf')
 
+# %% [markdown]
+#On peut voir que malgrès que la sélection récursive conserve 12 variables,
+#les plus corrélées sont les mêmes que pour les émissions nous conserverons
+#donc dans les 2 cas 6 variables : celles des émissions plus le nombre d'étages
 # %%
-# création dataframe pour étudier EnergyStarScore
-BEBESSNumClean = usefull_num.dropna()
+#création dataframe pour étudier les émissions de CO2 et la consommation
+#totale d’énergie
+BEBFeaturesFinales = BEBFullClean[ListColumnsRFECVEmissions].join(
+    BEBFullClean[['NumberofFloors', 'TotalGHGEmissions',
+                 'SiteEnergyUse(kBtu)']])
 if write_data is True:
-    BEBESSNumClean.to_csv('BEBESSNum.csv', index=False)
+    BEBFeaturesFinales.to_csv('BEBNum.csv', index=False)
 
 # %%
-# création dataframe avec données catégorielles
-BEBCatClean = usefull_num.join(
-    BEBFullClean[usefull_cat]).drop(columns='ENERGYSTARScore')
-BEBCatClean.dropna(inplace=True)
+#création dataframe pour étudier les émissions de CO2 et la consommation
+#totale d’énergie avec l'energy star score
+BEBFeaturesFinalesESS =  BEBFullClean[ListColumnsRFECVEmissions].join(
+    BEBFullClean[['NumberofFloors', 'TotalGHGEmissions',
+                 'SiteEnergyUse(kBtu)','ENERGYSTARScore']]).dropna()
 if write_data is True:
-    BEBCatClean.to_csv('BEBCat.csv', index=False)
+    BEBFeaturesFinalesESS.to_csv('BEBESSNum.csv', index=False)
 
 # %%
-BEBESSCatClean = usefull_num.join(BEBFullClean[usefull_cat])
-BEBESSCatClean.dropna(inplace=True)
-if write_data is True:
-    BEBESSCatClean.to_csv('BEBESSCat.csv', index=False)
-
-# %%
-# ACP sur toutes les colonnes
-numPCA = BEBESSNumClean.select_dtypes('number').drop(
+# ACP des features retenues avec l'energystar score
+numPCA = BEBFeaturesFinalesESS.drop(
     columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions']).dropna().values
 RobPCA = make_pipeline(StandardScaler(), PCA())
 components = RobPCA.fit_transform(numPCA)
@@ -449,7 +468,7 @@ if write_data is True:
 # %%
 # création des graphiques
 for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
-    fig = visuPCA(BEBESSNumClean.select_dtypes('number').drop(
+    fig = visuPCA(BEBFeaturesFinalesESS.drop(
         columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions']).dropna(),
                   pca,
                   components,
@@ -460,5 +479,3 @@ for a1, a2 in [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]:
         fig.write_image('./Figures/PCAF{}F{}.pdf'.format(a1 + 1, a2 + 1),
                         width=1100,
                         height=1100)
-
-# %%
