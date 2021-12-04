@@ -371,8 +371,9 @@ BEBFeatures = BEBFullClean.loc[:, ~BEBFullClean.columns.str.contains(
         BEBFullClean['SiteEnergyUse(kBtu)']).drop(
             columns='ENERGYSTARScore').dropna()
 
-BEBFeaturesM = BEBFeatures.drop(
-    columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
+BEBFeaturesM = BEBFeatures.drop(columns=[
+    'SiteEnergyUse(kBtu)', 'TotalGHGEmissions', 'GHGEmissionsIntensity'
+])
 SiteEnergyUse = np.array(BEBFeatures['SiteEnergyUse(kBtu)']).reshape(
     -1, 1).ravel()
 TotalGHGEmissions = np.array(BEBFeatures.TotalGHGEmissions).reshape(-1,
@@ -386,11 +387,11 @@ figRFECVEmissions.show()
 
 # %%
 # heatmap à partir des colonnes numériques utiles pour les émissions
-usednum_corr = BEBFeatures[ListColumnsRFECVEmissions].join(
+usedEmissions_corrFull = BEBFeatures[ListColumnsRFECVEmissions].join(
     BEBFeatures['TotalGHGEmissions']).corr()
-usednum_corr = usednum_corr.where(
-    np.tril(np.ones(usednum_corr.shape)).astype('bool'))
-fig = px.imshow(usednum_corr,
+usedEmissions_corr = usedEmissions_corrFull.where(
+    np.tril(np.ones(usedEmissions_corrFull.shape)).astype('bool'))
+fig = px.imshow(usedEmissions_corr,
                 height=500,
                 width=500,
                 color_continuous_scale='balance')
@@ -407,11 +408,11 @@ figRFECVConso.show()
 
 # %%
 # heatmap à partir des colonnes numériques utiles pour la consommation
-usednum_corr = BEBFeatures[ListColumnsRFECVConso].join(
+usedConso_corrFull = BEBFeatures[ListColumnsRFECVConso].join(
     BEBFeatures['SiteEnergyUse(kBtu)']).corr()
-usednum_corr = usednum_corr.where(
-    np.tril(np.ones(usednum_corr.shape)).astype('bool'))
-fig = px.imshow(usednum_corr,
+usedConso_corr = usedConso_corrFull.where(
+    np.tril(np.ones(usedConso_corrFull.shape)).astype('bool'))
+fig = px.imshow(usedConso_corr,
                 height=500,
                 width=500,
                 color_continuous_scale='balance')
@@ -423,22 +424,32 @@ if write_data is True:
 # %% [markdown]
 #On peut voir que malgrès que la sélection récursive conserve 12 variables,
 #les plus corrélées sont les mêmes que pour les émissions nous conserverons
-#donc dans les 2 cas 6 variables : celles des émissions plus le nombre d'étages
+#donc dans les 2 cas les 6 variables les plus corrélées (> 0.1) qui sont communes aux 
+#deux modèles
 # %%
 #création dataframe pour étudier les émissions de CO2 et la consommation
 #totale d’énergie
-BEBFeaturesFinales = BEBFullClean[ListColumnsRFECVEmissions].join(
-    BEBFullClean[['NumberofFloors', 'TotalGHGEmissions',
-                 'SiteEnergyUse(kBtu)']]).dropna()
+# sélection des colonnes ayant une corrélation > 0.1
+ColEmissions = usedEmissions_corrFull.loc[:, (
+    usedEmissions_corrFull['TotalGHGEmissions'] > 0.1) & (
+        usedEmissions_corrFull['TotalGHGEmissions'] < 1)]
+ColConso = usedConso_corrFull.loc[:, (
+    usedConso_corrFull['SiteEnergyUse(kBtu)'] > 0.1) & (
+        usedConso_corrFull['SiteEnergyUse(kBtu)'] < 1)]
+ListColFinal = ColConso.columns.intersection(ColEmissions.columns)
+
+BEBFeaturesFinales = BEBFullClean[ListColFinal].join(
+    BEBFullClean[['TotalGHGEmissions', 'SiteEnergyUse(kBtu)']]).dropna()
 if write_data is True:
     BEBFeaturesFinales.to_csv('BEBNum.csv', index=False)
 
 # %%
 #création dataframe pour étudier les émissions de CO2 et la consommation
 #totale d’énergie avec l'energy star score
-BEBFeaturesFinalesESS =  BEBFullClean[ListColumnsRFECVEmissions].join(
-    BEBFullClean[['NumberofFloors', 'TotalGHGEmissions',
-                 'SiteEnergyUse(kBtu)','ENERGYSTARScore']]).dropna()
+BEBFeaturesFinalesESS = BEBFullClean[ListColFinal].join(
+    BEBFullClean[['TotalGHGEmissions', 'SiteEnergyUse(kBtu)',
+        'ENERGYSTARScore'
+    ]]).dropna()
 if write_data is True:
     BEBFeaturesFinalesESS.to_csv('BEBESSNum.csv', index=False)
 
