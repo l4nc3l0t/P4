@@ -255,7 +255,7 @@ def visuRMSEGrid(model,
     return (fig3)
 
 
-def compareModels(modelslist,
+def compareGridModels(modelslist,
                   scaler,
                   X_train,
                   X_test,
