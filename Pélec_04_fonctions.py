@@ -246,27 +246,29 @@ def visuRMSEGrid(model,
             fig3 = go.Figure(data=fig1.data + fig2.data)
             fig3.update_xaxes(type='log', title=paramxname)
             fig3.update_yaxes(title='RMSE')
+            if i is float:
+                i = str(round(i, 2))
             fig3.update_layout(
-                title=
-                "RMSE du modèle {} pour la variable<br>{} avec le paramètre {}={}<br>en fonction de l'hyperparamètre {}"
-                .format(modelname, yname,
-                        parametre.split('__')[1], i, paramxname))
+                    title=
+                    "RMSE du modèle {} pour la variable<br>{} avec le paramètre {}={}<br>en fonction de l'hyperparamètre {}"
+                    .format(modelname, yname,
+                            parametre.split('__')[1], i, paramxname))
 
     return (fig3)
 
 
 def compareGridModels(modelslist,
-                  scaler,
-                  X_train,
-                  X_test,
-                  y_train,
-                  y_test,
-                  yname,
-                  paramlist,
-                  score,
-                  write_data=False,
-                  prefix='',
-                  suffix=''):
+                      scaler,
+                      X_train,
+                      X_test,
+                      y_train,
+                      y_test,
+                      yname,
+                      paramlist,
+                      score,
+                      write_data=False,
+                      prefix='',
+                      suffix=''):
     Result = dict()
     # pour chaques modèles
     for m, p in zip(modelslist, paramlist):
@@ -307,6 +309,7 @@ def compareGridModels(modelslist,
             figPredTest.write_image('./Figures/{}TestvsPred{}{}.pdf'.format(
                 prefix, modelname, suffix))
     return (Result)
+
 
 from sklearn.preprocessing import RobustScaler
 from sklearn.feature_selection import RFECV
