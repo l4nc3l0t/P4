@@ -429,7 +429,7 @@ if write_data is True:
 #totale d’énergie
 BEBFeaturesFinales = BEBFullClean[ListColumnsRFECVEmissions].join(
     BEBFullClean[['NumberofFloors', 'TotalGHGEmissions',
-                 'SiteEnergyUse(kBtu)']])
+                 'SiteEnergyUse(kBtu)']]).dropna()
 if write_data is True:
     BEBFeaturesFinales.to_csv('BEBNum.csv', index=False)
 
