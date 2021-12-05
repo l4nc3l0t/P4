@@ -252,7 +252,7 @@ if write_data is True:
 BEBESSNum = pd.read_csv('BEBESSNum.csv')
 
 BEBESSNumM = BEBESSNum.drop(
-    columns=['SiteEnergyUse(kBtu)', 'TotalGHGEmissions'])
+    columns={'SiteEnergyUse(kBtu)', 'TotalGHGEmissions'})
 SiteEnergyUseESS = np.array(BEBESSNum['SiteEnergyUse(kBtu)']).reshape(-1, 1)
 TotalGHGEmissionsESS = np.array(BEBESSNum.TotalGHGEmissions).reshape(-1, 1)
 
@@ -263,13 +263,17 @@ TotalGHGEmissionsESS_train_log = np.log(TotalGHGEmissionsESS_train)
 TotalGHGEmissionsESS_test_log = np.log(TotalGHGEmissionsESS_test)
 
 # %%
-BestParamRF_log = ResultEmissions_log[
+BestParamEmissionsRF_log = ResultEmissions_log[
     'BestParamRandomForestRegressor'].set_index('paramètre')
 paramlistEmissionsESS_log = [{
-    'randomforestregressor__n_estimators':
-    [int(BestParamRF_log.loc['randomforestregressor__n_estimators'].values)],
-    'randomforestregressor__max_features':
-    [*BestParamRF_log.loc['randomforestregressor__max_features', :].values]
+    'randomforestregressor__n_estimators': [
+        int(BestParamEmissionsRF_log.
+            loc['randomforestregressor__n_estimators'].values)
+    ],
+    'randomforestregressor__max_features': [
+        *BestParamEmissionsRF_log.loc[
+            'randomforestregressor__max_features', :].values
+    ]
 }]
 ResultEmissionsESS_log = compareGridModels([RandomForestRegressor()],
                                            scaler,
@@ -370,7 +374,7 @@ paramlistConso = [{
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
-    np.logspace(1, 3, 5, dtype=int),
+    np.logspace(2, 3, 5, dtype=int),
     'gradientboostingregressor__loss':
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
@@ -500,3 +504,68 @@ fig.update_layout(
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/ConsoCompareScores.pdf', height=700)
+
+# %% [markdown]
+#Afin de voir si l'energy star score permet d'améliorer le modèle nous allons
+#voir si le meilleurs modèle est amélioré avec cette variable.
+#Je choisi d'utiliser le modèle GradientBoostingRegressor avec la variable brute
+#car c'est le modèle ayant le rapport erreur / temps de calcul le plus intéressant
+
+# %%
+BEBESSNumM_train, BEBESSNumM_test, SiteEnergyUseESS_train, SiteEnergyUseESS_test = train_test_split(
+    BEBESSNumM, SiteEnergyUseESS, test_size=.2)
+
+SiteEnergyUseESS_train = np.log(SiteEnergyUseESS_train)
+SiteEnergyUseESS_test = np.log(SiteEnergyUseESS_test)
+
+# %%
+BestParamConsoGB = ResultConso[
+    'BestParamGradientBoostingRegressor'].set_index('paramètre')
+paramlistConsoESS = [{
+    'gradientboostingregressor__n_estimators': [
+        int(BestParamConsoGB.loc['gradientboostingregressor__n_estimators'].
+            values)
+    ],
+    'gradientboostingregressor__loss':
+    [*BestParamConsoGB.loc['gradientboostingregressor__loss', :].values]
+}]
+ResultConsoESS = compareGridModels([GradientBoostingRegressor()],
+                                   scaler,
+                                   BEBESSNumM_train,
+                                   BEBESSNumM_test,
+                                   SiteEnergyUseESS_train,
+                                   SiteEnergyUseESS_test,
+                                   'SiteEnergyUseESS',
+                                   paramlistConsoESS,
+                                   score,
+                                   write_data=write_data,
+                                   prefix='ConsoESS',
+                                   suffix='_ESS',
+                                   plotfigRMSE=False)
+
+# %%
+ConsoScoresESS = pd.DataFrame().append([
+    val for key, val in ResultConsoESS.items() if key.startswith('Score')
+]).rename('{}_ESS'.format)
+CompareConsoScoresESS = ConsoScores.append(ConsoScoresESS).drop(
+    columns=('FitTime(s)')).loc[[
+        'GradientBoostingRegressor()', 'GradientBoostingRegressor()_ESS'
+    ]]
+
+# %%
+fig = make_subplots(1,
+                    len(CompareScoresESS.columns),
+                    column_titles=(CompareScoresESS.columns.to_list()),
+                    horizontal_spacing=.1)
+for c, col in enumerate(CompareScoresESS.columns):
+    fig.add_trace(go.Bar(x=CompareScoresESS.index, y=CompareScoresESS[col]),
+                  row=1,
+                  col=c + 1)
+fig.update_layout(
+    title_text="Comparaison avec et sans ajout de l'energy score stars",
+    showlegend=False)
+fig.show()
+if write_data is True:
+    fig.write_image('./Figures/ConsoCompareScoresESS.pdf')
+
+# %%
