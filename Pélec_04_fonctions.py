@@ -105,13 +105,14 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
     #    return (pd.DataFrame({model: [scoreR2, scoreRMSLE, scoreRMSE]},
     #                         index=['R²', 'RMSLE', 'RMSE']))
 
-    # dataframe erreur
+    # dataframe scores
     ScoreModele = pd.DataFrame(
         {
             'R²': scoreR2,
             'RMSE': scoreRMSE,
             'MAE': scoreMAE,
-            'MAE%': scoreMAE100
+            'MAE%': scoreMAE100,
+            'FitTime(s)': gridpipemod.cv_results_['mean_fit_time'].sum()
         },
         index=[str(model)])
 
@@ -247,12 +248,12 @@ def visuRMSEGrid(model,
             fig3.update_xaxes(type='log', title=paramxname)
             fig3.update_yaxes(title='RMSE')
             if i is float:
-                i = str(round(i, 2))
+                i = round(i, 2)
             fig3.update_layout(
-                    title=
-                    "RMSE du modèle {} pour la variable<br>{} avec le paramètre {}={}<br>en fonction de l'hyperparamètre {}"
-                    .format(modelname, yname,
-                            parametre.split('__')[1], i, paramxname))
+                title=
+                "RMSE du modèle {} pour la variable<br>{} avec le paramètre {}={}<br>en fonction de l'hyperparamètre {}"
+                .format(modelname, yname,
+                        parametre.split('__')[1], i, paramxname))
 
     return (fig3)
 
@@ -268,7 +269,8 @@ def compareGridModels(modelslist,
                       score,
                       write_data=False,
                       prefix='',
-                      suffix=''):
+                      suffix='',
+                      plotfigRMSE=True):
     Result = dict()
     # pour chaques modèles
     for m, p in zip(modelslist, paramlist):
@@ -295,13 +297,14 @@ def compareGridModels(modelslist,
                                        list(p.keys())[0].split('__')[1],
                                        GridModel, yname, BestParametres,
                                        BestParametres['paramètre'][1])
-        FigRMSEGRid.show()
+        if plotfigRMSE is True:
+            FigRMSEGRid.show()
         if write_data is True:
             FigRMSEGRid.write_image('./Figures/{}GraphRMSE{}{}.pdf'.format(
                 prefix, modelname, suffix))
-        # affiches les meilleurs paramètres
+        # affiche les meilleurs paramètres
         print(BestParametres)
-        # affiches les scores
+        # affiche les scores
         print(ScoreModele)
         # visualisation des données prédites vs données test
         figPredTest.show()
