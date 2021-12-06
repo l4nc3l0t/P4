@@ -90,7 +90,7 @@
         \item La ville s'intéresse aux émissions des batiments non destinés
               à l'habitation
         \item[]
-        \item Pour cela des relevés de consomation ont été réalisés mais ils sont
+        \item Pour cela des relevés de consommation ont été réalisés mais ils sont
               couteux à obtenir
         \item[]
         \item Est-il possible de prédire les émissions et de la consommation d'énergie
@@ -126,5 +126,352 @@
   \end{itemize}
 \end{frame}
 
+\section{Nettoyage du jeu de données}
+\begin{frame}{\insertsection}
+
+\end{frame}
+\section{Étapes des modélisations}
+\begin{frame}{\insertsection}
+
+\end{frame}
+
+\section[Modélisation émissions]{Modélisation des émissions de carbone}
+\subsection{Modèle Ridge}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSERidge.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredRidge.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSERidge_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredRidge_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle Lasso}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSELasso.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredLasso.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSELasso_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredLasso_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle ElasticNet}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEElasticNet.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredElasticNet.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEElasticNet_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredElasticNet_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle kNeighborsRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEKNeighborsRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredKNeighborsRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEKNeighborsRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredKNeighborsRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle RandomForestRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSERandomForestRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredRandomForestRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSERandomForestRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredRandomForestRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle AdaBoostRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEAdaBoostRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredAdaBoostRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEAdaBoostRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredAdaBoostRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle GradientBoostingRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEGradientBoostingRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{EmissionsTestvsPredGradientBoostingRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEGradientBoostingRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{EmissionsTestvsPredGradientBoostingRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Comparaison des résultats selon que la variable est au log ou non}
+\begin{frame}{\insertsubsection}
+
+\end{frame}
+
+\subsection{Influence de l'EnergyStar score sur la prédiction des Émissions}
+\begin{frame}{\insertsubsection}
+
+\end{frame}
+
+\section[Modélisation consommation]{Modélisation de la consommation énergétique}
+\subsection{Modèle Ridge}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSERidge.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredRidge.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSERidge_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredRidge_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle Lasso}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSELasso.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredLasso.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSELasso_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredLasso_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle ElasticNet}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSEElasticNet.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredElasticNet.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSEElasticNet_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredElasticNet_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle kNeighborsRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSEKNeighborsRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredKNeighborsRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSEKNeighborsRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredKNeighborsRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle RandomForestRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSERandomForestRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredRandomForestRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSERandomForestRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredRandomForestRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle AdaBoostRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSEAdaBoostRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredAdaBoostRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSEAdaBoostRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredAdaBoostRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Modèle GradientBoostingRegressor}
+\begin{frame}[t]{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      {\centering Variable non modifiée
+
+      }
+      \includegraphics[width=.97\textwidth]{ConsoGraphRMSEGradientBoostingRegressor.pdf}
+      \includegraphics[width=.97\textwidth]{ConsoTestvsPredGradientBoostingRegressor.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+
+    \end{column}
+    \begin{column}{.33\textwidth}
+      {\centering Variable au log
+
+      }
+      \includegraphics[width=.96\textwidth]{ConsoGraphRMSEGradientBoostingRegressor_log.pdf}
+      \includegraphics[width=.96\textwidth]{ConsoTestvsPredGradientBoostingRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}{\insertsection}
+
+\end{frame}
 
 \end{document}
