@@ -84,6 +84,8 @@ fig = px.scatter(
     "Visualisation des données d'émissions prédites par le modèle de régression linéaire<br>vs les données test"
 )
 fig.show()
+if write_data is True:
+    fig.write_image('./Figures/EmissionsLR.pdf')
 
 # %% [markdown]
 ##### 1.1.1.2 Comparaison de différents modèles sur les émissions brutes
@@ -105,7 +107,7 @@ paramlistEmissions = [{
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }, {
     'adaboostregressor__n_estimators':
-    np.logspace(0, 2, 30, dtype=int),
+    np.linspace(1, 100, dtype=int),
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
@@ -164,6 +166,9 @@ fig = px.scatter(
     "Visualisation des données d'émissions prédites par le modèle de régression linéaire<br>vs les données test"
 )
 fig.show()
+if write_data is True:
+    fig.write_image('./Figures/EmissionsLR_log.pdf')
+
 # %% [markdown]
 ##### 1.1.2.2 Comparaison des modèles sur les émissions au log
 
@@ -184,7 +189,7 @@ paramlistEmissions_log = [{
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }, {
     'adaboostregressor__n_estimators':
-    np.logspace(0, 2, 30, dtype=int),
+    np.linspace(1, 100, dtype=int),
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
@@ -245,8 +250,8 @@ if write_data is True:
 # %% [markdown]
 #Afin de voir si l'energy star score permet d'améliorer le modèle nous allons
 #voir si le meilleurs modèle est amélioré avec cette variable.
-#Je choisi d'utiliser le modèle RandomForestRegressor avec la variable brute
-#car c'est le modèle ayant le rapport erreur / temps de calcul le plus intéressant
+#Je choisi d'utiliser le modèle GradientBoosting avec la variable brute
+#car c'est le modèle ayant la RMSE la plus faible
 
 # %%
 BEBESSNum = pd.read_csv('BEBESSNum.csv')
@@ -259,31 +264,34 @@ TotalGHGEmissionsESS = np.array(BEBESSNum.TotalGHGEmissions).reshape(-1, 1)
 BEBESSNumM_train, BEBESSNumM_test, TotalGHGEmissionsESS_train, TotalGHGEmissionsESS_test = train_test_split(
     BEBESSNumM, TotalGHGEmissionsESS, test_size=.2)
 
+TotalGHGEmissionsESS_train_log = np.log(TotalGHGEmissionsESS_train)
+TotalGHGEmissionsESS_test_log = np.log(TotalGHGEmissionsESS_test)
+
 # %%
-BestParamEmissionsRF = ResultEmissions[
-    'BestParamRandomForestRegressor'].set_index('paramètre')
+BestParamEmissionsGB = ResultEmissions[
+    'BestParamGradientBoostingRegressor'].set_index('paramètre')
 paramlistEmissionsESS = [{
-    'randomforestregressor__n_estimators': [
-        int(BestParamEmissionsRF.
-            loc['randomforestregressor__n_estimators'].values)
+    'gradientboostingregressor__n_estimators': [
+        int(BestParamEmissionsGB.
+            loc['gradientboostingregressor__n_estimators'].values)
     ],
-    'randomforestregressor__max_features': [
-        *BestParamEmissionsRF.loc[
-            'randomforestregressor__max_features', :].values
+    'gradientboostingregressor__loss': [
+        *BestParamEmissionsGB.loc[
+            'gradientboostingregressor__loss', :].values
     ]
 }]
-ResultEmissionsESS = compareGridModels([RandomForestRegressor()],
+ResultEmissionsESS = compareGridModels([GradientBoostingRegressor()],
                                            scaler,
                                            BEBESSNumM_train,
                                            BEBESSNumM_test,
-                                           TotalGHGEmissionsESS_train,
-                                           TotalGHGEmissionsESS_test,
-                                           'TotalGHGEmissionsESS',
+                                           TotalGHGEmissionsESS_train_log,
+                                           TotalGHGEmissionsESS_test_log,
+                                           'TotalGHGEmissionsESS_log',
                                            paramlistEmissionsESS,
                                            score,
                                            write_data=write_data,
                                            prefix='EmissionsESS',
-                                           suffix='_ESS',
+                                           suffix='_log',
                                            plotfigRMSE=False)
 
 # %%
@@ -293,7 +301,7 @@ EmissionsScoresESS = pd.DataFrame().append([
 ]).rename('{}_ESS'.format)
 CompareScoresESS = EmissionsScores.append(EmissionsScoresESS).drop(
     columns=('FitTime(s)')).loc[[
-        'RandomForestRegressor()', 'RandomForestRegressor()_ESS'
+        'GradientBoostingRegressor()', 'GradientBoostingRegressor()_ESS'
     ]]
 
 # %%
@@ -348,6 +356,9 @@ fig = px.scatter(
     'Visualisation des données de consommation prédites par le modèle de régression linéaire<br>vs les données test'
 )
 fig.show()
+if write_data is True:
+    fig.write_image('./Figures/ConsoLR.pdf')
+
 # %% [markdown]
 ##### 2.1.1.2 Comparaison des modèles sur la consommation
 # %%
@@ -367,7 +378,7 @@ paramlistConso = [{
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }, {
     'adaboostregressor__n_estimators':
-    np.logspace(0, 2, 30, dtype=int),
+    np.linspace(1, 100, dtype=int),
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
@@ -424,6 +435,8 @@ fig = px.scatter(
     'Visualisation des données de consommation prédites par le modèle de régression linéaire<br>vs les données test'
 )
 fig.show()
+if write_data is True:
+    fig.write_image('./Figures/ConsoLR_log.pdf')
 # %% [markdown]
 ##### 2.1.2.2 Comparaison des modèles sur la consommation au log
 
@@ -444,7 +457,7 @@ paramlistConso_log = [{
     'randomforestregressor__max_features': ['auto', 'sqrt', 'log2'],
 }, {
     'adaboostregressor__n_estimators':
-    np.logspace(0, 2, 30, dtype=int),
+    np.linspace(1, 100, dtype=int),
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
