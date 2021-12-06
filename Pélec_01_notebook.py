@@ -276,6 +276,15 @@ BEBFullClean.PrimaryPropertyType = BEBFullClean.PrimaryPropertyType.str.replace(
 # %%
 BEBFullClean.PrimaryPropertyType.unique()
 
+# %% [markdown]
+#Nous nous intéressons uniquement aux bâtiment non destinés à l'habitation
+# %%
+BEBFullClean.BuildingType.unique()
+# %%
+BEBFullClean = BEBFullClean[~BEBFullClean.BuildingType.str.contains(
+    'Multifamily')]
+BEBFullClean.BuildingType.unique()
+
 # %%
 # selection des colonnes de type numérique
 columns_num = BEBFullClean.select_dtypes('number')
@@ -422,19 +431,19 @@ if write_data is True:
     fig.write_image('./Figures/HeatmapUsedNumConso.pdf')
 
 # %% [markdown]
-#On peut voir que malgrès que la sélection récursive conserve 12 variables,
+#On peut voir que malgrès que la sélection récursive conserve 10 variables,
 #les plus corrélées sont les mêmes que pour les émissions nous conserverons
-#donc dans les 2 cas les 6 variables les plus corrélées (> 0.1) qui sont communes aux 
+#donc dans les 2 cas les 6 variables les plus corrélées (> 0.1) qui sont communes aux
 #deux modèles
 # %%
 #création dataframe pour étudier les émissions de CO2 et la consommation
 #totale d’énergie
 # sélection des colonnes ayant une corrélation > 0.1
 ColEmissions = usedEmissions_corrFull.loc[:, (
-    usedEmissions_corrFull['TotalGHGEmissions'] > 0.1) & (
+    usedEmissions_corrFull['TotalGHGEmissions'] > 0.09) & (
         usedEmissions_corrFull['TotalGHGEmissions'] < 1)]
 ColConso = usedConso_corrFull.loc[:, (
-    usedConso_corrFull['SiteEnergyUse(kBtu)'] > 0.1) & (
+    usedConso_corrFull['SiteEnergyUse(kBtu)'] > 0.09) & (
         usedConso_corrFull['SiteEnergyUse(kBtu)'] < 1)]
 ListColFinal = ColConso.columns.intersection(ColEmissions.columns)
 
@@ -446,10 +455,9 @@ if write_data is True:
 # %%
 #création dataframe pour étudier les émissions de CO2 et la consommation
 #totale d’énergie avec l'energy star score
-BEBFeaturesFinalesESS = BEBFullClean[ListColFinal].join(
-    BEBFullClean[['TotalGHGEmissions', 'SiteEnergyUse(kBtu)',
-        'ENERGYSTARScore'
-    ]]).dropna()
+BEBFeaturesFinalesESS = BEBFullClean[ListColFinal].join(BEBFullClean[[
+    'TotalGHGEmissions', 'SiteEnergyUse(kBtu)', 'ENERGYSTARScore'
+]]).dropna()
 if write_data is True:
     BEBFeaturesFinalesESS.to_csv('BEBESSNum.csv', index=False)
 
