@@ -9,7 +9,7 @@
 \usepackage{polyglossia}
 \setdefaultlanguage[frenchpart=false]{french}
 \setotherlanguage{english}
-\usepackage{microtype}
+%\usepackage{microtype}
 \usepackage[locale = FR,
             separate-uncertainty,
             multi-part-units = single,
@@ -85,17 +85,17 @@
     \begin{column}{.6\textwidth}
       \begin{itemize}
         \item Objectif de la ville de Seattle : atteindre la neutralité en émissions
-        de carbone
+              de carbone
         \item[]
         \item La ville s'intéresse aux émissions des batiments non destinés
-        à l'habitation
+              à l'habitation
         \item[]
-        \item Pour cela des relevés de consomation ont été réalisés mais ils sont 
-        couteux à obtenir
+        \item Pour cela des relevés de consomation ont été réalisés mais ils sont
+              couteux à obtenir
         \item[]
-        \item Est-il possible de prédire les émissions et de la consommation d'énergie 
-        pour des batiments pour lesquels les relevés n'ont pas été réalisé à partir des
-        relevés déjà obtenus  
+        \item Est-il possible de prédire les émissions et de la consommation d'énergie
+              pour des batiments pour lesquels les relevés n'ont pas été réalisé à partir
+              des relevés déjà obtenus
       \end{itemize}
     \end{column}
     \begin{column}{.4\textwidth}
@@ -104,6 +104,27 @@
       \end{figure}
     \end{column}
   \end{columns}
-
 \end{frame}
+
+\subsection{Jeu de données}
+\begin{frame}{\insertsubsection}
+  \begin{itemize}
+    \item Base de données issue de l'initiative de la ville de Seattle de proposer ses
+          données en accès libre (Open Data)
+    \item[]
+    \item Données concernant les batiments de la ville, caractérise :
+          \begin{itemize}
+            \item le type,
+            \item la surface,
+            \item le nombre d'étages,
+            \item la consomation énergétique,
+            \item les émissions de carbone,
+            \item $\vdots$
+          \end{itemize}
+    \item[]
+    \item Données des années 2015 et 2016
+  \end{itemize}
+\end{frame}
+
+
 \end{document}
