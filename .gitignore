@@ -5,3 +5,11 @@ Figures/
 Tableaux/
 *.synctex.gz
 __pycache__/
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.snm
+*.toc
