@@ -11,15 +11,15 @@ def visuPCA(df, pca, components, loadings, axis, color=None):
         else:
             fig = px.scatter(components, x=f1, y=f2, color=color)  #,
             #labels={'color': 'Score<br>Nutriscore'})
-    for i, feature in enumerate(df.columns):
+    for f, feature in enumerate(df.columns):
         fig.add_shape(type='line',
                       x0=0,
                       y0=0,
-                      x1=loadings[i, f1] * 10,
-                      y1=loadings[i, f2] * 10,
+                      x1=loadings[f, f1] * 10,
+                      y1=loadings[f, f2] * 10,
                       line=dict(color='yellow'))
-        fig.add_annotation(x=loadings[i, f1] * 10,
-                           y=loadings[i, f2] * 10,
+        fig.add_annotation(x=loadings[f, f1] * 10,
+                           y=loadings[f, f2] * 10,
                            ax=0,
                            ay=0,
                            xanchor="center",
@@ -64,14 +64,14 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
     y_pred = gridpipemod.predict(X_test)
 
     # score gridsearch
-    grid_params = gridpipemod.cv_results_[('params')]
-    GridParams = pd.DataFrame(grid_params)
+    grid_results = pd.DataFrame(gridpipemod.cv_results_)
+    GridParams = pd.DataFrame(gridpipemod.cv_results_['params'])
     grid_scores = {}
     for i in range(0, 5):
-        grid_scores['ScoresSplit{}'.format(i)] = -gridpipemod.cv_results_[
-            ('split{}_test_score'.format(i))]
-    grid_scores_mean = gridpipemod.cv_results_[('mean_test_score')]
-    grid_scores_sd = gridpipemod.cv_results_[('std_test_score')]
+        grid_scores['ScoresSplit{}'.format(
+            i)] = -gridpipemod.cv_results_['split{}_test_score'.format(i)]
+    grid_scores_mean = gridpipemod.cv_results_['mean_test_score']
+    grid_scores_sd = gridpipemod.cv_results_['std_test_score']
     GridScores = pd.DataFrame(grid_scores).join(
         pd.Series(-grid_scores_mean, name='ScoresMean')).join(
             pd.Series(grid_scores_sd, name='ScoresSD'))
@@ -86,6 +86,17 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
         BestParam, orient='index',
         columns=[str(model)
                  ]).reset_index().rename(columns={'index': 'paramètre'})
+    if len(BestParametres) == 1:
+        FitTimeBestParam = grid_results[grid_results['params'] == {
+            BestParametres['paramètre'][0]:
+            BestParametres[str(model)][0]
+        }]['mean_fit_time']
+    if len(BestParametres) == 2:
+        FitTimeBestParam = grid_results[
+            grid_results['params'] == {
+                BestParametres['paramètre'][0]: BestParametres[str(model)][0],
+                BestParametres['paramètre'][1]: BestParametres[str(model)][1]
+            }]['mean_fit_time']
 
     # score modèle
     if '_log' in yname:
@@ -112,7 +123,7 @@ def reg_modelGrid(model, scaler, X_train, X_test, y_train, y_test, yname,
             'RMSE': scoreRMSE,
             'MAE': scoreMAE,
             'MAE%': scoreMAE100,
-            'FitTime(s)': gridpipemod.cv_results_['mean_fit_time'].sum()
+            'FitTime(s)': float(FitTimeBestParam.values)
         },
         index=[str(model)])
 
@@ -202,22 +213,22 @@ def visuRMSEGrid(model,
             .format(modelname, yname, paramxname))
     # modèle à 2 paramètres (1 fixe et graph évolution du 2nd)
     else:
-        for i in bestparametres[str(model)][bestparametres['paramètre'] ==
+        for b in bestparametres[str(model)][bestparametres['paramètre'] ==
                                             parametre]:
             fig1 = go.Figure([
                 go.Scatter(name='RMSE moyenne',
                            x=paramx,
                            y=gridscoresy.ScoresMean.where(
-                               gridscoresy[parametre] == i).dropna(),
+                               gridscoresy[parametre] == b).dropna(),
                            mode='lines',
                            marker=dict(color='red', size=2),
                            showlegend=True),
                 go.Scatter(name='SDup RMSE',
                            x=paramx,
                            y=gridscoresy.ScoresMean.where(
-                               gridscoresy[parametre] == i).dropna() +
+                               gridscoresy[parametre] == b).dropna() +
                            gridscoresy.ScoresSD.where(
-                               gridscoresy[parametre] == i).dropna(),
+                               gridscoresy[parametre] == b).dropna(),
                            mode='lines',
                            marker=dict(color="#444"),
                            line=dict(width=1),
@@ -225,9 +236,9 @@ def visuRMSEGrid(model,
                 go.Scatter(name='SDdown RMSE',
                            x=paramx,
                            y=gridscoresy.ScoresMean.where(
-                               gridscoresy[parametre] == i).dropna() -
+                               gridscoresy[parametre] == b).dropna() -
                            gridscoresy.ScoresSD.where(
-                               gridscoresy[parametre] == i).dropna(),
+                               gridscoresy[parametre] == b).dropna(),
                            mode='lines',
                            marker=dict(color="#444"),
                            line=dict(width=1),
@@ -237,7 +248,7 @@ def visuRMSEGrid(model,
             ])
 
             fig2 = px.line(
-                gridscoresy.where(gridscoresy[parametre] == i).dropna(),
+                gridscoresy.where(gridscoresy[parametre] == b).dropna(),
                 x=paramx,
                 y=[
                     'ScoresSplit0', 'ScoresSplit1', 'ScoresSplit2',
@@ -247,13 +258,13 @@ def visuRMSEGrid(model,
             fig3 = go.Figure(data=fig1.data + fig2.data)
             fig3.update_xaxes(type='log', title=paramxname)
             fig3.update_yaxes(title='RMSE')
-            if i is float:
-                i = round(i, 2)
+            if b is float:
+                b = round(b, 2)
             fig3.update_layout(
                 title=
                 "RMSE du modèle {} pour la variable<br>{} avec le paramètre {}={}<br>en fonction de l'hyperparamètre {}"
                 .format(modelname, yname,
-                        parametre.split('__')[1], i, paramxname))
+                        parametre.split('__')[1], b, paramxname))
 
     return (fig3)
 
@@ -304,8 +315,14 @@ def compareGridModels(modelslist,
                 prefix, modelname, suffix))
         # affiche les meilleurs paramètres
         print(BestParametres)
+        if write_data is True:
+            BestParametres.to_latex('./Tableaux/{}BestParams{}{}.tex'.format(
+                prefix, modelname, suffix), index=False, float_format='%.2f')
         # affiche les scores
         print(ScoreModele)
+        if write_data is True:
+            ScoreModele.to_latex('./Tableaux/{}Score{}{}.tex'.format(
+                prefix, modelname, suffix), index=False, float_format='%.2f')
         # visualisation des données prédites vs données test
         figPredTest.show()
         if write_data is True:
