@@ -109,7 +109,7 @@ paramlistEmissions = [{
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
-    np.logspace(1, 3, 5, dtype=int),
+    np.logspace(2, 4, 5, dtype=int),
     'gradientboostingregressor__loss':
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
@@ -169,11 +169,11 @@ fig.show()
 
 # %%
 paramlistEmissions_log = [{
-    'ridge__alpha': np.logspace(3, 6, 100)
+    'ridge__alpha': np.logspace(3, 5, 100)
 }, {
-    'lasso__alpha': np.logspace(-2, 1, 100)
+    'lasso__alpha': np.logspace(-2, 0, 100)
 }, {
-    'elasticnet__alpha': np.logspace(-1, 2, 10),
+    'elasticnet__alpha': np.logspace(-1, 1, 10),
     'elasticnet__l1_ratio': np.linspace(0.1, 1, 6)
 }, {
     'kneighborsregressor__n_neighbors':
@@ -188,7 +188,7 @@ paramlistEmissions_log = [{
     'adaboostregressor__loss': ['linear', 'square', 'exponential']
 }, {
     'gradientboostingregressor__n_estimators':
-    np.logspace(2, 4, 5, dtype=int),
+    np.logspace(3, 4, 5, dtype=int),
     'gradientboostingregressor__loss':
     ['squared_error', 'absolute_error', 'huber', 'quantile']
 }]
@@ -245,7 +245,7 @@ if write_data is True:
 # %% [markdown]
 #Afin de voir si l'energy star score permet d'améliorer le modèle nous allons
 #voir si le meilleurs modèle est amélioré avec cette variable.
-#Je choisi d'utiliser le modèle RandomForestRegressor avec la variable au log
+#Je choisi d'utiliser le modèle RandomForestRegressor avec la variable brute
 #car c'est le modèle ayant le rapport erreur / temps de calcul le plus intéressant
 
 # %%
@@ -259,44 +259,41 @@ TotalGHGEmissionsESS = np.array(BEBESSNum.TotalGHGEmissions).reshape(-1, 1)
 BEBESSNumM_train, BEBESSNumM_test, TotalGHGEmissionsESS_train, TotalGHGEmissionsESS_test = train_test_split(
     BEBESSNumM, TotalGHGEmissionsESS, test_size=.2)
 
-TotalGHGEmissionsESS_train_log = np.log(TotalGHGEmissionsESS_train)
-TotalGHGEmissionsESS_test_log = np.log(TotalGHGEmissionsESS_test)
-
 # %%
-BestParamEmissionsRF_log = ResultEmissions_log[
+BestParamEmissionsRF = ResultEmissions[
     'BestParamRandomForestRegressor'].set_index('paramètre')
-paramlistEmissionsESS_log = [{
+paramlistEmissionsESS = [{
     'randomforestregressor__n_estimators': [
-        int(BestParamEmissionsRF_log.
+        int(BestParamEmissionsRF.
             loc['randomforestregressor__n_estimators'].values)
     ],
     'randomforestregressor__max_features': [
-        *BestParamEmissionsRF_log.loc[
+        *BestParamEmissionsRF.loc[
             'randomforestregressor__max_features', :].values
     ]
 }]
-ResultEmissionsESS_log = compareGridModels([RandomForestRegressor()],
+ResultEmissionsESS = compareGridModels([RandomForestRegressor()],
                                            scaler,
                                            BEBESSNumM_train,
                                            BEBESSNumM_test,
-                                           TotalGHGEmissionsESS_train_log,
-                                           TotalGHGEmissionsESS_test_log,
-                                           'TotalGHGEmissionsESS_log',
-                                           paramlistEmissionsESS_log,
+                                           TotalGHGEmissionsESS_train,
+                                           TotalGHGEmissionsESS_test,
+                                           'TotalGHGEmissionsESS',
+                                           paramlistEmissionsESS,
                                            score,
                                            write_data=write_data,
                                            prefix='EmissionsESS',
-                                           suffix='_log',
+                                           suffix='_ESS',
                                            plotfigRMSE=False)
 
 # %%
-EmissionsScoresLogESS = pd.DataFrame().append([
-    val for key, val in ResultEmissionsESS_log.items()
+EmissionsScoresESS = pd.DataFrame().append([
+    val for key, val in ResultEmissionsESS.items()
     if key.startswith('Score')
-]).rename('{}_logESS'.format)
-CompareScoresESS = EmissionsScoresLog.append(EmissionsScoresLogESS).drop(
+]).rename('{}_ESS'.format)
+CompareScoresESS = EmissionsScores.append(EmissionsScoresESS).drop(
     columns=('FitTime(s)')).loc[[
-        'RandomForestRegressor()_log', 'RandomForestRegressor()_logESS'
+        'RandomForestRegressor()', 'RandomForestRegressor()_ESS'
     ]]
 
 # %%
@@ -432,11 +429,11 @@ fig.show()
 
 # %%
 paramlistConso_log = [{
-    'ridge__alpha': np.logspace(3, 5, 100)
+    'ridge__alpha': np.logspace(1, 4, 100)
 }, {
-    'lasso__alpha': np.logspace(-1, 1, 100)
+    'lasso__alpha': np.logspace(-3, 0, 100)
 }, {
-    'elasticnet__alpha': np.logspace(-1, 1, 100),
+    'elasticnet__alpha': np.logspace(-3, 1, 100),
     'elasticnet__l1_ratio': np.linspace(0.1, 1, 6)
 }, {
     'kneighborsregressor__n_neighbors':
@@ -504,68 +501,3 @@ fig.update_layout(
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/ConsoCompareScores.pdf', height=700)
-
-# %% [markdown]
-#Afin de voir si l'energy star score permet d'améliorer le modèle nous allons
-#voir si le meilleurs modèle est amélioré avec cette variable.
-#Je choisi d'utiliser le modèle GradientBoostingRegressor avec la variable brute
-#car c'est le modèle ayant le rapport erreur / temps de calcul le plus intéressant
-
-# %%
-BEBESSNumM_train, BEBESSNumM_test, SiteEnergyUseESS_train, SiteEnergyUseESS_test = train_test_split(
-    BEBESSNumM, SiteEnergyUseESS, test_size=.2)
-
-SiteEnergyUseESS_train = np.log(SiteEnergyUseESS_train)
-SiteEnergyUseESS_test = np.log(SiteEnergyUseESS_test)
-
-# %%
-BestParamConsoGB = ResultConso[
-    'BestParamGradientBoostingRegressor'].set_index('paramètre')
-paramlistConsoESS = [{
-    'gradientboostingregressor__n_estimators': [
-        int(BestParamConsoGB.loc['gradientboostingregressor__n_estimators'].
-            values)
-    ],
-    'gradientboostingregressor__loss':
-    [*BestParamConsoGB.loc['gradientboostingregressor__loss', :].values]
-}]
-ResultConsoESS = compareGridModels([GradientBoostingRegressor()],
-                                   scaler,
-                                   BEBESSNumM_train,
-                                   BEBESSNumM_test,
-                                   SiteEnergyUseESS_train,
-                                   SiteEnergyUseESS_test,
-                                   'SiteEnergyUseESS',
-                                   paramlistConsoESS,
-                                   score,
-                                   write_data=write_data,
-                                   prefix='ConsoESS',
-                                   suffix='_ESS',
-                                   plotfigRMSE=False)
-
-# %%
-ConsoScoresESS = pd.DataFrame().append([
-    val for key, val in ResultConsoESS.items() if key.startswith('Score')
-]).rename('{}_ESS'.format)
-CompareConsoScoresESS = ConsoScores.append(ConsoScoresESS).drop(
-    columns=('FitTime(s)')).loc[[
-        'GradientBoostingRegressor()', 'GradientBoostingRegressor()_ESS'
-    ]]
-
-# %%
-fig = make_subplots(1,
-                    len(CompareScoresESS.columns),
-                    column_titles=(CompareScoresESS.columns.to_list()),
-                    horizontal_spacing=.1)
-for c, col in enumerate(CompareScoresESS.columns):
-    fig.add_trace(go.Bar(x=CompareScoresESS.index, y=CompareScoresESS[col]),
-                  row=1,
-                  col=c + 1)
-fig.update_layout(
-    title_text="Comparaison avec et sans ajout de l'energy score stars",
-    showlegend=False)
-fig.show()
-if write_data is True:
-    fig.write_image('./Figures/ConsoCompareScoresESS.pdf')
-
-# %%
