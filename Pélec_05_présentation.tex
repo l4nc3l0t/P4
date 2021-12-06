@@ -137,22 +137,34 @@
 
 \section[Modélisation émissions]{Modélisation des émissions de carbone}
 \subsection{Modèle Ridge}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSERidge.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredRidge.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreRidge.tex}}
+      \input{./Tableaux/EmissionsBestParamsRidge.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreRidge_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsRidge_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSERidge_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredRidge_log.pdf}
     \end{column}
@@ -160,22 +172,34 @@
 \end{frame}
 
 \subsection{Modèle Lasso}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSELasso.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredLasso.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreLasso.tex}}
+      \input{./Tableaux/EmissionsBestParamsLasso.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreLasso_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsLasso_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSELasso_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredLasso_log.pdf}
     \end{column}
@@ -183,22 +207,34 @@
 \end{frame}
 
 \subsection{Modèle ElasticNet}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEElasticNet.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredElasticNet.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreElasticNet.tex}}
+      \input{./Tableaux/EmissionsBestParamsElasticNet.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreElasticNet_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsElasticNet_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEElasticNet_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredElasticNet_log.pdf}
     \end{column}
@@ -206,22 +242,34 @@
 \end{frame}
 
 \subsection{Modèle kNeighborsRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEKNeighborsRegressor.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredKNeighborsRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreKNeighborsRegressor.tex}}
+      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreKNeighborsRegressor_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEKNeighborsRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredKNeighborsRegressor_log.pdf}
     \end{column}
@@ -229,22 +277,34 @@
 \end{frame}
 
 \subsection{Modèle RandomForestRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSERandomForestRegressor.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredRandomForestRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreRandomForestRegressor.tex}}
+      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreRandomForestRegressor_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSERandomForestRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredRandomForestRegressor_log.pdf}
     \end{column}
@@ -252,22 +312,34 @@
 \end{frame}
 
 \subsection{Modèle AdaBoostRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEAdaBoostRegressor.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredAdaBoostRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreAdaBoostRegressor.tex}}
+      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreAdaBoostRegressor_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEAdaBoostRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredAdaBoostRegressor_log.pdf}
     \end{column}
@@ -275,22 +347,34 @@
 \end{frame}
 
 \subsection{Modèle GradientBoostingRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{EmissionsGraphRMSEGradientBoostingRegressor.pdf}
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredGradientBoostingRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreGradientBoostingRegressor.tex}}
+      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/EmissionsScoreGradientBoostingRegressor_log.tex}}
+      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{EmissionsGraphRMSEGradientBoostingRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{EmissionsTestvsPredGradientBoostingRegressor_log.pdf}
     \end{column}
@@ -299,32 +383,64 @@
 
 \subsection{Comparaison des résultats selon que la variable est au log ou non}
 \begin{frame}{\insertsubsection}
-
+  \begin{columns}
+    \begin{column}{.5\textwidth}
+      \centering
+      \includegraphics[width=.95\textwidth]{EmissionsCompareScores.pdf}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+        \item
+      \end{itemize}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \subsection{Influence de l'EnergyStar score sur la prédiction des Émissions}
 \begin{frame}{\insertsubsection}
-
+  \begin{columns}
+    \begin{column}{.6\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{EmissionsCompareScoresESS.pdf}
+    \end{column}
+    \begin{column}{.4\textwidth}
+      \begin{itemize}
+        \item
+      \end{itemize}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \section[Modélisation consommation]{Modélisation de la consommation énergétique}
 \subsection{Modèle Ridge}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSERidge.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredRidge.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreRidge.tex}}
+      \input{./Tableaux/ConsoBestParamsRidge.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreRidge_log.tex}}
+      \input{./Tableaux/ConsoBestParamsRidge_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSERidge_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredRidge_log.pdf}
     \end{column}
@@ -332,22 +448,34 @@
 \end{frame}
 
 \subsection{Modèle Lasso}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSELasso.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredLasso.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreLasso.tex}}
+      \input{./Tableaux/ConsoBestParamsLasso.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreLasso_log.tex}}
+      \input{./Tableaux/ConsoBestParamsLasso_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSELasso_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredLasso_log.pdf}
     \end{column}
@@ -355,22 +483,34 @@
 \end{frame}
 
 \subsection{Modèle ElasticNet}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSEElasticNet.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredElasticNet.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreElasticNet.tex}}
+      \input{./Tableaux/ConsoBestParamsElasticNet.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreElasticNet_log.tex}}
+      \input{./Tableaux/ConsoBestParamsElasticNet_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSEElasticNet_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredElasticNet_log.pdf}
     \end{column}
@@ -378,22 +518,34 @@
 \end{frame}
 
 \subsection{Modèle kNeighborsRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSEKNeighborsRegressor.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredKNeighborsRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreKNeighborsRegressor.tex}}
+      \input{./Tableaux/ConsoBestParamsKNeighborsRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreKNeighborsRegressor_log.tex}}
+      \input{./Tableaux/ConsoBestParamsKNeighborsRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSEKNeighborsRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredKNeighborsRegressor_log.pdf}
     \end{column}
@@ -401,22 +553,34 @@
 \end{frame}
 
 \subsection{Modèle RandomForestRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSERandomForestRegressor.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredRandomForestRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreRandomForestRegressor.tex}}
+      \input{./Tableaux/ConsoBestParamsRandomForestRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreRandomForestRegressor_log.tex}}
+      \input{./Tableaux/ConsoBestParamsRandomForestRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSERandomForestRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredRandomForestRegressor_log.pdf}
     \end{column}
@@ -424,22 +588,34 @@
 \end{frame}
 
 \subsection{Modèle AdaBoostRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSEAdaBoostRegressor.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredAdaBoostRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreAdaBoostRegressor.tex}}
+      \input{./Tableaux/ConsoBestParamsAdaBoostRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreAdaBoostRegressor_log.tex}}
+      \input{./Tableaux/ConsoBestParamsAdaBoostRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSEAdaBoostRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredAdaBoostRegressor_log.pdf}
     \end{column}
@@ -447,24 +623,51 @@
 \end{frame}
 
 \subsection{Modèle GradientBoostingRegressor}
-\begin{frame}[t]{\insertsubsection}
-  \begin{columns}
+\begin{frame}{\insertsubsection}
+  \begin{columns}[t]
     \begin{column}{.33\textwidth}
-      {\centering Variable non modifiée
-
-      }
+      \centering Variable non modifiée
       \includegraphics[width=.97\textwidth]{ConsoGraphRMSEGradientBoostingRegressor.pdf}
       \includegraphics[width=.97\textwidth]{ConsoTestvsPredGradientBoostingRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+      $\Longleftarrow$
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreGradientBoostingRegressor.tex}}
+      \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor.tex}
 
+      \normalsize
+      $\Longleftarrow$
+
+      \raggedleft{$\Longrightarrow$}
+      \scriptsize
+      {\centering
+        \input{./Tableaux/ConsoScoreGradientBoostingRegressor_log.tex}}
+      \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor_log.tex}
+
+      \normalsize
+      \raggedleft{$\Longrightarrow$}
     \end{column}
     \begin{column}{.33\textwidth}
-      {\centering Variable au log
-
-      }
+      \centering Variable au log
       \includegraphics[width=.96\textwidth]{ConsoGraphRMSEGradientBoostingRegressor_log.pdf}
       \includegraphics[width=.96\textwidth]{ConsoTestvsPredGradientBoostingRegressor_log.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Comparaison des résultats selon que la variable est au log ou non}
+\begin{frame}{\insertsubsection}
+  \begin{columns}
+    \begin{column}{.5\textwidth}
+      \centering
+      \includegraphics[width=.95\textwidth]{ConsoCompareScores.pdf}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+        \item
+      \end{itemize}
     \end{column}
   \end{columns}
 \end{frame}
