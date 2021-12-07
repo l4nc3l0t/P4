@@ -245,7 +245,7 @@
   \graph [tree layout, level distance=4cm] {
   train test split [grow=right] ->
   {RobustScaler -> "Modèle.fit"} -> {"R², RMSE, MAE et temps de calcul",
-  meilleur paramètre, "figure RMSE", 
+  meilleur paramètre, "figure RMSE",
   figure variable test vs variable prédite};
   boucle [draw] // {RobustScaler, "Modèle.fit", "R², RMSE, MAE et temps de calcul",
   meilleur paramètre, "figure RMSE",
@@ -510,7 +510,18 @@
     \end{column}
     \begin{column}{.5\textwidth}
       \begin{itemize}
-        \item
+        \item RandomForestRegressor, AdaBoostRegressor et GradientBoostingRegressor ont
+              des erreur moins importantes et un R² plus grand quelque soit la variable modélisée
+        \item[]
+        \item KNeighborsRegressor est plus performant avec la variable au log
+        \item[]
+        \item Modèles linéaire : Ridge, Lasso et ElasticNet moins efficaces avec la variable au log
+        \item[]
+        \item Temps de modélisation de RandomForestRegressor et GradientBoostingRegressor
+              plus importants que les autres
+        \item[]
+        \item Temps de modélisation de RandomForestRegressor avec la variable au log moindre
+              qu'avec la variable non modifiée
       \end{itemize}
     \end{column}
   \end{columns}
@@ -525,7 +536,11 @@
     \end{column}
     \begin{column}{.4\textwidth}
       \begin{itemize}
-        \item
+        \item GradientBoostingRegressor avec la variable au log (RMSE la plus petite)
+        \item[]
+        \item L'EnergyStar score améliore la RMSE
+        \item[]
+        \item Amélioration des les autres mesures d'erreur et de corrélation
       \end{itemize}
     \end{column}
   \end{columns}
@@ -786,7 +801,16 @@
     \end{column}
     \begin{column}{.5\textwidth}
       \begin{itemize}
-        \item
+        \item RMSE KNeighborsRegressor, RandomForestRegressor, AdaBoostRegressor et
+              GradientBoostingRegressor inférieures avec la variable au log
+        \item[]
+        \item RMSE de RandomForestRegressor et GradientBoostingRegressor légèrement
+              inférieures quelque soit la variable
+        \item[]
+        \item MAE de RandomForestRegressor et GradientBoostingRegressor plus significativement
+              inférieures quelque soit la variable
+        \item[]
+        \item Temps de modélisation plus important pour GradientBoostingRegressor
       \end{itemize}
     \end{column}
   \end{columns}
@@ -794,7 +818,16 @@
 
 \section{Conclusion}
 \begin{frame}{\insertsection}
-
+  \begin{itemize}
+    \item Découverte des différents modèles et de leur fonctionnement
+    \item[]
+    \item Obtention avec certains modèles d'une estimation avec moins de 1\% d'écart
+          à la moyenne absolue
+    \item[]
+    \item Si de nouveaux batiments ont été construits il peut être intéressant de rentrer leurs
+          caractéristiques dans notre base de donnée et voir si on peut prédire leurs émissions
+          et consommation quitte à faire des mesures pour estimer si ces prédictions sont bonnes
+  \end{itemize}
 \end{frame}
 
 \end{document}
