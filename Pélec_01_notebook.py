@@ -232,7 +232,8 @@ fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
 fig.show(renderer='notebook')
 if write_data is True:
     fig.write_image('./Figures/DataNbFull.pdf')
-
+if write_data is True:
+    fig.write_image('./Figures/DataNbFull.pdf')
 # %% [markdown]
 # Nous allons supprimer les colonnes comportant moins de 50% de données
 # et celles qui ne nous intéressent pas
@@ -241,8 +242,8 @@ if write_data is True:
 BEBFullClean.dropna(
     axis='columns',
     thresh=(BEBFullClean.shape[0] * .5),
-    # nombre de valeurs = shape * .1
-    # soit 90% de NaN et 10% de valeurs
+    # nombre de valeurs = shape * .5
+    # soit 50% de NaN et 50% de valeurs
     inplace=True)
 
 # %%
@@ -281,8 +282,8 @@ BEBFullClean.PrimaryPropertyType.unique()
 # %%
 BEBFullClean.BuildingType.unique()
 # %%
-BEBFullClean = BEBFullClean[~BEBFullClean.BuildingType.str.contains(
-    'Multifamily')]
+BEBFullClean = BEBFullClean[~BEBFullClean.BuildingType.str.
+                            contains('Multifamily')]
 BEBFullClean.BuildingType.unique()
 
 # %%
@@ -348,13 +349,14 @@ for i in BEBFullClean.loc[:,
 
 # %%
 # graphique du nombre de données par indicateurs après filtre NaN
-fig = px.bar(x=BEBFullClean.isna().sum().sort_values().index,
-             y=BEBFullClean.shape[0] -
-             BEBFullClean.isna().sum().sort_values().values,
-             labels=dict(x='Indicateurs', y='Nombre de données'),
-             title='Nombre de données par colonnes',
-             height=400,
-             width=700)
+fig = px.bar(
+    x=BEBFullClean.isna().sum().sort_values().index,
+    y=BEBFullClean.shape[0] - BEBFullClean.isna().sum().sort_values().values,
+    labels=dict(x='Indicateurs', y='Nombre de données'),
+    title=
+    'Nombre de données par colonnes après suppression<br>des colonnes ayant moins de 50% de données',
+    height=400,
+    width=700)
 fig.show(renderer='notebook')
 if write_data is True:
     fig.write_image('./Figures/DataNbDrop.pdf')
@@ -404,7 +406,12 @@ fig = px.imshow(usedEmissions_corr,
                 height=500,
                 width=500,
                 color_continuous_scale='balance')
-fig.update_layout(plot_bgcolor='white')
+fig.update_xaxes(tickangle=90)
+fig.update_layout(
+    plot_bgcolor='white',
+    title=
+    'Matrice des corrélations sur les variables<br>selectionnées par RFE pour les émissions'
+)
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/HeatmapUsedNumEmissions.pdf')
@@ -425,7 +432,11 @@ fig = px.imshow(usedConso_corr,
                 height=500,
                 width=500,
                 color_continuous_scale='balance')
-fig.update_layout(plot_bgcolor='white')
+fig.update_layout(
+    plot_bgcolor='white',
+    title=
+    'Matrice des corrélations sur les variables<br>selectionnées par RFE pour la consommation'
+)
 fig.show()
 if write_data is True:
     fig.write_image('./Figures/HeatmapUsedNumConso.pdf')
