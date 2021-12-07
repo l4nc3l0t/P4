@@ -395,6 +395,8 @@ TotalGHGEmissions = np.array(BEBFeatures.TotalGHGEmissions).reshape(-1,
 ListColumnsRFECVEmissions, ScoresRFECVEmissions, figRFECVEmissions = featureRFECV(
     BEBFeaturesM, TotalGHGEmissions, 'TotalGHGEmissions')
 figRFECVEmissions.show()
+if write_data is True:
+    figRFECVEmissions.write_image('./Figures/RFECVEmissions.pdf')
 
 # %%
 # heatmap à partir des colonnes numériques utiles pour les émissions
@@ -421,6 +423,8 @@ if write_data is True:
 ListColumnsRFECVConso, ScoresRFECVConso, figRFECVConso = featureRFECV(
     BEBFeaturesM, SiteEnergyUse, 'SiteEnergyUse')
 figRFECVConso.show()
+if write_data is True:
+    figRFECVConso.write_image('./Figures/RFECVConso.pdf')
 
 # %%
 # heatmap à partir des colonnes numériques utiles pour la consommation
