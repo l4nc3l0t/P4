@@ -273,11 +273,11 @@ BestParamEmissionsGB = ResultEmissions[
 paramlistEmissionsESS = [{
     'gradientboostingregressor__n_estimators': [
         int(BestParamEmissionsGB.
-            loc['gradientboostingregressor__n_estimators'].values)
+            loc['n_estimators'].values)
     ],
     'gradientboostingregressor__loss': [
         *BestParamEmissionsGB.loc[
-            'gradientboostingregressor__loss', :].values
+            'loss', :].values
     ]
 }]
 ResultEmissionsESS = compareGridModels([GradientBoostingRegressor()],

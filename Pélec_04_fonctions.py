@@ -315,14 +315,23 @@ def compareGridModels(modelslist,
                 prefix, modelname, suffix))
         # affiche les meilleurs paramètres
         print(BestParametres)
+        WriteBestParametres = BestParametres
+        for bp in range(0, len(WriteBestParametres.paramètre)):
+            WriteBestParametres.paramètre[
+                bp] = WriteBestParametres.paramètre.str.split('__')[bp][1]
         if write_data is True:
-            BestParametres.to_latex('./Tableaux/{}BestParams{}{}.tex'.format(
-                prefix, modelname, suffix), index=False, float_format='%.2f')
+            WriteBestParametres.to_latex(
+                './Tableaux/{}BestParams{}{}.tex'.format(
+                    prefix, modelname, suffix),
+                index=False,
+                float_format='%.2f')
         # affiche les scores
         print(ScoreModele)
         if write_data is True:
             ScoreModele.to_latex('./Tableaux/{}Score{}{}.tex'.format(
-                prefix, modelname, suffix), index=False, float_format='%.2f')
+                prefix, modelname, suffix),
+                                 index=False,
+                                 float_format='%.2f')
         # visualisation des données prédites vs données test
         figPredTest.show()
         if write_data is True:
