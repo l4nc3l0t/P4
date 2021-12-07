@@ -127,12 +127,100 @@
 \end{frame}
 
 \section{Nettoyage du jeu de données}
-\begin{frame}{\insertsection}
-
+\subsection{Correction et selection des données}
+\begin{frame}{\insertsection : \insertsubsection}
+  \begin{columns}[t]
+    \begin{column}{.5\textwidth}
+      \includegraphics[width=\textwidth]{DataNbFull.pdf}
+      \begin{itemize}
+        \item Nettoyage des valeurs négative pour la surface des batiments/parkings,
+              la consommation et les émissions
+        \item Correction du nombre de d'étages aberrant pour certains batiments
+        \item Correction du nombre de batiment nul par 1
+      \end{itemize}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \includegraphics[width=\textwidth]{DataNbDrop.pdf}
+      \begin{itemize}
+        \item Conservation des variables ayant plus de 50\% de données
+      \end{itemize}
+    \end{column}
+  \end{columns}
 \end{frame}
+
+\subsection{Selections des variables}
+\subsubsection{RFE et matrice de corrélation}
+\begin{frame}{\insertsection : \insertsubsection}{\insertsubsubsection}
+  \begin{columns}[t]
+    \begin{column}{.5\textwidth}
+      \centering
+      Variables pertinentes pour les émissions
+      \includegraphics[width=\textwidth]{RFECVEmissions.pdf}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \centering
+      Variables pertinentes pour la consommation
+      \includegraphics[width=\textwidth]{RFECVConso.pdf}
+    \end{column}
+  \end{columns}
+  \begin{itemize}
+    \item Selection des variables les plus pertinentes par elimination recursive des variables (RFE)
+    \item Réduction efficace pour les émissions
+    \item Pas de réel changement de RMSE pour la consommation
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\insertsection : \insertsubsection}{\insertsubsubsection}
+  \begin{columns}[t]
+    \begin{column}{.33\textwidth}
+      \centering
+      Variables pertinentes pour les émissions
+      \includegraphics[width=\textwidth]{HeatmapUsedNumEmissions.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+      \begin{itemize}
+        \item Observation des résultats de RFE par les matrices de corrélation
+        \item[]
+        \item Les variables les plus corrélées sont communes aux deux sélection
+        \item[]
+        \item Conservation de 6 variables jugées pertinentes
+      \end{itemize}
+    \end{column}
+    \begin{column}{.33\textwidth}
+      \centering
+      Variables pertinentes pour la consommation
+      \includegraphics[width=\textwidth]{HeatmapUsedNumConso.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsubsection{PCA}
+\begin{frame}[t]{\insertsection : \insertsubsection}{\insertsubsubsection}
+  \begin{columns}
+    \begin{column}{.33\textwidth}
+      \includegraphics[width=\textwidth]{ScreePlot.pdf}
+      \begin{itemize}
+        \item Le graphique de la variance expliquée cumulée nous montre que
+              99\% de la matrice est exliquée avec 5 variables
+        \item Les quatres variables les plus corrélées se retrouvent sur l'axe F1
+        \item L'EnergyStar score semble avoir une certaine importance car il explique
+              une grande partie de l'axe F3
+      \end{itemize}
+    \end{column}
+    \begin{column}{.33\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{PCAF1F2.pdf}
+    \end{column}
+    \begin{column}{.33\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{PCAF1F3.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \section{Étapes des modélisations}
 \begin{frame}{\insertsection}
-
+  
 \end{frame}
 
 \section[Modélisation émissions]{Modélisation des émissions de carbone}
