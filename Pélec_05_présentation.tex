@@ -29,7 +29,7 @@
     \newcolumntype{L}{>{\raggedright\arraybackslash}X}
     \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 \usepackage{tikz}
-\usetikzlibrary{graphs, graphdrawing} \usegdlibrary{trees}
+\usetikzlibrary{graphs, graphdrawing} \usegdlibrary{layered}
 \usetikzlibrary{overlay-beamer-styles}
 \usepackage{subcaption}
 \usepackage[]{animate}
@@ -222,35 +222,43 @@
 
 \section{Étapes des modélisations}
 \begin{frame}{\insertsection}
-  Afin de comparer les différents modèles
-  \begin{itemize}
-    \item split commun à chaque modèle (varie selon la variable modélisée)
-    \item boucle pour chaque modèle
-          \begin{itemize}
-            \item création d'un pipeline : scaling et fit du modèle
-                  \begin{itemize}
-                    \item scaling par RobustScaler car plus résistant aux valeurs aberrantes
-                          selon la documentation
-                  \end{itemize}
-          \end{itemize}
-    \item la boucle retourne :
-          \begin{itemize}
-            \item la RMSE en fonction du paramètre le plus évolutif
-            \item le(s) meilleur(s) paramètre(s)
-            \item le R², la RMSE, la MAE (mean absolute error) et le temps de calcul du modèle
-          \end{itemize}
-  \end{itemize}
+  \begin{columns}
+    \begin{column}{.5\textwidth}
+      Afin de comparer les différents modèles
+      \begin{itemize}
+        \item split commun à chaque modèle (varie selon la variable modélisée)
+        \item boucle pour chaque modèle
+              \begin{itemize}
+                \item création d'un pipeline : scaling et fit du modèle
+                      \begin{itemize}
+                        \item scaling par RobustScaler car plus résistant aux valeurs aberrantes
+                              selon la documentation
+                      \end{itemize}
+              \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+        \item la boucle retourne :
+              \begin{itemize}
+                \item la RMSE en fonction du paramètre le plus évolutif
+                \item le(s) meilleur(s) paramètre(s)
+                \item le R², la RMSE, la MAE (mean absolute error) et le temps de calcul du modèle
+              \end{itemize}
+      \end{itemize}
+    \end{column}
+  \end{columns}
   \vspace{.5cm}
-  \tikz [nodes={draw}]
-  \graph [tree layout, level distance=4cm] {
-  train test split [grow=right] ->
-  {RobustScaler -> "Modèle.fit"} -> {"R², RMSE, MAE et temps de calcul",
-  meilleur paramètre, "figure RMSE",
-  figure variable test vs variable prédite};
-  boucle [draw] // {RobustScaler, "Modèle.fit", "R², RMSE, MAE et temps de calcul",
-  meilleur paramètre, "figure RMSE",
-  figure variable test vs variable prédite};
-  pipeline [draw] // {RobustScaler, "Modèle.fit"};
+  \tikz [rounded corners]
+  \graph [layered layout, grow=right, nodes={draw, font=\small}, head anchor=west, tail anchor=east,
+  edges=rounded corners, sibling distance=5mm]{
+  Jeu de données -> train test split  -> Cross Validation -> {Split 5, Split 4, Split 3, Split 2, Split 1}
+  -> Pipeline [draw] // {RobustScaler -> "Modèle.fit"}, "Modèle.fit"
+  -> {"R² RMSE, MAE et temps de calcul", Meilleur paramètre, Figure RMSE,
+  Figure variable test vs variable prédite},
+  "GridSearch"  [draw]  // {Cross Validation, Split 5, Split 4, Split 3, Split 2, Split 1, RobustScaler, "Modèle.fit"},
+  Résultats [draw] // {"R² RMSE, MAE et temps de calcul", Meilleur paramètre, Figure RMSE,
+  Figure variable test vs variable prédite}
   };
 
 \end{frame}
@@ -286,7 +294,7 @@
       \raggedright
       \begin{itemize}
         \item Modèle de régression linéaire introduisant un coefficient cherchant à minimiser
-              l'erreur quadratique  
+              l'erreur quadratique
       \end{itemize}
 
     \end{column}
@@ -366,7 +374,7 @@
 
       \normalsize
       $\Longrightarrow$
-      
+
       \raggedright
       \begin{itemize}
         \item Combine les coefficients des regressions ridge et lasso
@@ -491,9 +499,9 @@
       \begin{itemize}
         \item Même principe que les forêts aléatoires
         \item Utilisation d'apprenants faibles (modèles légèrement plus performant que la prediction aléatoire
-                similaire à de petits arbre de décision)
-        \item Les prédictions de ces apprenants sont combinées avec un coéfficient de poids 
-        \item À chaque itération le poids des mauvaises prédictions est augmenté ce qui pousse le modèle 
+              similaire à de petits arbre de décision)
+        \item Les prédictions de ces apprenants sont combinées avec un coéfficient de poids
+        \item À chaque itération le poids des mauvaises prédictions est augmenté ce qui pousse le modèle
               à se concentrer dessus
       \end{itemize}
     \end{column}
@@ -534,7 +542,7 @@
 
       \raggedright
       \begin{itemize}
-        \item Similaire à AdaBoostRegressor 
+        \item Similaire à AdaBoostRegressor
         \item Prend en compte une fonction objectif (loss fonction) plus complexe afin
               d'améliorer l'optimisation
       \end{itemize}
@@ -605,7 +613,7 @@
       $\Longleftarrow$
 
       \scriptsize
-      {\centering 
+      {\centering
         \input{./Tableaux/ConsoScoreRidge.tex}}
       \input{./Tableaux/ConsoBestParamsRidge.tex}
 
