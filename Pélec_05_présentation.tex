@@ -274,14 +274,21 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreRidge_log.tex}}
       \input{./Tableaux/EmissionsBestParamsRidge_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+
+      \raggedright
+      \begin{itemize}
+        \item Modèle de régression linéaire introduisant un coefficient cherchant à minimiser
+              l'erreur quadratique  
+      \end{itemize}
+
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -309,14 +316,21 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreLasso_log.tex}}
       \input{./Tableaux/EmissionsBestParamsLasso_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+
+      \raggedright
+      \begin{itemize}
+        \item Similaire à la regression ridge
+        \item Coefficient est réduit à zéro pour les variables peu corrélées
+        \item Peut être utilisé pour la sélection de feature
+      \end{itemize}
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -344,14 +358,19 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreElasticNet_log.tex}}
       \input{./Tableaux/EmissionsBestParamsElasticNet_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+      
+      \raggedright
+      \begin{itemize}
+        \item Combine les coefficients des regressions ridge et lasso
+      \end{itemize}
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -379,14 +398,19 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreKNeighborsRegressor_log.tex}}
       \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+
+      \raggedright
+      \begin{itemize}
+        \item Prédiction par interpolation avec les plus proches voisins dans le jeu de données
+      \end{itemize}
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -414,14 +438,19 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreRandomForestRegressor_log.tex}}
       \input{./Tableaux/EmissionsBestParamsRandomForestRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+      \raggedright
+      \begin{itemize}
+        \item Classification des valeurs à partir d'arbre de décision aléatoire
+        \item Prédiction à partir de ces classifieurs
+      \end{itemize}
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -449,14 +478,24 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreAdaBoostRegressor_log.tex}}
       \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+
+      \footnotesize
+      \begin{itemize}
+        \item Même principe que les forêts aléatoires
+        \item Utilisation d'apprenants faibles (modèles légèrement plus performant que la prediction aléatoire
+                similaire à de petits arbre de décision)
+        \item Les prédictions de ces apprenants sont combinées avec un coéfficient de poids 
+        \item À chaque itération le poids des mauvaises prédictions est augmenté ce qui pousse le modèle 
+              à se concentrer dessus
+      \end{itemize}
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -484,14 +523,21 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/EmissionsScoreGradientBoostingRegressor_log.tex}}
       \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
+
+      \raggedright
+      \begin{itemize}
+        \item Similaire à AdaBoostRegressor 
+        \item Prend en compte une fonction objectif (loss fonction) plus complexe afin
+              d'améliorer l'optimisation
+      \end{itemize}
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -565,14 +611,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreRidge_log.tex}}
       \input{./Tableaux/ConsoBestParamsRidge_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -600,14 +646,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreLasso_log.tex}}
       \input{./Tableaux/ConsoBestParamsLasso_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -635,14 +681,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreElasticNet_log.tex}}
       \input{./Tableaux/ConsoBestParamsElasticNet_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -670,14 +716,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreKNeighborsRegressor_log.tex}}
       \input{./Tableaux/ConsoBestParamsKNeighborsRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -705,14 +751,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreRandomForestRegressor_log.tex}}
       \input{./Tableaux/ConsoBestParamsRandomForestRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -740,14 +786,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreAdaBoostRegressor_log.tex}}
       \input{./Tableaux/ConsoBestParamsAdaBoostRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -775,14 +821,14 @@
       \normalsize
       $\Longleftarrow$
 
-      \raggedleft{$\Longrightarrow$}
+      \raggedleft $\Longrightarrow$
       \scriptsize
       {\centering
         \input{./Tableaux/ConsoScoreGradientBoostingRegressor_log.tex}}
       \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor_log.tex}
 
       \normalsize
-      \raggedleft{$\Longrightarrow$}
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
