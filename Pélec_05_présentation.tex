@@ -136,13 +136,14 @@
         \item Nettoyage des valeurs négative pour la surface des batiments/parkings,
               la consommation et les émissions
         \item Correction du nombre de d'étages aberrant pour certains batiments
-        \item Correction du nombre de batiment nul par 1
+        \item Lorsque le nombre de batiment est nul on remplace par 1
       \end{itemize}
     \end{column}
     \begin{column}{.5\textwidth}
       \includegraphics[width=\textwidth]{DataNbDrop.pdf}
       \begin{itemize}
-        \item Conservation des variables ayant plus de 50\% de données
+        \item Suppression des batiments d'habitation
+        \item Suppression des variables ayant moins de 50\% de données
         \item Suppressions des variables étant des relevés afin de voir si notre modèle
               peut s'en passer
       \end{itemize}
@@ -168,7 +169,7 @@
   \begin{itemize}
     \item Selection des variables les plus pertinentes par elimination recursive des variables (RFE)
     \item Réduction efficace pour les émissions
-    \item Pas de réel changement de RMSE pour la consommation
+    \item Pas de réel changement de RMSE pour la consommation
   \end{itemize}
 \end{frame}
 
@@ -226,12 +227,13 @@
     \begin{column}{.5\textwidth}
       Afin de comparer les différents modèles
       \begin{itemize}
-        \item split commun à chaque modèle (varie selon la variable modélisée)
-        \item boucle pour chaque modèle
+        \item Split commun à chaque modèle (varie selon la variable modélisée)
+        \item Pour chaque modèle (boucle) :
               \begin{itemize}
-                \item création d'un pipeline : scaling et fit du modèle
+                \item GridSearch des meilleurs paramètres avec validation croisée
+                \item Création d'un pipeline : scaling et fit du modèle
                       \begin{itemize}
-                        \item scaling par RobustScaler car plus résistant aux valeurs aberrantes
+                        \item Scaling par RobustScaler car plus résistant aux valeurs aberrantes
                               selon la documentation
                       \end{itemize}
               \end{itemize}
@@ -239,26 +241,27 @@
     \end{column}
     \begin{column}{.5\textwidth}
       \begin{itemize}
-        \item la boucle retourne :
+        \item La boucle retourne :
               \begin{itemize}
-                \item le(s) meilleur(s) paramètre(s)
-                \item la RMSE en fonction du paramètre le plus évolutif
-                \item la figure de la variable étudiée vs ses prédictions
-                \item le R², la RMSE, la MAE (mean absolute error) et le temps de calcul du modèle
+                \item Le(s) meilleur(s) paramètre(s) (gridsearch)
+                \item La RMSE en fonction du paramètre le plus évolutif (validation croisée)
+                \item La figure de la variable étudiée vs ses prédictions
+                \item Le R², la RMSE, la MAE (mean absolute error) et le temps de calcul du modèle
               \end{itemize}
       \end{itemize}
     \end{column}
   \end{columns}
   \vspace{.5cm}
+  \centering
   \tikz [rounded corners, every node/.style={anchor=west}, level sep = 5mm, >={Stealth}]
-  \graph [layered layout, grow=right, nodes={draw, font=\small}, head anchor=west, tail anchor=east,
+  \graph [layered layout, grow=right, nodes={draw, font=\footnotesize}, head anchor=west, tail anchor=east,
   edges=rounded corners, sibling distance=5mm]{
   Data -> train test split  -> Cross Validation -> {Split 5, Split 4, Split 3, Split 2, Split 1}
   -- Pipeline [draw] // {RobustScaler -> "Modèle.fit"[align here]},
-  "GridSearch : Recherche des meilleurs paramètres"  [draw]  // {Cross Validation, Split 5, Split 4, 
+  "GridSearch : Recherche des meilleurs paramètres"  [draw]  // {Cross Validation, Split 5, Split 4,
   Split 3, Split 2, Split 1, RobustScaler, "Modèle.fit"}
-  -> Résultats [draw] // { Meilleur paramètre [grow=down] --[draw=none] Figure RMSE[align here] --[draw=none]
-  Figure variable test vs variable prédite --[draw=none] "R² RMSE, MAE et temps de calcul"}
+  -> Résultats [draw] // { Meilleur paramètre [grow=down] --[draw=none] Figure RMSE --[draw=none]
+  Figure variable test vs variable prédite[align here] --[draw=none] "R² RMSE, MAE et temps de calcul"}
   };
 
 \end{frame}
@@ -274,21 +277,18 @@
     \end{column}
     \begin{column}{.33\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreRidge.tex}}
+
       \input{./Tableaux/EmissionsBestParamsRidge.tex}
 
-      \normalsize
+      \raggedright
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreRidge_log.tex}}
+      \raggedleft
+      $\Longrightarrow$
+
       \input{./Tableaux/EmissionsBestParamsRidge_log.tex}
 
-      \normalsize
+      \raggedleft
       $\Longrightarrow$
 
       \raggedright
@@ -297,6 +297,20 @@
               l'erreur quadratique
       \end{itemize}
 
+      $\Longleftarrow$
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreRidge.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreRidge_log.tex}
+        }
+      \raggedleft
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -316,21 +330,20 @@
     \end{column}
     \begin{column}{.33\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreLasso.tex}}
-      \input{./Tableaux/EmissionsBestParamsLasso.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/EmissionsBestParamsLasso.tex}}
+
+      \raggedright
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreLasso_log.tex}}
-      \input{./Tableaux/EmissionsBestParamsLasso_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/EmissionsBestParamsLasso_log.tex}}
+
+      \raggedleft
       $\Longrightarrow$
 
       \raggedright
@@ -339,6 +352,22 @@
         \item Coefficient est réduit à zéro pour les variables peu corrélées
         \item Peut être utilisé pour la sélection de feature
       \end{itemize}
+
+      $\Longleftarrow$
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreLasso.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreLasso_log.tex}
+        }
+      \raggedleft
+      $\Longrightarrow$
+
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -358,27 +387,41 @@
     \end{column}
     \begin{column}{.33\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreElasticNet.tex}}
-      \input{./Tableaux/EmissionsBestParamsElasticNet.tex}
 
-      \normalsize
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsElasticNet.tex}}
+
+      \raggedright
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreElasticNet_log.tex}}
-      \input{./Tableaux/EmissionsBestParamsElasticNet_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsElasticNet_log.tex}}
+
+      \raggedleft
       $\Longrightarrow$
 
       \raggedright
       \begin{itemize}
         \item Combine les coefficients des regressions ridge et lasso
       \end{itemize}
+
+      $\Longleftarrow$
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreElasticNet.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreElasticNet_log.tex}
+        }
+      \raggedleft
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -397,28 +440,42 @@
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredKNeighborsRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
+       $\Longleftarrow$
+
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor.tex}}
+
+      \raggedright
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreKNeighborsRegressor.tex}}
-      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor.tex}
 
-      \normalsize
-      $\Longleftarrow$
+      \raggedleft
+      $\Longrightarrow$
+      
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor_log.tex}}
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreKNeighborsRegressor_log.tex}}
-      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor_log.tex}
-
-      \normalsize
+      \raggedleft
       $\Longrightarrow$
 
       \raggedright
       \begin{itemize}
         \item Prédiction par interpolation avec les plus proches voisins dans le jeu de données
       \end{itemize}
+
+      $\Longleftarrow$
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreKNeighborsRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreKNeighborsRegressor_log.tex}
+        }
+      \raggedleft
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -438,27 +495,42 @@
     \end{column}
     \begin{column}{.33\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreRandomForestRegressor.tex}}
-      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor.tex}
 
-      \normalsize
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor.tex}}
+
+      \raggedright
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreRandomForestRegressor_log.tex}}
-      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor_log.tex}
-
-      \normalsize
+      \raggedleft
       $\Longrightarrow$
+      
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor_log.tex}}
+
+      \raggedleft
+      $\Longrightarrow$
+
       \raggedright
       \begin{itemize}
         \item Classification des valeurs à partir d'arbre de décision aléatoire
         \item Prédiction à partir de ces classifieurs
       \end{itemize}
+
+      $\Longleftarrow$
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreRandomForestRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreRandomForestRegressor_log.tex}
+        }
+      \raggedleft
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -478,32 +550,43 @@
     \end{column}
     \begin{column}{.33\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreAdaBoostRegressor.tex}}
-      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor.tex}
 
-      \normalsize
-      $\Longleftarrow$
+      {\tiny
+      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor.tex}}
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreAdaBoostRegressor_log.tex}}
-      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor_log.tex}
+      $\Longleftarrow$ \hfill $\Longrightarrow$
+      
+      \raggedleft
+      {\tiny
+      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor_log.tex}}
 
-      \normalsize
       $\Longrightarrow$
 
-      \footnotesize
+      \scriptsize
       \begin{itemize}
         \item Même principe que les forêts aléatoires
-        \item Utilisation d'apprenants faibles (modèles légèrement plus performant que la prediction aléatoire
+        \item Utilisation d'apprenants faibles (légèrement plus performants que la prediction aléatoire
               similaire à de petits arbre de décision)
-        \item Les prédictions de ces apprenants sont combinées avec un coéfficient de poids
+        \item Les prédictions des apprenants sont combinées avec un coefficient de poids
         \item À chaque itération le poids des mauvaises prédictions est augmenté ce qui pousse le modèle
               à se concentrer dessus
       \end{itemize}
+
+      \normalsize
+      \raggedright
+      $\Longleftarrow$
+
+      {\tiny
+          \input{./Tableaux/EmissionsScoreAdaBoostRegressor.tex}}
+
+      $\Longleftarrow$ \hfill $\Longrightarrow$
+
+      \raggedleft
+      {\tiny
+          \input{./Tableaux/EmissionsScoreAdaBoostRegressor_log.tex}
+        }
+
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -523,21 +606,16 @@
     \end{column}
     \begin{column}{.33\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreGradientBoostingRegressor.tex}}
-      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor.tex}
 
-      \normalsize
-      $\Longleftarrow$
+      {\footnotesize
+      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor.tex}}
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/EmissionsScoreGradientBoostingRegressor_log.tex}}
-      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor_log.tex}
+      $\Longleftarrow$ \hfill $\Longrightarrow$
+      
+      \raggedleft
+      {\footnotesize 
+      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor_log.tex}}
 
-      \normalsize
       $\Longrightarrow$
 
       \raggedright
@@ -546,6 +624,21 @@
         \item Prend en compte une fonction objectif (loss fonction) plus complexe afin
               d'améliorer l'optimisation
       \end{itemize}
+
+      $\Longleftarrow$
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreGradientBoostingRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize \centering
+          \input{./Tableaux/EmissionsScoreGradientBoostingRegressor_log.tex}
+        }
+      \raggedleft
+      $\Longrightarrow$
     \end{column}
     \begin{column}{.33\textwidth}
       \centering Variable au log
@@ -590,7 +683,7 @@
     \end{column}
     \begin{column}{.4\textwidth}
       \begin{itemize}
-        \item GradientBoostingRegressor avec la variable au log (RMSE la plus petite)
+        \item GradientBoostingRegressor avec la variable au log (RMSE la plus petite)
         \item[]
         \item L'EnergyStar score améliore la RMSE
         \item[]
