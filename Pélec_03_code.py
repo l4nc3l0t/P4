@@ -1,15 +1,14 @@
 # %%
 import os
 import pandas as pd
-
 pd.options.plotting.backend = 'plotly'
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn import metrics
-from sklearn.preprocessing import RobustScaler, OneHotEncoder
-from sklearn.model_selection import train_test_split, GridSearchCV, KFold
+from sklearn.preprocessing import RobustScaler
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.neighbors import KNeighborsRegressor
@@ -47,7 +46,7 @@ BEBNumM_train, BEBNumM_test, TotalGHGEmissions_train, TotalGHGEmissions_test = t
 score = 'neg_root_mean_squared_error'
 
 # %%
-# Scaler moins sensible aux outlier d'après la doc
+# Scaler moins sensible aux outlier d'après la doc
 scaler = RobustScaler(quantile_range=(10, 90))
 
 # %% [markdown]
@@ -251,7 +250,7 @@ if write_data is True:
 #Afin de voir si l'energy star score permet d'améliorer le modèle nous allons
 #voir si le meilleurs modèle est amélioré avec cette variable.
 #Je choisi d'utiliser le modèle GradientBoosting avec la variable brute
-#car c'est le modèle ayant la RMSE la plus faible
+#car c'est le modèle ayant la RMSE la plus faible
 
 # %%
 BEBESSNum = pd.read_csv('BEBESSNum.csv')
