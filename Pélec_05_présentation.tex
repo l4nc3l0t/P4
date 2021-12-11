@@ -106,24 +106,55 @@
   \end{columns}
 \end{frame}
 
-\subsection{Jeu de données}
+\subsection{Jeu de données et modélisation}
 \begin{frame}{\insertsubsection}
-  \begin{itemize}
-    \item Base de données issue de l'initiative de la ville de Seattle de proposer ses
-          données en accès libre (Open Data)
-    \item[]
-    \item Données concernant les batiments de la ville, caractérise :
-          \begin{itemize}
-            \item le type,
-            \item la surface,
-            \item le nombre d'étages,
-            \item la consomation énergétique,
-            \item les émissions de carbone,
-            \item $\vdots$
-          \end{itemize}
-    \item[]
-    \item Données des années 2015 et 2016
-  \end{itemize}
+  \begin{columns}[t]
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+        \item Base de données issue de l'initiative de la ville de Seattle de proposer ses
+              données en accès libre (Open Data)
+        \item[]
+        \item Données concernant les batiments de la ville, caractérise :
+              \begin{itemize}
+                \item le type,
+                \item la surface,
+                \item le nombre d'étages,
+                \item la consomation énergétique,
+                \item les émissions de carbone,
+                \item $\vdots$
+              \end{itemize}
+        \item[]
+        \item Données des années 2015 et 2016
+      \end{itemize}
+    \end{column}
+    \begin{column}{.5\textwidth}
+      \begin{itemize}
+        \item Objectif : trouver le modèle le plus performant
+        \item[]
+        \item Test de modèles de différents type:
+              \begin{itemize}
+                \item Linéaires :
+                      \begin{itemize}
+                        \item Ridge
+                        \item Lasso
+                        \item ElasticNet
+                      \end{itemize}
+                \item Plus proches voisins :
+                      \begin{itemize}
+                        \item KNeighborsRegressor
+                      \end{itemize}
+                \item Ensemblistes :
+                      \begin{itemize}
+                        \item RandomForestRegressor
+                        \item AdaBoostRegressor
+                        \item GradientBoostingRegressor
+                      \end{itemize}
+              \end{itemize}
+        \item[]
+        \item GridSearch afin de trouver les paramètres optimaux pour chacuns de ces modèles
+      \end{itemize}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \section{Nettoyage du jeu de données}
@@ -389,7 +420,7 @@
       $\Longleftarrow$
 
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsElasticNet.tex}}
+          \input{./Tableaux/EmissionsBestParamsElasticNet.tex}}
 
       \raggedright
       $\Longleftarrow$
@@ -398,7 +429,7 @@
       $\Longrightarrow$
 
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsElasticNet_log.tex}}
+          \input{./Tableaux/EmissionsBestParamsElasticNet_log.tex}}
 
       \raggedleft
       $\Longrightarrow$
@@ -440,19 +471,19 @@
       \includegraphics[width=.97\textwidth]{EmissionsTestvsPredKNeighborsRegressor.pdf}
     \end{column}
     \begin{column}{.33\textwidth}
-       $\Longleftarrow$
+      $\Longleftarrow$
 
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor.tex}}
+          \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor.tex}}
 
       \raggedright
       $\Longleftarrow$
 
       \raggedleft
       $\Longrightarrow$
-      
+
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor_log.tex}}
+          \input{./Tableaux/EmissionsBestParamsKNeighborsRegressor_log.tex}}
 
       \raggedleft
       $\Longrightarrow$
@@ -497,16 +528,16 @@
       $\Longleftarrow$
 
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor.tex}}
+          \input{./Tableaux/EmissionsBestParamsRandomForestRegressor.tex}}
 
       \raggedright
       $\Longleftarrow$
 
       \raggedleft
       $\Longrightarrow$
-      
+
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsRandomForestRegressor_log.tex}}
+          \input{./Tableaux/EmissionsBestParamsRandomForestRegressor_log.tex}}
 
       \raggedleft
       $\Longrightarrow$
@@ -552,13 +583,13 @@
       $\Longleftarrow$
 
       {\tiny
-      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor.tex}}
+          \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor.tex}}
 
       $\Longleftarrow$ \hfill $\Longrightarrow$
-      
+
       \raggedleft
       {\tiny
-      \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor_log.tex}}
+        \input{./Tableaux/EmissionsBestParamsAdaBoostRegressor_log.tex}}
 
       $\Longrightarrow$
 
@@ -583,8 +614,8 @@
 
       \raggedleft
       {\tiny
-          \input{./Tableaux/EmissionsScoreAdaBoostRegressor_log.tex}
-        }
+        \input{./Tableaux/EmissionsScoreAdaBoostRegressor_log.tex}
+      }
 
       $\Longrightarrow$
     \end{column}
@@ -608,13 +639,13 @@
       $\Longleftarrow$
 
       {\footnotesize
-      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor.tex}}
+          \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor.tex}}
 
       $\Longleftarrow$ \hfill $\Longrightarrow$
-      
+
       \raggedleft
-      {\footnotesize 
-      \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor_log.tex}}
+      {\footnotesize
+        \input{./Tableaux/EmissionsBestParamsGradientBoostingRegressor_log.tex}}
 
       $\Longrightarrow$
 
@@ -687,7 +718,7 @@
         \item[]
         \item L'EnergyStar score améliore la RMSE
         \item[]
-        \item Amélioration des les autres mesures d'erreur et de corrélation
+        \item Amélioration des autres mesures d'erreur et de corrélation
       \end{itemize}
     \end{column}
   \end{columns}
@@ -705,22 +736,35 @@
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
 
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreRidge.tex}}
-      \input{./Tableaux/ConsoBestParamsRidge.tex}
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsRidge.tex}}
 
-      \normalsize
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
+      \raggedleft
+      $\Longrightarrow$
 
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreRidge_log.tex}}
-      \input{./Tableaux/ConsoBestParamsRidge_log.tex}
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsRidge_log.tex}}
 
-      \normalsize
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreRidge.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreRidge_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -741,21 +785,36 @@
     \end{column}
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreLasso.tex}}
-      \input{./Tableaux/ConsoBestParamsLasso.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsLasso.tex}}
+
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreLasso_log.tex}}
-      \input{./Tableaux/ConsoBestParamsLasso_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsLasso_log.tex}}
+
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreLasso.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreLasso_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -776,21 +835,36 @@
     \end{column}
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreElasticNet.tex}}
-      \input{./Tableaux/ConsoBestParamsElasticNet.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsElasticNet.tex}}
+
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreElasticNet_log.tex}}
-      \input{./Tableaux/ConsoBestParamsElasticNet_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsElasticNet_log.tex}}
+
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreElasticNet.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreElasticNet_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -811,21 +885,36 @@
     \end{column}
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreKNeighborsRegressor.tex}}
-      \input{./Tableaux/ConsoBestParamsKNeighborsRegressor.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsKNeighborsRegressor.tex}}
+
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreKNeighborsRegressor_log.tex}}
-      \input{./Tableaux/ConsoBestParamsKNeighborsRegressor_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsKNeighborsRegressor_log.tex}}
+
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreKNeighborsRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreKNeighborsRegressor_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -846,21 +935,36 @@
     \end{column}
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreRandomForestRegressor.tex}}
-      \input{./Tableaux/ConsoBestParamsRandomForestRegressor.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsRandomForestRegressor.tex}}
+
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreRandomForestRegressor_log.tex}}
-      \input{./Tableaux/ConsoBestParamsRandomForestRegressor_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsRandomForestRegressor_log.tex}}
+
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreRandomForestRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreRandomForestRegressor_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -881,21 +985,36 @@
     \end{column}
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreAdaBoostRegressor.tex}}
-      \input{./Tableaux/ConsoBestParamsAdaBoostRegressor.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsAdaBoostRegressor.tex}}
+
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreAdaBoostRegressor_log.tex}}
-      \input{./Tableaux/ConsoBestParamsAdaBoostRegressor_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsAdaBoostRegressor_log.tex}}
+
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreAdaBoostRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreAdaBoostRegressor_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -916,21 +1035,36 @@
     \end{column}
     \begin{column}{.38\textwidth}
       $\Longleftarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreGradientBoostingRegressor.tex}}
-      \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor.tex}
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor.tex}}
+
       $\Longleftarrow$
 
-      \raggedleft $\Longrightarrow$
-      \scriptsize
-      {\centering
-        \input{./Tableaux/ConsoScoreGradientBoostingRegressor_log.tex}}
-      \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor_log.tex}
+      \raggedleft
+      $\Longrightarrow$
 
-      \normalsize
+      {\footnotesize
+          \input{./Tableaux/ConsoBestParamsGradientBoostingRegressor_log.tex}}
+
+      $\Longrightarrow$
+
+      \vspace{1cm}
+
+      \raggedright
+      $\Longleftarrow$
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreGradientBoostingRegressor.tex}}
+
+      $\Longleftarrow$
+
+      \raggedleft
+      $\Longrightarrow$
+
+      {\scriptsize
+          \input{./Tableaux/ConsoScoreGradientBoostingRegressor_log.tex}
+        }
+
       $\Longrightarrow$
     \end{column}
     \begin{column}{.31\textwidth}
@@ -966,6 +1100,22 @@
 \end{frame}
 
 \section{Conclusion}
+\subsection{Meilleurs modèles}
+\begin{frame}{\insertsection : \insertsubsection}
+  \begin{itemize}
+    \item GradientBoostingRegressor est le modèle le plus performant dans les deux cas
+    \item[]
+    \item Cependant plus gourmant en ressources/temps de calcul
+    \item[]
+    \item Peut-être plus difficile à utiliser sur des jeu de données plus importants
+    \item[]
+    \item RandomForestRegressor semble être un bon compromis entre performance et temps de calcul
+    \item[]
+    \item KNeighborsRegressor semble aussi bien se défendre
+  \end{itemize}
+\end{frame}
+
+\subsection{}
 \begin{frame}{\insertsection}
   \begin{itemize}
     \item Découverte des différents modèles et de leur fonctionnement
