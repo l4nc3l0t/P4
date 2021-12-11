@@ -14,8 +14,16 @@
 
 `./PyP4/bin/python -m ipykernel install --user --name 'PyP4'`
 
-5. ouvrir le notebook 
+5. ouvrir le notebook de nettoyage
 
-`jupyter notebook ./Pélec_01_notebooknettoyage.ipynb`
+`jupyter notebook ./Pélec_01_notebook.ipynb`
+
+6. changer le noyau dans jupyter : / Noyau / Changer le noyau / PyP4
+
+7. faire tourner le fichier Pélec_01_notebook.ipynb pour obtenir les fichiers .csv nécessaires à la modélisation
+
+8. ouvrir le notebook de modélisation
+
+`jupyter notebook ./Pélec_02_code.ipynb`
 
 6. changer le noyau dans jupyter : / Noyau / Changer le noyau / PyP4
