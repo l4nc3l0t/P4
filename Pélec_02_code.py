@@ -15,7 +15,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, \
                              GradientBoostingRegressor
 
-from Pélec_04_fonctions import reg_modelGrid, visuRMSEGrid, compareGridModels
+from Pélec_03_fonctions import reg_modelGrid, visuRMSEGrid, compareGridModels
 
 # %%
 write_data = True

@@ -16,7 +16,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-from Pélec_04_fonctions import visuPCA, featureRFECV
+from Pélec_03_fonctions import visuPCA, featureRFECV
 
 # %%
 write_data = True
